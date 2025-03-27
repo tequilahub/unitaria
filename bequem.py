@@ -13,6 +13,8 @@ class Node:
 
     def projection_out(self) -> Projection:
 
+    def normalization(self) -> float:
+
     def is_vector(self) -> bool:
         self.projection_in() == Projection(0)
 
@@ -25,11 +27,27 @@ class Node:
 
 
 class Projection:
-    num_bits: int
+
+    components: list[AtomicProjection]
+
+
+enum AtomicProjection:
+    - 0 bit -> ZeroQubit
+    - keineProjektion -> IdQubit
+    - case (p1, p2)
+    - custom Projektion -> Projection
+    - ancilla -> AncillaMarker
+    - borrowed ancilla -> BorrowedAnc
 
 registry = {}
 
 class Mul(Node):
+
+    def __init__(A, B):
+        # Checken dass Projektionen passen
+        A.projection_out() == B.projection_in()
+        # Qubits permutieren, memory management
+        pass
 
     def simulate(self, input: np.array | None) -> np.array:
         for child in children:
@@ -42,6 +60,15 @@ class Mul(Node):
             circuit.append(child.circuit())
 
         return circuit
+
+    def projection_in(self) -> Projection:
+        self.B.projection_in()
+
+    def projection_out(self) -> Projection:
+        self.A.projection_out()
+
+    def normalization(self) -> float:
+        self.A.normalization() * self.B.normalization()
 
 
 class Solve(Node):
