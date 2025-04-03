@@ -30,3 +30,16 @@ class Mul(Node):
 
     def normalization(self) -> float:
         self.A.normalization() * self.B.normalization()
+
+class Tensor(Node):
+    pass
+
+class Adjoint(Node):
+    pass
+
+class Scale(Node):
+
+    def __init__(self, A, scale: float=1, remove_efficiency: float=1, scale_absolute=False):
+        self.scale = scale
+        self.remove_efficiency = remove_efficiency
+        self.scale_absolute = scale_absolute

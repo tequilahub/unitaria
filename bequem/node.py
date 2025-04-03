@@ -18,8 +18,7 @@ class Node(ABC):
     # @abstractmethod
     # def __init__(children: list[Node], data: str | None):
     #     raise NotImplementedError
-
-    # TODO
+ 
     # @abstractmethod
     # def children(self) -> list[Node]:
     #     return []
@@ -69,3 +68,25 @@ class Node(ABC):
                     return False
             return True
                 
+
+class WrapperNode(Node):
+    # TODO: caching
+
+    @abstractmethod
+    def definition(self) -> Node:
+        raise NotImplementedError
+
+    def qubits_in(self) -> QubitMap:
+        return self.definition().qubits_in()
+
+    def qubits_out(self) -> QubitMap:
+        return self.definition().qubits_out()
+
+    def normalization(self) -> float:
+        return self.definition().normalization()
+
+    def compute(self, input: np.array | None=None) -> np.array:
+        return self.definition().compute(input)
+
+    def circuit(self) -> Circuit:
+        return self.definition().circuit()
