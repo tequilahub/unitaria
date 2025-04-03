@@ -1,0 +1,12 @@
+[project]
+name = "bequem"
+authors = [
+  {name = "Matthias Deiml", email = "matthias.deiml@uni-a.de"},
+]
+version = "0.0.0"
+description = "A tool to construct and simulate block encodings for quantum computation"
+keywords = ["quantum computing"]
+
+
+[project.urls]
+Repository = "https://github.com/bequem-py/bequem.git"
