@@ -14,19 +14,21 @@ The encoded vector or the action of the encoded matrix can be obtained either th
 """
 class Node(ABC):
 
-    @abstractmethod
-    def __init__(children: list[Node]=[]):
-        raise NotImplementedError
+    # TODO
+    # @abstractmethod
+    # def __init__(children: list[Node], data: str | None):
+    #     raise NotImplementedError
 
-    @abstractmethod
-    def children(self) -> list[Node]:
-        return []
+    # TODO
+    # @abstractmethod
+    # def children(self) -> list[Node]:
+    #     return []
 
-    def uuid() -> Uuid:
-        raise NotImplementedError
+    # def uuid() -> Uuid:
+    #     raise NotImplementedError
 
-    def serialize_data(self) -> str | None:
-        return None
+    # def serialize_data(self) -> str | None:
+    #     return None
 
     @abstractmethod
     def qubits_in(self) -> QubitMap:
