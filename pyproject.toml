@@ -10,3 +10,9 @@ keywords = ["quantum computing"]
 
 [project.urls]
 Repository = "https://github.com/bequem-py/bequem.git"
+
+[tool.pytest.ini_options]
+addopts = [
+  "--import-mode=importlib",
+]
+pythonpath = ["src"]
