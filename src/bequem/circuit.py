@@ -1,3 +1,4 @@
+from __future__ import annotations
 import tequila as tq
 import numpy as np
 from dataclasses import dataclass
@@ -13,7 +14,7 @@ class Circuit:
         else:
             self.tq_circuit = tq.QCircuit()
 
-    def simulate(self, input: np.array | None=None, **kwargs) -> np.array:
+    def simulate(self, input: np.array | None = None, **kwargs) -> np.array:
         input = tq.QubitWaveFunction.from_array(input, BitNumbering.LSB)
         result = tq.simulate(self.tq_circuit, initial_state=input, **kwargs)
         return result.to_array(BitNumbering.LSB, copy=False)

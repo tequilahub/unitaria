@@ -1,4 +1,4 @@
-from bequem import ConstantIntegerAddition, Identity, Add, Scale, Adjoint
+from bequem.nodes import Increment, Identity, Add, Scale, Adjoint
 
 N = 4
 

@@ -1,9 +1,11 @@
-from node import Node
+import numpy as np
+
+from .node import Node
 
 
 class Mul(Node):
 
-    def __init__(self, A, B):
+    def __init__(self, A: Node, B: Node):
         assert A.qubits_out().simplify().reduce() == B.qubits_in().simplify().reduce()
         self.A = A
         self.B = B

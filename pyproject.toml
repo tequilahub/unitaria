@@ -1,3 +1,7 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "bequem"
 authors = [
@@ -6,6 +10,9 @@ authors = [
 version = "0.0.0"
 description = "A tool to construct and simulate block encodings for quantum computation"
 keywords = ["quantum computing"]
+dependencies = [
+  "tequila-basic==1.9.*",
+]
 
 
 [project.urls]
