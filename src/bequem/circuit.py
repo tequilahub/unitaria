@@ -8,6 +8,7 @@ from tequila import BitNumbering
 
 @dataclass
 class Circuit:
+
     def __init__(self, tq_circuit: tq.QCircuit | None = None):
         if tq_circuit is not None:
             self.tq_circuit = tq_circuit

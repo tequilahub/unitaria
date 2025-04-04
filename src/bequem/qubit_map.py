@@ -3,6 +3,8 @@ from dataclasses import dataclass
 
 import numpy as np
 
+from .circuit import Circuit
+
 
 @dataclass(frozen=True)
 class QubitMap:
@@ -27,8 +29,8 @@ class QubitMap:
 
     def reduce(self) -> QubitMap:
         return QubitMap([
-            register for register in self.registers
-            if type(register) is IdBit or type(register) is Controlled or type(register) is Projection
+            register for register in self.registers if type(register) is IdBit
+            or type(register) is Controlled or type(register) is Projection
         ])
 
     def is_all_zeros(self) -> bool:
@@ -48,18 +50,21 @@ class QubitMap:
 class ZeroBit:
     pass
 
+
 @dataclass(frozen=True)
 class IdBit:
     pass
+
 
 @dataclass(frozen=True)
 class Controlled:
     case_zero: QubitMap
     case_one: QubitMap
 
+
 @dataclass(frozen=True)
 class Projection:
     circuit: Circuit
 
-Register = ZeroBit | IdBit | Controlled | Projection
 
+Register = ZeroBit | IdBit | Controlled | Projection

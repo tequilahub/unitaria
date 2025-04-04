@@ -7,9 +7,10 @@ from bequem.qubit_map import QubitMap, ZeroBit, IdBit
 
 
 class ConstantMatrix(Node):
+
     def __init__(self, vec: np.array):
         self.n_qubits = round(np.log2(vec.shape[0]))
-        assert 2 ** self.n_qubits == vec.shape[0]
+        assert 2**self.n_qubits == vec.shape[0]
         self.vec = vec
 
     def qubits_in(self) -> QubitMap:

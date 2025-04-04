@@ -1,8 +1,8 @@
 import numpy as np
 import tequila as tq
-from node import Node
-from qubit_map import QubitMap, IdBit
-from circuit import Circuit
+from .node import Node
+from bequem.qubit_map import QubitMap, IdBit
+from bequem.circuit import Circuit
 
 
 class Increment(Node):
@@ -25,6 +25,7 @@ class Increment(Node):
     def circuit(self) -> Circuit:
         circuit = tq.QCircuit()
         for i in range(self.bits - 1):
-            circuit += tq.CNOT(target=self.bits-i, control=tuple(range(0, self.bits-i)))
+            circuit += tq.CNOT(target=self.bits - i,
+                               control=tuple(range(0, self.bits - i)))
         circuit += tq.X(target=0)
         return Circuit(circuit)

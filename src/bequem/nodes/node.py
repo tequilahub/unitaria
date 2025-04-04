@@ -59,9 +59,8 @@ class Node(ABC):
     def verify(self) -> bool:
         if self.is_vector():
             computed = self.compute()
-            simulated = \
-                self.normalization() * \
-                self.qubits_out().project(self.circuit().simulate())
+            simulated = self.normalization() * self.qubits_out().project(
+                self.circuit().simulate())
             return np.allclose(computed, simulated)
         else:
             basis = self.qubits_in().enumerate_basis()
@@ -69,9 +68,8 @@ class Node(ABC):
                 v = np.zeros(len(basis))
                 v[i] = 1
                 computed = self.compute(v)
-                simulated = \
-                    self.normalization() * \
-                    self.qubits_out().project(self.circuit().simulate(b))
+                simulated = self.normalization() * self.qubits_out().project(
+                    self.circuit().simulate(b))
                 if not np.allclose(computed, simulated):
                     return False
             return True
