@@ -8,13 +8,15 @@ from bequem.circuit import Circuit
 class Increment(Node):
 
     def __init__(self, bits: int):
+        if bits < 1:
+            raise ValueError()
         self.bits = bits
 
     def qubits_in(self) -> QubitMap:
-        return QubitMap([IdBit for _ in range(self.bits)])
+        return QubitMap([IdBit() for _ in range(self.bits)])
 
     def qubits_out(self) -> QubitMap:
-        return QubitMap([IdBit for _ in range(self.bits)])
+        return QubitMap([IdBit() for _ in range(self.bits)])
 
     def normalization(self) -> float:
         return 1

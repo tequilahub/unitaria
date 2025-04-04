@@ -7,9 +7,20 @@ import numpy as np
 from .circuit import Circuit
 
 
+# TODO: It is very easy to make the error of writing QubitMap([ZeroBit]) instead
+# of QubitMap([ZeroBit()])
 @dataclass(frozen=True)
 class QubitMap:
     registers: list[Register]
+
+    def __init__(self, registers: list[Register]):
+        for register in registers:
+            if not isinstance(register, Register):
+                if register is ZeroBit or register is IdBit:
+                    raise ValueError(f"You wrote {register} instead of {register}()")
+                else:
+                    raise ValueError(f"{register} is not valid in a QubitMap")
+        self.registers = registers
 
     def simplify(self) -> QubitMap:
         simplified = []
