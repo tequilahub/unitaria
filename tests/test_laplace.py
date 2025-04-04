@@ -3,10 +3,9 @@ from bequem.nodes import Increment, Identity, Add, Scale, Adjoint
 N = 4
 
 
-def test_add():
+def test_increment():
     C = Increment(N)
-
-    assert C.verify()
+    C.verify()
 
 # A = Add(Scale(Identity(N), 2), Scale(Add(C, Adjoint(C)), -1))
 

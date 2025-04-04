@@ -19,13 +19,13 @@ class Increment(Node):
     def normalization(self) -> float:
         return 1
 
-    def compute(self, input: np.array) -> np.array:
+    def compute(self, input: np.ndarray) -> np.ndarray:
         return np.roll(input, 1)
 
     def circuit(self) -> Circuit:
         circuit = tq.QCircuit()
         for i in range(self.bits - 1):
-            circuit += tq.CNOT(target=self.bits - i,
-                               control=tuple(range(0, self.bits - i)))
-        circuit += tq.X(target=0)
+            circuit += tq.gates.CNOT(target=self.bits - i - 1,
+                               control=tuple(range(0, self.bits - i - 1)))
+        circuit += tq.gates.X(target=0)
         return Circuit(circuit)

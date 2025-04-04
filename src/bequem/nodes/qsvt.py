@@ -3,7 +3,7 @@ from node import Node
 
 class QSVT(Node):
 
-    def __init__(self, A: Node, angles: np.array):
+    def __init__(self, A: Node, angles: np.ndarray):
         self.A = A
         self.angles = angles
 

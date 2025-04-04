@@ -15,7 +15,7 @@ class Mul(Node):
         self.A = A
         self.B = B
 
-    def compute(self, input: np.array | None) -> np.array:
+    def compute(self, input: np.ndarray | None) -> np.ndarray:
         input = self.A.compute(input)
         input = self.B.compute(input)
         return input

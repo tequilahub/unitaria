@@ -20,7 +20,7 @@ class Identity(Node):
     def normalization(self) -> float:
         return 1
 
-    def compute(self, input: np.array) -> np.array:
+    def compute(self, input: np.ndarray) -> np.ndarray:
         return input
 
     def circuit(self) -> Circuit:

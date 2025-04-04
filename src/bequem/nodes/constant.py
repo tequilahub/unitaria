@@ -8,7 +8,7 @@ from bequem.qubit_map import QubitMap, ZeroBit, IdBit
 
 class ConstantMatrix(Node):
 
-    def __init__(self, vec: np.array):
+    def __init__(self, vec: np.ndarray):
         self.n_qubits = round(np.log2(vec.shape[0]))
         assert 2**self.n_qubits == vec.shape[0]
         self.vec = vec
@@ -22,7 +22,7 @@ class ConstantMatrix(Node):
     def normalization(self) -> float:
         return np.linalg.norm(self.vec)
 
-    def compute(self, input: np.array | None = None) -> np.array:
+    def compute(self, input: np.ndarray | None = None) -> np.ndarray:
         assert input is None
         return self.vec / self.normalization()
 

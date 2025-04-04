@@ -49,27 +49,26 @@ class Node(ABC):
         self.qubits_in().is_all_zeros()
 
     @abstractmethod
-    def compute(self, input: np.array | None = None) -> np.array:
+    def compute(self, input: np.ndarray | None = None) -> np.ndarray:
         raise NotImplementedError
 
     @abstractmethod
     def circuit(self) -> Circuit:
         raise NotImplementedError
 
-    def verify(self) -> bool:
+    def verify(self):
         if self.is_vector():
             computed = self.compute()
             simulated = self.normalization() * self.qubits_out().project(
                 self.circuit().simulate())
-            return np.allclose(computed, simulated)
+            np.testing.assert_allclose(computed, simulated)
         else:
-            basis = self.qubits_in().enumerate_basis()
-            for (i, b) in enumerate(basis):
-                v = np.zeros(len(basis))
-                v[i] = 1
-                computed = self.compute(v)
-                simulated = self.normalization() * self.qubits_out().project(
-                    self.circuit().simulate(b))
-                if not np.allclose(computed, simulated):
-                    return False
-            return True
+            basis_in = self.qubits_in().enumerate_basis()
+            basis_out = self.qubits_out().enumerate_basis()
+            computed = np.eye(len(basis_out), len(basis_in), dtype=np.complex64)
+            simulated = np.zeros((len(basis_out), len(basis_in)), dtype=np.complex64)
+            for (i, b) in enumerate(basis_in):
+                computed[:, i] = self.compute(computed[:, i])
+                simulated[:, i] = self.normalization() * self.qubits_out().project(
+                    self.circuit().simulate(b, backend="qulacs"))
+            np.testing.assert_allclose(computed, simulated)
