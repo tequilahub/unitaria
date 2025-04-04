@@ -1,31 +1,28 @@
 from node import Node
 
+
 class QSVT(Node):
 
     def __init__(self, A: Node, angles: np.array):
         self.A = A
         self.angles = angles
 
-class Inverse(WrapperNode):
+
+class Inverse(QSVT):
 
     def __init__(self, A: Node, condition: float, accuracy: float):
-        self.A = A
+        angles = None
+        raise NotImplementedError
+        super().__init__(A, angles)
         self.condition = condition
         self.accuracy = accuracy
 
-    def definition(self):
-        angles = None
-        raise NotImplementedError
-        return QSVT(A, angles)
 
-
-class AmplitudeAmplificiation(WrapperNode):
+class AmplitudeAmplificiation(QSVT):
 
     def __init__(self, A: Node, iterations: int):
-        self.A = A
-        self.iterations = iterations
-
-    def definition(self):
         angles = None
         raise NotImplementedError
-        return QSVT(A, angles)
+        super().__init__(A, angles)
+        self.A = A
+        self.iterations = iterations

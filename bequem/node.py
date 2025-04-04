@@ -1,4 +1,4 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 
 import numpy as np
 
@@ -7,12 +7,15 @@ from circuit import Circuit, simulate
 
 Uuid = str
 
-"""
-Abstract class for all nodes in the computational graph
 
-The encoded vector or the action of the encoded matrix can be obtained either through matrix arithmetic using `simulate` or as a quantum circuit using `circuit`.
-"""
 class Node(ABC):
+    """
+    Abstract class for all nodes in the computational graph
+
+    The encoded vector or the action of the encoded matrix can be obtained either
+    through matrix arithmetic using `simulate` or as a quantum circuit using
+    `circuit`.
+    """
 
     # TODO
     # @abstractmethod
@@ -42,7 +45,7 @@ class Node(ABC):
         raise NotImplementedError
 
     def is_vector(self) -> bool:
-        self.projection_in().is_all_zeros()
+        self.qubits_in().is_all_zeros()
 
     @abstractmethod
     def compute(self, input: np.array | None=None) -> np.array:
@@ -67,26 +70,3 @@ class Node(ABC):
                 if not np.allclose(computed, simulated):
                     return False
             return True
-                
-
-class WrapperNode(Node):
-    # TODO: caching
-
-    @abstractmethod
-    def definition(self) -> Node:
-        raise NotImplementedError
-
-    def qubits_in(self) -> QubitMap:
-        return self.definition().qubits_in()
-
-    def qubits_out(self) -> QubitMap:
-        return self.definition().qubits_out()
-
-    def normalization(self) -> float:
-        return self.definition().normalization()
-
-    def compute(self, input: np.array | None=None) -> np.array:
-        return self.definition().compute(input)
-
-    def circuit(self) -> Circuit:
-        return self.definition().circuit()

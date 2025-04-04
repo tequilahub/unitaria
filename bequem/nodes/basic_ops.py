@@ -2,7 +2,7 @@ from node import Node
 
 
 class Mul(Node):
-            
+
     def __init__(self, A, B):
         assert A.qubits_out().simplify().reduce() == B.qubits_in().simplify().reduce()
         self.A = A
@@ -23,7 +23,7 @@ class Mul(Node):
         return circuit
 
     def qubits_in(self) -> QubitMap:
-        self.A.qubits_in()
+        self.A.qubits_in() # TODO: Stimmt noch nicht
 
     def qubits_out(self) -> QubitMap:
         self.B.qubits_out()
