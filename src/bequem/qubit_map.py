@@ -8,7 +8,7 @@ from .circuit import Circuit
 
 @dataclass(frozen=True)
 class QubitMap:
-    components: list[Register]
+    registers: list[Register]
 
     def simplify(self) -> QubitMap:
         simplified = []
@@ -39,7 +39,7 @@ class QubitMap:
     def test_basis(self, bits: int):
         raise NotImplementedError
 
-    def enumerate_basis() -> list[int]:
+    def enumerate_basis(self) -> list[int]:
         raise NotImplementedError
 
     def project(self, vector: np.array) -> np.array:

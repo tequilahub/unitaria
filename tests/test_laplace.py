@@ -4,7 +4,7 @@ N = 4
 
 
 def test_add():
-    C = ConstantIntegerAddition(N, 1)
+    C = Increment(N)
 
     assert C.verify()
 
