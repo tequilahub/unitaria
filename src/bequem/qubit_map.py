@@ -8,8 +8,6 @@ import numpy as np
 from .circuit import Circuit
 
 
-# TODO: It is very easy to make the error of writing QubitMap([ZeroBit])
-# instead of QubitMap([ZeroBit()])
 @dataclass(frozen=True)
 class QubitMap:
     registers: list[Register]
@@ -29,7 +27,7 @@ class QubitMap:
                     case_zero = register.case_zero.simplify()
                     case_one = register.case_one.simplify()
                     if case_zero == case_one:
-                        simplified.append(case_zero)
+                        simplified.extend(case_zero.registers)
                         simplified.append(Qubit.ID)
                     else:
                         simplified.append(Controlled(case_zero, case_one))
@@ -65,7 +63,7 @@ class QubitMap:
         for register in self.registers:
             match register:
                 case Qubit(QubitType.ZERO):
-                    if bits & 0 != 0:
+                    if bits & 1 != 0:
                         return False
                     bits = bits >> 1
                 case Qubit(QubitType.ID):
@@ -89,6 +87,8 @@ class QubitMap:
                 case Controlled(case_one):
                     sum += 1 + case_one.total_bits()
                 case Projection(circuit):
+                    # One bit in the circuit corresponds to the result of the
+                    # operation
                     sum += len(circuit.tq_circuit.qubits) - 1
                 case Qubit():
                     sum += 1
