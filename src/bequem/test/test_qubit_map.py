@@ -1,10 +1,10 @@
-import pytest
-
-from ..qubit_map import QubitMap, IdBit, ZeroBit
+from ..qubit_map import QubitMap, Qubit
 
 
 def test_reduce():
     assert QubitMap([]).reduce() == QubitMap([])
-    assert QubitMap([ZeroBit()]).reduce() == QubitMap([])
-    assert QubitMap([IdBit()]).reduce() == QubitMap([IdBit()])
-    assert QubitMap([ZeroBit(), IdBit(), ZeroBit(), ZeroBit(), IdBit(), ZeroBit()]).reduce() == QubitMap([IdBit(), IdBit()])
+    assert QubitMap([Qubit.ZERO]).reduce() == QubitMap([])
+    assert QubitMap([Qubit.ID]).reduce() == QubitMap([Qubit.ID])
+    assert QubitMap(
+        [Qubit.ZERO, Qubit.ID, Qubit.ZERO, Qubit.ZERO, Qubit.ID, Qubit.ZERO]
+    ).reduce() == QubitMap([Qubit.ID, Qubit.ID])
