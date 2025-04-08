@@ -68,24 +68,36 @@ class QubitMap:
                     bits = bits >> 1
                 case Qubit(QubitType.ID):
                     bits = bits >> 1
+                case Controlled(case_zero, case_one):
+                    num_qubits = case_zero.total_qubits()
+                    relevant_bits = bits & ((1 << num_qubits) - 1)
+                    control_bit = (bits >> num_qubits) & 1
+                    result = None
+                    if control_bit == 0:
+                        result = case_zero.test_basis(relevant_bits)
+                    else:
+                        result = case_one.test_basis(relevant_bits)
+                    if not result:
+                        return False
+                    bits = bits >> (num_qubits + 1)
                 case _:
                     raise NotImplementedError
         return True
 
     def enumerate_basis(self) -> np.ndarray:
         return np.fromiter(
-            filter(self.test_basis, range(2 ** self.total_bits())), dtype=np.int32
+            filter(self.test_basis, range(2 ** self.total_qubits())), dtype=np.int32
         )
 
     def project(self, vector: np.ndarray) -> np.ndarray:
         return vector[self.enumerate_basis()]
 
-    def total_bits(self) -> int:
+    def total_qubits(self) -> int:
         sum = 0
         for register in self.registers:
             match register:
                 case Controlled(case_one):
-                    sum += 1 + case_one.total_bits()
+                    sum += 1 + case_one.total_qubits()
                 case Projection(circuit):
                     # One bit in the circuit corresponds to the result of the
                     # operation
@@ -95,6 +107,10 @@ class QubitMap:
                 case _:
                     raise NotImplementedError
         return sum
+
+    def dimension(self) -> int:
+        # TODO
+        return len(self.enumerate_basis())
 
 
 class QubitType(Enum):

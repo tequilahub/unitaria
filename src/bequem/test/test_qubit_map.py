@@ -98,20 +98,20 @@ def test_basis():
     )
 
 
-def test_total_bits():
-    assert QubitMap([]).total_bits() == 0
-    assert QubitMap([Qubit.ZERO]).total_bits() == 1
-    assert QubitMap([Qubit.ID]).total_bits() == 1
+def test_total_qubits():
+    assert QubitMap([]).total_qubits() == 0
+    assert QubitMap([Qubit.ZERO]).total_qubits() == 1
+    assert QubitMap([Qubit.ID]).total_qubits() == 1
     assert (
         QubitMap(
             [Controlled(QubitMap([Qubit.ID]), QubitMap([Qubit.ZERO]))]
-        ).total_bits()
+        ).total_qubits()
         == 2
     )
     circuit = Circuit()
     circuit.tq_circuit += tq.gates.X(target=0)
     circuit.tq_circuit += tq.gates.X(target=1)
-    assert QubitMap([Projection(circuit)]).total_bits() == 1
+    assert QubitMap([Projection(circuit)]).total_qubits() == 1
     assert (
         QubitMap(
             [
@@ -123,6 +123,6 @@ def test_total_bits():
                 Controlled(QubitMap([Qubit.ZERO]), QubitMap([Qubit.ZERO])),
                 Qubit.ZERO,
             ]
-        ).total_bits()
+        ).total_qubits()
         == 8
     )

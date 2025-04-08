@@ -1,0 +1,26 @@
+from ..controlled_ops import BlockDiagonal, Add
+from ..identity import Identity
+from ..integer_arithmetic import Increment
+from bequem.qubit_map import QubitMap, Qubit
+
+
+def test_block_diagonal():
+
+    A = Identity(QubitMap([Qubit.ID, Qubit.ZERO]))
+    B = Increment(2)
+
+    D = BlockDiagonal(A, B)
+    D.verify()
+    D = BlockDiagonal(B, A)
+    D.verify()
+
+
+def test_add():
+
+    A = Identity(QubitMap([Qubit.ID]))
+    B = Increment(1)
+
+    D = Add(A, B)
+    D.verify()
+    D = Add(B, A)
+    D.verify()

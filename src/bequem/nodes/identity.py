@@ -7,10 +7,9 @@ from .node import Node
 
 
 class Identity(Node):
-
     def __init__(self, qubits: QubitMap):
         self.qubits = qubits
-    
+
     def qubits_in(self) -> QubitMap:
         return self.qubits
 
@@ -24,4 +23,6 @@ class Identity(Node):
         return input
 
     def circuit(self) -> Circuit:
-        return Circuit(tq.QCircuit())
+        circuit = tq.QCircuit()
+        circuit += tq.gates.Phase(target=list(range(self.qubits.total_qubits())), angle=0)
+        return Circuit(circuit)
