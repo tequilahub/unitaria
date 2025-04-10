@@ -46,7 +46,7 @@ class Node(ABC):
         raise NotImplementedError
 
     def is_vector(self) -> bool:
-        self.qubits_in().is_all_zeros()
+        return self.qubits_in().is_all_zeros()
 
     @abstractmethod
     def compute(self, input: np.ndarray | None = None) -> np.ndarray:
@@ -57,6 +57,8 @@ class Node(ABC):
         raise NotImplementedError
 
     def verify(self):
+        # TODO: Do we really need a special case for is_vector = True?
+        #  Shouldn't this be covered by having enumerate_basis yield only 0?
         if self.is_vector():
             computed = self.compute()
             simulated = self.normalization() * self.qubits_out().project(

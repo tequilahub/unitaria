@@ -2,30 +2,30 @@ import numpy as np
 from tequila_building_blocks.state_prep import prepare_state
 
 from bequem.circuit import Circuit
-from bequem.node import Node
-from bequem.qubit_map import QubitMap, ZeroBit, IdBit
+from bequem.nodes.node import Node
+from bequem.qubit_map import QubitMap, Qubit
 
 
-class ConstantMatrix(Node):
-
+class ConstantVector(Node):
     def __init__(self, vec: np.ndarray):
         self.n_qubits = round(np.log2(vec.shape[0]))
-        assert 2**self.n_qubits == vec.shape[0]
+        assert 2 ** self.n_qubits == vec.shape[0]
         self.vec = vec
 
     def qubits_in(self) -> QubitMap:
-        return QubitMap([ZeroBit() for _ in range(self.n_qubits)])
+        return QubitMap([Qubit.ZERO for _ in range(self.n_qubits)])
 
     def qubits_out(self) -> QubitMap:
-        return QubitMap([IdBit() for _ in range(self.n_qubits)])
+        return QubitMap([Qubit.ID for _ in range(self.n_qubits)])
 
     def normalization(self) -> float:
         return np.linalg.norm(self.vec)
 
     def compute(self, input: np.ndarray | None = None) -> np.ndarray:
-        assert input is None
-        return self.vec / self.normalization()
+        return self.vec
 
     def circuit(self) -> Circuit:
-        tq_circuit = prepare_state(self.vec, range(self.n_qubits))
+        normalized = self.vec / self.normalization()
+        # reversed because prepare_state expects MSB ordering
+        tq_circuit = prepare_state(normalized, list(reversed(range(self.n_qubits))))
         return Circuit(tq_circuit)
