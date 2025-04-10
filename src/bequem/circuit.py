@@ -15,9 +15,7 @@ class Circuit:
         else:
             self.tq_circuit = tq.QCircuit()
 
-    def simulate(self, input: np.ndarray | int | None = None, **kwargs) -> np.ndarray:
-        if input is None:
-            input = 0
+    def simulate(self, input: np.ndarray | int = 0, **kwargs) -> np.ndarray:
         if isinstance(input, np.ndarray):
             input = tq.QubitWaveFunction.from_array(input, BitNumbering.LSB)
         elif isinstance(input, (int, np.integer)):

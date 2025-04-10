@@ -26,8 +26,6 @@ class Increment(Node):
 
     def circuit(self) -> Circuit:
         circuit = tq.QCircuit()
-        for i in range(self.bits - 1):
-            circuit += tq.gates.CNOT(target=self.bits - i - 1,
-                               control=tuple(range(0, self.bits - i - 1)))
-        circuit += tq.gates.X(target=0)
+        for i in reversed(range(self.bits)):
+            circuit += tq.gates.X(target=i, control=list(range(i)))
         return Circuit(circuit)
