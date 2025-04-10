@@ -1,8 +1,8 @@
 import numpy as np
 import tequila as tq
 
-from ..qubit_map import QubitMap, Qubit, Controlled, Projection
-from ..circuit import Circuit
+from bequem.qubit_map import QubitMap, Qubit, Controlled, Projection
+from bequem.circuit import Circuit
 
 
 def test_simplify():

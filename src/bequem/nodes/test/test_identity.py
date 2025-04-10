@@ -1,4 +1,4 @@
-from ..identity import Identity
+from bequem.nodes.identity import Identity
 from bequem.qubit_map import QubitMap, Qubit
 
 

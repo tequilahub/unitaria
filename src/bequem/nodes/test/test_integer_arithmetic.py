@@ -1,6 +1,6 @@
 import pytest
 
-from ..integer_arithmetic import Increment
+from bequem.nodes.integer_arithmetic import Increment
 
 
 @pytest.mark.parametrize("bits", [-2, 0])

@@ -1,6 +1,6 @@
-from ..controlled_ops import BlockDiagonal, Add
-from ..identity import Identity
-from ..integer_arithmetic import Increment
+from bequem.nodes.controlled_ops import BlockDiagonal, Add
+from bequem.nodes.identity import Identity
+from bequem.nodes.integer_arithmetic import Increment
 from bequem.qubit_map import QubitMap, Qubit
 
 

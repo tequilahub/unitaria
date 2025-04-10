@@ -5,7 +5,7 @@ from enum import Enum
 
 import numpy as np
 
-from .circuit import Circuit
+from bequem.circuit import Circuit
 
 
 @dataclass(frozen=True)

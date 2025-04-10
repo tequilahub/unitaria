@@ -3,7 +3,7 @@ import tequila as tq
 
 from bequem.circuit import Circuit
 from bequem.qubit_map import QubitMap
-from .node import Node
+from bequem.nodes.node import Node
 
 
 class Identity(Node):
