@@ -1,22 +1,21 @@
 import numpy as np
 import tequila as tq
 from .node import Node
-from bequem.qubit_map import QubitMap, Qubit
+from bequem.qubit_map import QubitMap, ID
 from bequem.circuit import Circuit
 
 
 class Increment(Node):
-
     def __init__(self, bits: int):
         if bits < 1:
             raise ValueError()
         self.bits = bits
 
     def qubits_in(self) -> QubitMap:
-        return QubitMap([Qubit.ID for _ in range(self.bits)])
+        return QubitMap([ID for _ in range(self.bits)])
 
     def qubits_out(self) -> QubitMap:
-        return QubitMap([Qubit.ID for _ in range(self.bits)])
+        return QubitMap([ID for _ in range(self.bits)])
 
     def normalization(self) -> float:
         return 1

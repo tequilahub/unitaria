@@ -24,5 +24,5 @@ class Identity(Node):
 
     def circuit(self) -> Circuit:
         circuit = tq.QCircuit()
-        circuit += tq.gates.Phase(target=list(range(self.qubits.total_qubits())), angle=0)
+        circuit += tq.gates.Phase(target=list(range(self.qubits.total_qubits)), angle=0)
         return Circuit(circuit)

@@ -46,7 +46,7 @@ class Node(ABC):
         raise NotImplementedError
 
     def is_vector(self) -> bool:
-        return self.qubits_in().is_all_zeros()
+        return self.qubits_in().is_trivial()
 
     @abstractmethod
     def compute(self, input: np.ndarray | None = None) -> np.ndarray:

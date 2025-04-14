@@ -1,7 +1,7 @@
 import numpy as np
 import tequila as tq
 
-from bequem.qubit_map import QubitMap, Controlled, Qubit
+from bequem.qubit_map import QubitMap, Controlled, ZERO
 from bequem.circuit import Circuit
 from bequem.nodes.node import Node
 
@@ -11,7 +11,7 @@ class BlockDiagonal(Node):
         # TODO: Automatically use maximum normalization using Scale
         assert np.isclose(A.normalization(), B.normalization())
         # TODO
-        assert A.qubits_in().total_qubits() == B.qubits_in().total_qubits()
+        assert A.qubits_in().total_qubits == B.qubits_in().total_qubits
         self.A = A
         self.B = B
 
@@ -25,7 +25,7 @@ class BlockDiagonal(Node):
         return self.A.normalization()
 
     def compute(self, input: np.ndarray) -> np.ndarray:
-        dim_A = self.A.qubits_in().dimension()
+        dim_A = self.A.qubits_in().dimension
         result_A = self.A.compute(input[:dim_A])
         result_B = self.B.compute(input[dim_A:])
         return np.concatenate((result_A, result_B))
@@ -57,10 +57,10 @@ class Add(Node):
         self.B = B
 
     def qubits_in(self) -> QubitMap:
-        return QubitMap(self.A.qubits_in().registers + [Qubit.ZERO])
+        return QubitMap(self.A.qubits_in().registers + [ZERO])
 
     def qubits_out(self) -> QubitMap:
-        return QubitMap(self.A.qubits_out().registers + [Qubit.ZERO])
+        return QubitMap(self.A.qubits_out().registers + [ZERO])
 
     def normalization(self) -> float:
         return self.A.normalization() + self.B.normalization()
