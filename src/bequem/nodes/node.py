@@ -2,6 +2,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 
 import numpy as np
+import tequila as tq
 
 from bequem.qubit_map import QubitMap
 from bequem.circuit import Circuit
@@ -61,8 +62,18 @@ class Node(ABC):
         basis_out = self.qubits_out().enumerate_basis()
         computed = np.eye(len(basis_out), len(basis_in), dtype=np.complex64)
         simulated = np.zeros((len(basis_out), len(basis_in)), dtype=np.complex64)
+        computed_m = self.compute(computed.T).T
+        circuit = self.circuit()
         for (i, b) in enumerate(basis_in):
             computed[:, i] = self.compute(computed[:, i])
             simulated[:, i] = self.normalization() * self.qubits_out().project(
-                self.circuit().simulate(b, backend="qulacs"))
+                circuit.simulate(b, backend="qulacs")
+            )
+
+
+        print(tq.draw(circuit.tq_circuit))
+        print(computed)
+        # verify compute with tensor valued input
+        np.testing.assert_allclose(computed, computed_m)
+        # verify circuit
         np.testing.assert_allclose(computed, simulated)

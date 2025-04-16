@@ -21,7 +21,7 @@ class Increment(Node):
         return 1
 
     def compute(self, input: np.ndarray) -> np.ndarray:
-        return np.roll(input, 1)
+        return np.roll(input, 1, axis=-1)
 
     def circuit(self) -> Circuit:
         circuit = tq.QCircuit()

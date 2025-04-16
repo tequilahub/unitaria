@@ -9,7 +9,7 @@ def test_increment_constructor(bits):
         Increment(bits)
 
 
-@pytest.mark.parametrize("bits", [1, 4])
+@pytest.mark.parametrize("bits", [1, 2, 4])
 def test_increment(bits):
     A = Increment(bits)
     A.verify()

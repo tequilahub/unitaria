@@ -26,9 +26,10 @@ class BlockDiagonal(Node):
 
     def compute(self, input: np.ndarray) -> np.ndarray:
         dim_A = self.A.qubits_in().dimension
-        result_A = self.A.compute(input[:dim_A])
-        result_B = self.B.compute(input[dim_A:])
-        return np.concatenate((result_A, result_B))
+        input_A, input_B = np.split(input, [dim_A], axis=-1)
+        result_A = self.A.compute(input_A)
+        result_B = self.B.compute(input_B)
+        return np.concatenate((result_A, result_B), axis=-1)
 
     def circuit(self) -> Circuit:
         circuit_A = self.A.circuit().tq_circuit

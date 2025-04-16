@@ -1,7 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass
 
-import tequila as tq
 import numpy as np
 
 from bequem.circuit import Circuit
