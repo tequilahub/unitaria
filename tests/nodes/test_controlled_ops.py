@@ -1,4 +1,3 @@
-from bequem.nodes.controlled_ops import BlockDiagonal, Add
 from bequem.nodes.identity import Identity
 from bequem.nodes.integer_arithmetic import Increment
 from bequem.qubit_map import QubitMap
@@ -17,7 +16,7 @@ def test_block_diagonal():
 
 def test_add():
 
-    A = Identity(QubitMap(1, 0))
+    A = Identity(QubitMap(1, 1))
     B = Increment(1)
 
     D = A + B

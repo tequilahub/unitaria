@@ -11,8 +11,9 @@ def find_permutation(a: QubitMap, b: QubitMap) -> tuple[Circuit, Circuit, QubitM
     for (sub_a, sub_b) in _find_matching_subdivision(a, b):
         if sub_a == sub_b:
             continue
+        raise NotImplementedError
 
-    return Circuit(), Circuit(), a
+    return Circuit(), Circuit(), QubitMap(a.registers, max(a.zero_qubits, b.zero_qubits))
 
 
 def _find_matching_subdivision(

@@ -13,3 +13,9 @@ def test_tensor():
     (B & A).verify()
     (B & (A & B)).verify()
     ((B & A) & B).verify()
+
+
+def test_mul():
+    A = Increment(2)
+
+    (A @ A).verify()

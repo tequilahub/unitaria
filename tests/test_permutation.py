@@ -43,6 +43,10 @@ def test_find_permutation():
     c = Qubit(QubitMap(1), QubitMap(0, 1))
     check_find_permutation(QubitMap([c]), QubitMap([c]))
 
+    check_find_permutation(QubitMap(0), QubitMap(0, 1))
+    check_find_permutation(QubitMap(1), QubitMap(1, 1))
+    check_find_permutation(QubitMap([c]), QubitMap([c], 1))
+
 
 def test_find_matching_subdivision():
     assert _find_matching_subdivision(QubitMap(0), QubitMap(0)) == []

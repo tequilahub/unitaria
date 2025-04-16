@@ -4,6 +4,7 @@ import tequila as tq
 from bequem.qubit_map import QubitMap, Qubit
 from bequem.circuit import Circuit
 from bequem.nodes.node import Node
+from bequem.permutation import find_permutation
 
 
 class BlockDiagonal(Node):
@@ -52,19 +53,22 @@ Node.__or__ = lambda A, B: BlockDiagonal(A, B)
 
 class Add(Node):
     def __init__(self, A: Node, B: Node):
-        # TODO
-        assert A.qubits_in() == B.qubits_in()
-        assert A.qubits_out() == B.qubits_out()
+        self.perm_in_A, self.perm_in_B, qubits_in = find_permutation(
+            A.qubits_in(), B.qubits_in()
+        )
+        self._qubits_in = QubitMap(qubits_in.registers, qubits_in.zero_qubits + 1)
+        self.perm_out_A, self.perm_out_B, qubits_out = find_permutation(
+            A.qubits_out(), B.qubits_out()
+        )
+        self._qubits_out = QubitMap(qubits_out.registers, qubits_out.zero_qubits + 1)
         self.A = A
         self.B = B
 
     def qubits_in(self) -> QubitMap:
-        # TODO: Stimmt so nicht
-        return QubitMap(self.A.qubits_in().registers, 1)
+        return self._qubits_in
 
     def qubits_out(self) -> QubitMap:
-        # TODO: Stimmt so nicht
-        return QubitMap(self.A.qubits_out().registers, 1)
+        return self._qubits_out
 
     def normalization(self) -> float:
         return self.A.normalization() + self.B.normalization()
@@ -73,12 +77,22 @@ class Add(Node):
         return self.A.compute(input) + self.B.compute(input)
 
     def circuit(self) -> Circuit:
-        circuit_A = self.A.circuit().tq_circuit
-        circuit_B = self.B.circuit().tq_circuit
-        control_qubit = circuit_A.n_qubits
+        circuit_A = (
+            self.perm_in_A.tq_circuit
+            + self.A.circuit().tq_circuit
+            + self.perm_out_A.tq_circuit
+        )
+        circuit_B = (
+            self.perm_in_B.tq_circuit
+            + self.B.circuit().tq_circuit
+            + self.perm_out_B.tq_circuit
+        )
+        control_qubit = self.qubits_in().total_qubits - 1
         circuit_A.add_controls(control_qubit, inpl=True)
         circuit_B.add_controls(control_qubit, inpl=True)
-        angle = np.arctan2(np.sqrt(self.B.normalization()), np.sqrt(self.A.normalization()))
+        angle = np.arctan2(
+            np.sqrt(self.B.normalization()), np.sqrt(self.A.normalization())
+        )
 
         circuit = tq.QCircuit()
         circuit += tq.gates.Ry(2 * angle, target=control_qubit)

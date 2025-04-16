@@ -74,6 +74,10 @@ class QubitMap:
     def project(self, vector: np.ndarray) -> np.ndarray:
         return vector[self.enumerate_basis()]
 
+    def circuit(self) -> Circuit:
+        # TODO
+        return Circuit()
+
 
 @dataclass(frozen=True)
 class Qubit:

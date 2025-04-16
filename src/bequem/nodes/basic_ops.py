@@ -5,11 +5,31 @@ import tequila as tq
 from bequem.circuit import Circuit
 from bequem.qubit_map import QubitMap
 from bequem.nodes.node import Node
+from bequem.permutation import find_permutation
 
 
 class Mul(Node):
     def __init__(self, A: Node, B: Node):
-        assert A.qubits_out().simplify().reduce() == B.qubits_in().simplify().reduce()
+        self.perm_A, self.perm_B, self.qubits_middle = find_permutation(
+            A.qubits_out(), B.qubits_in()
+        )
+        self.qubits_middle = QubitMap(
+            self.qubits_middle.registers, self.qubits_middle.zero_qubits + 1
+        )
+        qubits_in_A = A.qubits_in()
+        self._qubits_in = QubitMap(
+            qubits_in_A.registers,
+            self.qubits_middle.total_qubits
+            - qubits_in_A.total_qubits
+            + qubits_in_A.zero_qubits,
+        )
+        qubits_out_B = B.qubits_out()
+        self._qubits_out = QubitMap(
+            qubits_out_B.registers,
+            self.qubits_middle.total_qubits
+            - qubits_out_B.total_qubits
+            + qubits_out_B.zero_qubits,
+        )
         self.A = A
         self.B = B
 
@@ -20,21 +40,25 @@ class Mul(Node):
 
     def circuit(self) -> Circuit:
         circuit = Circuit()
-        circuit.append(self.A.circuit())
-        raise NotImplementedError
-        # TODO: Qubit permutation
-        circuit.append(self.B.circuit())
+        circuit += self.A.circuit()
+        circuit += self.perm_A
+        circuit += self.qubits_middle.circuit()
+        circuit.tq_circuit += self.perm_B.tq_circuit.dagger()
+        circuit += self.B.circuit()
 
         return circuit
 
     def qubits_in(self) -> QubitMap:
-        self.A.qubits_in()  # TODO: Stimmt noch nicht
+        return self._qubits_in
 
     def qubits_out(self) -> QubitMap:
-        self.B.qubits_out()
+        return self._qubits_out
 
     def normalization(self) -> float:
         return self.A.normalization() * self.B.normalization()
+
+
+Node.__matmul__ = lambda A, B: Mul(A, B)
 
 
 class Tensor(Node):
