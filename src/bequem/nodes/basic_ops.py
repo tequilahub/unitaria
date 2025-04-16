@@ -104,6 +104,9 @@ class Tensor(Node):
         return self.A.normalization() * self.B.normalization()
 
 
+Node.__and__ = lambda A, B: Tensor(A, B)
+
+
 class Adjoint(Node):
     pass
 

@@ -8,7 +8,8 @@ def test_tensor():
     A = Increment(1)
     B = Identity(QubitMap(1, 1))
 
-    # Tensor(A, B).verify()
-    # Tensor(B, A).verify()
-    # Tensor(B, Tensor(A, B)).verify()
-    Tensor(Tensor(B, A), B).verify()
+    (A & B).verify()
+    (A & B).verify()
+    (B & A).verify()
+    (B & (A & B)).verify()
+    ((B & A) & B).verify()

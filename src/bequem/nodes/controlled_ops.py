@@ -47,6 +47,9 @@ class BlockDiagonal(Node):
         return Circuit(circuit)
 
 
+Node.__or__ = lambda A, B: BlockDiagonal(A, B)
+
+
 class Add(Node):
     def __init__(self, A: Node, B: Node):
         # TODO
@@ -86,6 +89,10 @@ class Add(Node):
         circuit += tq.gates.Ry(-2 * angle, target=control_qubit)
 
         return Circuit(circuit)
+
+
+Node.__add__ = lambda A, B: Add(A, B)
+
 
 class BlockHorizontal(Node):
     pass
