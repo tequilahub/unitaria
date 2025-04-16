@@ -35,3 +35,9 @@
 
 Vielleicht von Numpy inspirieren lassen
 
+
+## TODOS
+
+1. Matthias: Tensor, Multiplikation; Oliver: Increment, Addition, Building blocks
+2. Laplace / Konvolution testen <-- für nächstes Treffen
+3. Ancillas, User interface (Operatorschreibweise), measurements

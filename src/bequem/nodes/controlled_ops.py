@@ -1,7 +1,7 @@
 import numpy as np
 import tequila as tq
 
-from bequem.qubit_map import QubitMap, Controlled, ZERO
+from bequem.qubit_map import QubitMap, Qubit
 from bequem.circuit import Circuit
 from bequem.nodes.node import Node
 
@@ -16,10 +16,10 @@ class BlockDiagonal(Node):
         self.B = B
 
     def qubits_in(self) -> QubitMap:
-        return QubitMap([Controlled(self.A.qubits_in(), self.B.qubits_in())])
+        return QubitMap([Qubit(self.A.qubits_in(), self.B.qubits_in())])
 
     def qubits_out(self) -> QubitMap:
-        return QubitMap([Controlled(self.A.qubits_out(), self.B.qubits_out())])
+        return QubitMap([Qubit(self.A.qubits_out(), self.B.qubits_out())])
 
     def normalization(self) -> float:
         return self.A.normalization()
@@ -33,7 +33,7 @@ class BlockDiagonal(Node):
     def circuit(self) -> Circuit:
         circuit_A = self.A.circuit().tq_circuit
         circuit_B = self.B.circuit().tq_circuit
-        control_qubit = len(circuit_A.qubits)
+        control_qubit = circuit_A.n_qubits
         circuit_A.add_controls(control_qubit, inpl=True)
         circuit_B.add_controls(control_qubit, inpl=True)
 
@@ -49,18 +49,18 @@ class BlockDiagonal(Node):
 class Add(Node):
     def __init__(self, A: Node, B: Node):
         # TODO
-        # assert A.qubits_in().reduce() == B.qubits_in().reduce()
-        # assert A.qubits_out().reduce() == B.qubits_out().reduce()
-        assert A.qubits_in().simplify() == B.qubits_in().simplify()
-        assert A.qubits_out().simplify() == B.qubits_out().simplify()
+        assert A.qubits_in() == B.qubits_in()
+        assert A.qubits_out() == B.qubits_out()
         self.A = A
         self.B = B
 
     def qubits_in(self) -> QubitMap:
-        return QubitMap(self.A.qubits_in().registers + [ZERO])
+        # TODO: Stimmt so nicht
+        return QubitMap(self.A.qubits_in().registers, 1)
 
     def qubits_out(self) -> QubitMap:
-        return QubitMap(self.A.qubits_out().registers + [ZERO])
+        # TODO: Stimmt so nicht
+        return QubitMap(self.A.qubits_out().registers, 1)
 
     def normalization(self) -> float:
         return self.A.normalization() + self.B.normalization()
@@ -71,7 +71,7 @@ class Add(Node):
     def circuit(self) -> Circuit:
         circuit_A = self.A.circuit().tq_circuit
         circuit_B = self.B.circuit().tq_circuit
-        control_qubit = len(circuit_A.qubits)
+        control_qubit = circuit_A.n_qubits
         circuit_A.add_controls(control_qubit, inpl=True)
         circuit_B.add_controls(control_qubit, inpl=True)
         angle = np.arctan2(np.sqrt(self.B.normalization()), np.sqrt(self.A.normalization()))

@@ -3,7 +3,7 @@ from tequila_building_blocks.state_prep import prepare_state
 
 from bequem.circuit import Circuit
 from bequem.nodes.node import Node
-from bequem.qubit_map import QubitMap, Qubit
+from bequem.qubit_map import QubitMap
 
 
 class ConstantVector(Node):
@@ -13,10 +13,10 @@ class ConstantVector(Node):
         self.vec = vec
 
     def qubits_in(self) -> QubitMap:
-        return QubitMap([Qubit.ZERO for _ in range(self.n_qubits)])
+        return QubitMap(0, self.n_qubits)
 
     def qubits_out(self) -> QubitMap:
-        return QubitMap([Qubit.ID for _ in range(self.n_qubits)])
+        return QubitMap(self.n_qubits)
 
     def normalization(self) -> float:
         return np.linalg.norm(self.vec)

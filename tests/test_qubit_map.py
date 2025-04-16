@@ -1,85 +1,67 @@
 import numpy as np
 import tequila as tq
 
-from bequem.qubit_map import QubitMap, Controlled, Projection, ID, ZERO
+from bequem.qubit_map import QubitMap, Qubit, Projection, ID
 from bequem.circuit import Circuit
 
 
-def test_simplify():
-    assert QubitMap([]).simplify() == QubitMap([])
-    assert QubitMap([ZERO]).simplify() == QubitMap([ZERO])
-    assert QubitMap([ID]).simplify() == QubitMap([ID])
-    assert QubitMap(
-        [Controlled(QubitMap([ID]), QubitMap([ZERO]))]
-    ).simplify() == QubitMap([Controlled(QubitMap([ID]), QubitMap([ZERO]))])
-    circuit = Circuit()
-    assert QubitMap([Projection(circuit)]).simplify() == QubitMap([Projection(circuit)])
-
-    assert QubitMap(
-        [Controlled(QubitMap([ZERO]), QubitMap([ZERO]))]
-    ).simplify() == QubitMap([ZERO, ID])
-    c = Controlled(QubitMap([ZERO]), QubitMap([ZERO]))
-    assert QubitMap([Controlled(QubitMap([c]), QubitMap([c]))]).simplify() == QubitMap(
-        [ZERO, ID, ID]
-    )
+def test_eq():
+    assert QubitMap(0) == QubitMap(0)
+    assert QubitMap(1) == QubitMap(1)
+    assert QubitMap(0, 1) == QubitMap(0, 1)
+    assert QubitMap(1, 0) != QubitMap(1, 1)
+    assert QubitMap(1) == QubitMap([ID])
+    c = Qubit(QubitMap(0), QubitMap(0))
+    assert QubitMap(1) == QubitMap([c])
+    c = Qubit(QubitMap(1), QubitMap(0, 1))
+    assert QubitMap([c]) == QubitMap([c])
+    assert QubitMap([c]) != QubitMap(1)
 
 
-def test_is_all_zeros():
-    assert QubitMap([]).is_trivial()
-    assert QubitMap([ZERO]).is_trivial()
-    assert not QubitMap([ID]).is_trivial()
-    assert not QubitMap(
-        [Controlled(QubitMap([ID]), QubitMap([ZERO]))]
-    ).is_trivial()
+def test_is_trivial():
+    assert QubitMap(0).is_trivial()
+    assert QubitMap(0, 1).is_trivial()
+    assert not QubitMap(1).is_trivial()
+    assert not QubitMap([Qubit(QubitMap(1), QubitMap(0, 1))]).is_trivial()
     circuit = Circuit()
     assert not QubitMap([Projection(circuit)]).is_trivial()
     assert not QubitMap(
         [
-            ZERO,
             ID,
-            ZERO,
-            ZERO,
             Projection(circuit),
-            Controlled(QubitMap([ZERO]), QubitMap([ZERO])),
-            ZERO,
-        ]
+            Qubit(QubitMap(0, 1), QubitMap(0, 1)),
+        ], 2
     ).is_trivial()
 
 
 def test_basis():
-    assert QubitMap([ZERO]).test_basis(0)
-    assert not QubitMap([ZERO]).test_basis(1)
+    assert QubitMap(0, 1).test_basis(0)
+    assert not QubitMap(0, 1).test_basis(1)
 
-    np.testing.assert_allclose(QubitMap([]).enumerate_basis(), np.array([0]))
-    np.testing.assert_allclose(QubitMap([ZERO]).enumerate_basis(), np.array([0]))
-    np.testing.assert_allclose(QubitMap([ID]).enumerate_basis(), np.array([0, 1]))
+    np.testing.assert_allclose(QubitMap(0).enumerate_basis(), np.array([0]))
+    np.testing.assert_allclose(QubitMap(0, 1).enumerate_basis(), np.array([0]))
+    np.testing.assert_allclose(QubitMap(1).enumerate_basis(), np.array([0, 1]))
     # TODO
-    # np.testing.assert_allclose(QubitMap([Controlled(QubitMap([ID]), QubitMap([ZERO]))]).enumerate_basis(), np.array([0, 1, 2]))
+    # np.testing.assert_allclose(QubitMap([Controlled(QubitMap(1), QubitMap(0, 1))]).enumerate_basis(), np.array([0, 1, 2]))
     # circuit = Circuit()
     # assert not QubitMap([Projection(circuit)]).enumerate_basis()
     np.testing.assert_allclose(
         QubitMap(
             [
                 ID,
-                ZERO,
-                # Controlled(QubitMap([ZERO]), QubitMap([ZERO])),
+                # Controlled(QubitMap(0, 1), QubitMap(0, 1)),
                 # Projection(circuit),
-            ]
+            ], 1
         ).enumerate_basis(),
         np.array([0, 1]),
     )
 
 
 def test_total_qubits():
-    assert QubitMap([]).total_qubits == 0
-    assert QubitMap([ZERO]).total_qubits == 1
-    assert QubitMap([ID]).total_qubits == 1
-    assert (
-        QubitMap(
-            [Controlled(QubitMap([ID]), QubitMap([ZERO]))]
-        ).total_qubits
-        == 2
-    )
+    assert QubitMap(0).total_qubits == 0
+    assert QubitMap(0, 1).total_qubits == 1
+    assert QubitMap(1).total_qubits == 1
+    assert QubitMap([Qubit(QubitMap(1), QubitMap(0, 1))]).total_qubits == 2
     circuit = Circuit()
     circuit.tq_circuit += tq.gates.X(target=0)
     circuit.tq_circuit += tq.gates.X(target=1)
@@ -87,14 +69,11 @@ def test_total_qubits():
     assert (
         QubitMap(
             [
-                ZERO,
                 ID,
-                ZERO,
-                ZERO,
                 Projection(circuit),
-                Controlled(QubitMap([ZERO]), QubitMap([ZERO])),
-                ZERO,
-            ]
+                Qubit(QubitMap(0, 1), QubitMap(0, 1)),
+            ], 2
         ).total_qubits
-        == 8
+        == 6
     )
+
