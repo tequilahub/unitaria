@@ -1,12 +1,11 @@
+import pytest
+
 from bequem.nodes import Increment, Identity, Add, Scale, Adjoint
+from bequem.qubit_map import QubitMap
 
-N = 4
 
-
-def test_increment():
-    C = Increment(N)
-    C.verify()
-
-# A = Add(Scale(Identity(N), 2), Scale(Add(C, Adjoint(C)), -1))
-
-# assert A.verify()
+@pytest.mark.parametrize("n", range(1, 5))
+def test_laplace(n: int):
+    C = Increment(n)
+    A = Add(Scale(Identity(QubitMap(n)), -2), Scale(Add(C, Adjoint(C)), 1))
+    A.verify()
