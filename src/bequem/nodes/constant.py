@@ -1,7 +1,7 @@
 import numpy as np
-from tequila_building_blocks.state_prep import prepare_state
 
 from bequem.circuit import Circuit
+from bequem.circuits.state_prep import prepare_state
 from bequem.nodes.node import Node
 from bequem.qubit_map import QubitMap
 
@@ -22,7 +22,7 @@ class ConstantVector(Node):
         return np.linalg.norm(self.vec)
 
     def compute(self, input: np.ndarray | None = None) -> np.ndarray:
-        return self.vec
+        return self.vec[np.newaxis, :]
 
     def circuit(self) -> Circuit:
         normalized = self.vec / self.normalization()
