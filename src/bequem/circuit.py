@@ -8,7 +8,6 @@ from tequila import BitNumbering
 
 @dataclass
 class Circuit:
-
     def __init__(self, tq_circuit: tq.QCircuit | None = None):
         if tq_circuit is not None:
             self.tq_circuit = tq_circuit
@@ -39,3 +38,6 @@ class Circuit:
     def __iadd__(self, other):
         self.tq_circuit += other.tq_circuit
         return self
+
+    def dagger(self):
+        return Circuit(self.tq_circuit.dagger())

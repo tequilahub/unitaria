@@ -132,7 +132,27 @@ Node.__and__ = lambda A, B: Tensor(A, B)
 
 
 class Adjoint(Node):
-    pass
+    def __init__(self, A: Node):
+        self.A = A
+
+    def qubits_in(self) -> QubitMap:
+        return self.A.qubits_out()
+
+    def qubits_out(self) -> QubitMap:
+        return self.A.qubits_in()
+
+    def normalization(self) -> float:
+        return 1.0 / self.A.normalization()
+
+    def compute(self, input: np.ndarray | None) -> np.ndarray:
+        # TODO: How do we implement this in general?
+        #  Do we need to manually implement the reverse for each node?
+        if type(self.A).__name__ == "Increment":
+            return np.roll(input, -1, axis=-1)
+        raise NotImplementedError()
+
+    def circuit(self) -> Circuit:
+        return self.A.circuit().dagger()
 
 
 class Scale(Node):
@@ -143,6 +163,26 @@ class Scale(Node):
         remove_efficiency: float = 1,
         scale_absolute=False,
     ):
+        self.A = A
         self.scale = scale
+        # TODO: assert_efficiency not implemented yet
+        assert remove_efficiency == 1
         self.remove_efficiency = remove_efficiency
+        # TODO: scale_absolute not implemented yet
+        assert not scale_absolute
         self.scale_absolute = scale_absolute
+
+    def qubits_in(self) -> QubitMap:
+        return self.A.qubits_in()
+
+    def qubits_out(self) -> QubitMap:
+        return self.A.qubits_out()
+
+    def normalization(self) -> float:
+        return self.scale * self.A.normalization()
+
+    def compute(self, input: np.ndarray | None = None) -> np.ndarray:
+        return self.scale * self.A.compute(input)
+
+    def circuit(self) -> Circuit:
+        return self.A.circuit()

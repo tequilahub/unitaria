@@ -70,9 +70,6 @@ class Node(ABC):
                 circuit.simulate(b, backend="qulacs")
             )
 
-
-        print(tq.draw(circuit.tq_circuit))
-        print(computed)
         # verify compute with tensor valued input
         np.testing.assert_allclose(computed, computed_m)
         # verify circuit
