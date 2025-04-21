@@ -4,8 +4,7 @@ from bequem.qubit_map import QubitMap
 
 
 def test_block_diagonal():
-
-    A = Identity(QubitMap(1, 1))
+    A = Identity(QubitMap(2, 1))
     B = Increment(2)
 
     D = A | B
@@ -15,7 +14,6 @@ def test_block_diagonal():
 
 
 def test_add():
-
     A = Identity(QubitMap(1, 1))
     B = Increment(1)
 

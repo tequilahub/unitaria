@@ -1,10 +1,9 @@
 import numpy as np
-import tequila as tq
-from tequila_building_blocks.arithmetic import increment_circuit_single_ancilla, addition_circuit
 
 from .node import Node
 from bequem.qubit_map import QubitMap, ID
 from bequem.circuit import Circuit
+from bequem.circuits.arithmetic import increment_circuit_single_ancilla, addition_circuit
 
 
 class Increment(Node):

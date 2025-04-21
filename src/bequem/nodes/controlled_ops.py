@@ -35,7 +35,7 @@ class BlockDiagonal(Node):
     def circuit(self) -> Circuit:
         circuit_A = self.A.circuit().tq_circuit
         circuit_B = self.B.circuit().tq_circuit
-        control_qubit = circuit_A.n_qubits
+        control_qubit = max(circuit_A.n_qubits, circuit_B.n_qubits)
         circuit_A.add_controls(control_qubit, inpl=True)
         circuit_B.add_controls(control_qubit, inpl=True)
 
