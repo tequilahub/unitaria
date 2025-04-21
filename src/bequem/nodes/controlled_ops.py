@@ -71,7 +71,10 @@ class Add(Node):
         return self._qubits_out
 
     def normalization(self) -> float:
-        return self.A.normalization() + self.B.normalization()
+        # TODO: This seems to be necessary because Tequila's phase gate seems to implement
+        #  diag(exp(-i theta / 2), exp(i theta / 2)) instead of diag(1, exp(i theta)).
+        phase = (np.angle(self.A.normalization()) + np.angle(self.B.normalization())) / 2
+        return np.exp(phase * 1j) * (np.abs(self.A.normalization()) + np.abs(self.B.normalization()))
 
     def compute(self, input: np.ndarray) -> np.ndarray:
         return self.A.compute(input) + self.B.compute(input)
@@ -90,15 +93,20 @@ class Add(Node):
         control_qubit = self.qubits_in().total_qubits - 1
         circuit_A.add_controls(control_qubit, inpl=True)
         circuit_B.add_controls(control_qubit, inpl=True)
+        norm_A = self.A.normalization()
+        norm_B = self.B.normalization()
         angle = np.arctan2(
-            np.sqrt(self.B.normalization()), np.sqrt(self.A.normalization())
+            np.sqrt(np.abs(norm_B)),
+            np.sqrt(np.abs(norm_A))
         )
+        phase = np.angle(norm_B) - np.angle(norm_A)
 
         circuit = tq.QCircuit()
         circuit += tq.gates.Ry(2 * angle, target=control_qubit)
         circuit += tq.gates.X(target=control_qubit)
         circuit += circuit_A
         circuit += tq.gates.X(target=control_qubit)
+        circuit += tq.gates.Phase(angle=phase, target=control_qubit)
         circuit += circuit_B
         circuit += tq.gates.Ry(-2 * angle, target=control_qubit)
 
