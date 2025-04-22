@@ -39,5 +39,5 @@ class Circuit:
         self.tq_circuit += other.tq_circuit
         return self
 
-    def dagger(self):
+    def adjoint(self):
         return Circuit(self.tq_circuit.dagger())

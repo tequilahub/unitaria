@@ -142,7 +142,8 @@ class Adjoint(Node):
         return self.A.qubits_in()
 
     def normalization(self) -> float:
-        return 1.0 / self.A.normalization()
+        # TODO: Should normalization be a complex number
+        return self.A.normalization()
 
     def compute(self, input: np.ndarray | None) -> np.ndarray:
         # TODO: How do we implement this in general?
@@ -152,7 +153,7 @@ class Adjoint(Node):
         raise NotImplementedError()
 
     def circuit(self) -> Circuit:
-        return self.A.circuit().dagger()
+        return self.A.circuit().adjoint()
 
 
 class Scale(Node):
