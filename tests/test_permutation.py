@@ -1,11 +1,20 @@
 import numpy as np
+import tequila as tq
 
 from bequem.qubit_map import QubitMap, Qubit, ID
 from bequem.permutation import _find_matching_subdivision, find_permutation
 
 
 def check_find_permutation(a: QubitMap, b: QubitMap):
+    print(f"permuting\n{a}\nand\n{b}")
     perm_a, perm_b, result = find_permutation(a, b)
+    for i in range(result.total_qubits):
+        perm_a.tq_circuit += tq.gates.Phase(i, angle=0)
+        perm_b.tq_circuit += tq.gates.Phase(i, angle=0)
+    print("result:")
+    print(result)
+    tq.draw(perm_a.tq_circuit)
+    tq.draw(perm_b.tq_circuit)
     assert result.dimension == a.dimension
 
     max_qubits = max(a.total_qubits, result.total_qubits)
@@ -34,7 +43,7 @@ def check_find_permutation(a: QubitMap, b: QubitMap):
         assert result.test_basis(i_permuted)
 
 
-def test_find_permutation():
+def test_find_permutation_matching_subdivision():
     check_find_permutation(QubitMap(0), QubitMap(0))
     check_find_permutation(QubitMap(0, 1), QubitMap(0, 1))
     check_find_permutation(QubitMap(1), QubitMap(1))
@@ -46,6 +55,16 @@ def test_find_permutation():
     check_find_permutation(QubitMap(0), QubitMap(0, 1))
     check_find_permutation(QubitMap(1), QubitMap(1, 1))
     check_find_permutation(QubitMap([c]), QubitMap([c], 1))
+
+
+def test_find_permutation_brute_force():
+    a = QubitMap(1)
+    a1 = QubitMap(1, 1)
+    b = QubitMap([Qubit(a, a)])
+    c = QubitMap([Qubit(b, a1)])
+    d = QubitMap([Qubit(a1, b)])
+    check_find_permutation(d, c)
+    check_find_permutation(c, d)
 
 
 def test_find_matching_subdivision():

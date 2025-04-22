@@ -42,6 +42,11 @@ class QubitMap:
     def __eq__(self, other) -> bool:
         return self.registers == other.registers and self.zero_qubits == other.zero_qubits
 
+    def __repr__(self) -> str:
+        if self.zero_qubits == 0:
+            return f"QubitMap({self.registers})"
+        return f"QubitMap({self.registers}, zero_qubits={self.zero_qubits})"
+
     def is_trivial(self) -> bool:
         return len(self.registers) == 0
 
@@ -79,10 +84,15 @@ class QubitMap:
         return Circuit()
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class Qubit:
     case_zero: QubitMap
     case_one: QubitMap
+
+    def __repr__(self) -> str:
+        if self == ID:
+            return "ID"
+        return f"Qubit(case_zero={self.case_zero}, case_one={self.case_one})"
 
     def total_qubits(self) -> int:
         return 1 + self.case_zero.total_qubits
