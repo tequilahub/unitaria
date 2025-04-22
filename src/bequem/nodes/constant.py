@@ -22,7 +22,10 @@ class ConstantVector(Node):
         return np.linalg.norm(self.vec)
 
     def compute(self, input: np.ndarray | None = None) -> np.ndarray:
-        return self.vec[:]
+        return self.vec
+
+    def compute_adjoint(self, input: np.ndarray | None = None) -> np.ndarray:
+        return self.vec.T @ input
 
     def circuit(self) -> Circuit:
         normalized = self.vec / self.normalization()

@@ -38,6 +38,11 @@ class Mul(Node):
         input = self.B.compute(input)
         return input
 
+    def compute_adjoint(self, input: np.ndarray | None) -> np.ndarray:
+        input = self.B.compute_adjoint(input)
+        input = self.A.compute_adjoint(input)
+        return input
+
     def circuit(self) -> Circuit:
         circuit = Circuit()
         circuit += self.A.circuit()
@@ -74,6 +79,17 @@ class Tensor(Node):
         input = self.A.compute(input)
         input = np.swapaxes(input, -1, -2)
         input = self.B.compute(input)
+        input = np.swapaxes(input, -1, -2)
+        return np.reshape(input, batch_shape + [-1])
+
+    def compute_adjoint(self, input: np.ndarray | None) -> np.ndarray:
+        batch_shape = list(input.shape[:-1])
+        input = input.reshape(
+            batch_shape + [self.B.qubits_out().dimension, self.A.qubits_out().dimension]
+        )
+        input = self.A.compute_adjoint(input)
+        input = np.swapaxes(input, -1, -2)
+        input = self.B.compute_adjoint(input)
         input = np.swapaxes(input, -1, -2)
         return np.reshape(input, batch_shape + [-1])
 
@@ -146,11 +162,10 @@ class Adjoint(Node):
         return self.A.normalization()
 
     def compute(self, input: np.ndarray | None) -> np.ndarray:
-        # TODO: How do we implement this in general?
-        #  Do we need to manually implement the reverse for each node?
-        if type(self.A).__name__ == "Increment":
-            return np.roll(input, -1, axis=-1)
-        raise NotImplementedError()
+        return self.A.compute_adjoint(input)
+
+    def compute_adjoint(self, input: np.ndarray | None) -> np.ndarray:
+        return self.A.compute(input)
 
     def circuit(self) -> Circuit:
         return self.A.circuit().adjoint()
@@ -183,6 +198,9 @@ class Scale(Node):
         return self.scale * self.A.normalization()
 
     def compute(self, input: np.ndarray | None = None) -> np.ndarray:
+        return self.scale * self.A.compute(input)
+
+    def compute_adjoint(self, input: np.ndarray | None = None) -> np.ndarray:
         return self.scale * self.A.compute(input)
 
     def circuit(self) -> Circuit:

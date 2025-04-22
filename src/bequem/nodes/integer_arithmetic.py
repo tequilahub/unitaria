@@ -24,6 +24,9 @@ class Increment(Node):
     def compute(self, input: np.ndarray) -> np.ndarray:
         return np.roll(input, 1, axis=-1)
 
+    def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
+        return np.roll(input, -1, axis=-1)
+
     def circuit(self) -> Circuit:
         circuit = increment_circuit_single_ancilla(target=list(reversed(range(self.bits))), ancilla=self.bits)
         return Circuit(circuit)
@@ -55,6 +58,16 @@ class IntegerAddition(Node):
         result = np.zeros_like(input)
         for val in range(N):
             result[:, :, val] += np.roll(input[:, :, val], val, axis=-1)
+        return result.reshape(old_shape)
+
+    def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
+        old_shape = input.shape
+        N = 2 ** self.source_bits
+        M = 2 ** self.target_bits
+        input = input.reshape((-1, M, N))
+        result = np.zeros_like(input)
+        for val in range(N):
+            result[:, :, val] += np.roll(input[:, :, val], -val, axis=-1)
         return result.reshape(old_shape)
 
     def circuit(self) -> Circuit:

@@ -22,6 +22,9 @@ class Identity(Node):
     def compute(self, input: np.ndarray) -> np.ndarray:
         return input
 
+    def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
+        return input
+
     def circuit(self) -> Circuit:
         circuit = tq.QCircuit()
         circuit += tq.gates.Phase(target=list(range(self.qubits.total_qubits)), angle=0)
