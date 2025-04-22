@@ -22,7 +22,7 @@ class ConstantVector(Node):
         return np.linalg.norm(self.vec)
 
     def compute(self, input: np.ndarray | None = None) -> np.ndarray:
-        return self.vec[np.newaxis, :]
+        return self.vec[:]
 
     def circuit(self) -> Circuit:
         normalized = self.vec / self.normalization()

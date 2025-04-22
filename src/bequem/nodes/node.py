@@ -62,8 +62,11 @@ class Node(ABC):
         basis_out = self.qubits_out().enumerate_basis()
         computed = np.eye(len(basis_out), len(basis_in), dtype=np.complex64)
         simulated = np.zeros((len(basis_out), len(basis_in)), dtype=np.complex64)
-        computed_m = self.compute(computed.T).T
         circuit = self.circuit()
+
+        if not self.is_vector():
+            computed_m = self.compute(computed.T).T
+
         for (i, b) in enumerate(basis_in):
             computed[:, i] = self.compute(computed[:, i])
             simulated[:, i] = self.normalization() * self.qubits_out().project(
@@ -71,6 +74,7 @@ class Node(ABC):
             )
 
         # verify compute with tensor valued input
-        np.testing.assert_allclose(computed, computed_m)
+        if not self.is_vector():
+            np.testing.assert_allclose(computed, computed_m)
         # verify circuit
         np.testing.assert_allclose(computed, simulated)
