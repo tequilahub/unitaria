@@ -12,6 +12,7 @@ description = "A tool to construct and simulate block encodings for quantum comp
 keywords = ["quantum computing"]
 dependencies = [
   "tequila-basic==1.9.*",
+  "rich==14.0.*"
 ]
 
 

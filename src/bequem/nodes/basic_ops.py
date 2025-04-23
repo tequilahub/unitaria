@@ -29,6 +29,9 @@ class UnsafeMul(Node):
         self.A = A
         self.B = B
 
+    def children(self) -> list[Node]:
+        return [self.A, self.B]
+
     def compute(self, input: np.ndarray | None) -> np.ndarray:
         input = self.A.compute(input)
         input = self.B.compute(input)
@@ -59,6 +62,9 @@ class Tensor(Node):
     def __init__(self, A: Node, B: Node):
         self.A = A
         self.B = B
+
+    def children(self) -> list[Node]:
+        return [self.A, self.B]
 
     def compute(self, input: np.ndarray | None) -> np.ndarray:
         batch_shape = list(input.shape[:-1])
@@ -142,6 +148,9 @@ class Adjoint(Node):
     def __init__(self, A: Node):
         self.A = A
 
+    def children(self) -> list[Node]:
+        return [self.A]
+
     def qubits_in(self) -> QubitMap:
         return self.A.qubits_out()
 
@@ -181,6 +190,9 @@ class Scale(Node):
             self.scale = scale
             self._absolute_scale = scale * self.A.normalization()
         self.scale_absolute = scale_absolute
+
+    def children(self) -> list[Node]:
+        return [self.A]
 
     def qubits_in(self) -> QubitMap:
         return self.A.qubits_in()

@@ -3,6 +3,8 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 import tequila as tq
+from rich.tree import Tree
+from rich.console import Console
 
 from bequem.qubit_map import QubitMap
 from bequem.circuit import Circuit
@@ -24,9 +26,12 @@ class Node(ABC):
     # def __init__(children: list[Node], data: str | None):
     #     raise NotImplementedError
 
-    # @abstractmethod
-    # def children(self) -> list[Node]:
-    #     return []
+    # TODO: How do we check that this is implemented properly
+    def children(self) -> list[Node]:
+        return []
+
+    def parameters(self) -> dict:
+        return {}
 
     # def uuid() -> Uuid:
     #     raise NotImplementedError
@@ -60,6 +65,35 @@ class Node(ABC):
     @abstractmethod
     def circuit(self) -> Circuit:
         raise NotImplementedError
+
+    def tree_label(self, verbose: bool = False):
+        label = self.__class__.__name__
+        parameters = self.parameters()
+        if len(parameters) != 0:
+            label += str(parameters)
+        return label
+
+    def tree(self, verbose: bool = False, tree: Tree | None = None):
+        label = self.tree_label(verbose)
+        if tree is None:
+            subtree = Tree(label)
+        else:
+            subtree = tree.add(label)
+
+        for child in self.children():
+            child.tree(verbose, subtree)
+
+        return subtree
+
+    def draw(self, verbose: bool = False):
+        console = Console()
+        with console.capture() as capture:
+            console.print(self.tree(verbose))
+        output = capture.get()
+        return output
+
+    def __str__(self):
+        return self.draw()
 
     def verify(self) -> np.ndarray:
         basis_in = self.qubits_in().enumerate_basis()

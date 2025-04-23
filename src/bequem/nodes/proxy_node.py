@@ -1,6 +1,7 @@
 from abc import abstractmethod
 
 import numpy as np
+from rich.panel import Panel
 
 from bequem.nodes.node import Node
 from bequem.nodes.basic_ops import UnsafeMul, Adjoint, Tensor, Scale
@@ -49,10 +50,22 @@ class ProxyNode(Node):
             self._definition = self.definition()
         return self._definition.normalization()
 
+    def tree_label(self, verbose: bool = False):
+        label = super().tree_label()
+        if not verbose:
+            return label
+        else:
+            if self._definition is None:
+                self._definition = self.definition()
+            return Panel(self._definition.tree(verbose=True), title=label)
+
 
 class ProjectionNode(Node):
     def __init__(self, qubits: QubitMap):
         self.qubits = QubitMap(qubits.registers, qubits.zero_qubits + 1)
+
+    def children(self) -> list[Node]:
+        return []
 
     def qubits_in(self) -> QubitMap:
         return self.qubits
@@ -78,6 +91,9 @@ class Mul(ProxyNode):
     def __init__(self, A: Node, B: Node):
         self.A = A
         self.B = B
+
+    def children(self) -> list[Node]:
+        return [self.A, self.B]
 
     def definition(self) -> Node:
         permutation = find_permutation(
@@ -108,6 +124,9 @@ class Add(ProxyNode):
     def __init__(self, A: Node, B: Node):
         self.A = A
         self.B = B
+
+    def children(self) -> list[Node]:
+        return [self.A, self.B]
 
     def definition(self) -> Node:
         permutation_in = find_permutation(

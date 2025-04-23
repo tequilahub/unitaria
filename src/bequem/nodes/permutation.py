@@ -76,6 +76,9 @@ class SimplifyZeros(Node):
         self.common_zeros = min(case_zero.zero_qubits, case_one.zero_qubits)
         self.qubits = qubits
 
+    def children(self) -> list[Node]:
+        return []
+
     def qubits_in(self) -> QubitMap:
         return self.qubits
 

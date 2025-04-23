@@ -45,6 +45,9 @@ class BlockDiagonal(Node):
         self.A = A
         self.B = B
 
+    def children(self) -> list[Node]:
+        return [self.A, self.B]
+
     def qubits_in(self) -> QubitMap:
         return self._qubits_in
 

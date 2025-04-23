@@ -11,6 +11,12 @@ class Identity(Node):
     def __init__(self, qubits: QubitMap):
         self.qubits = qubits
 
+    def children(self) -> list[Node]:
+        return []
+
+    def parameters(self) -> dict:
+        return { "qubits": self.qubits }
+
     def qubits_in(self) -> QubitMap:
         return self.qubits
 

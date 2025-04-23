@@ -12,6 +12,12 @@ class Increment(Node):
             raise ValueError()
         self.bits = bits
 
+    def children(self) -> list[Node]:
+        return []
+
+    def parameters(self) -> dict:
+        return { "bits": self.bits }
+
     def qubits_in(self) -> QubitMap:
         return QubitMap(self.bits, 1)
 
@@ -40,6 +46,12 @@ class IntegerAddition(Node):
             raise ValueError()
         self.source_bits = source_bits
         self.target_bits = target_bits
+
+    def children(self) -> list[Node]:
+        return []
+
+    def parameters(self) -> dict:
+        return { "source_bits": self.source_bits, "target_bits": self.target_bits }
 
     def qubits_in(self) -> QubitMap:
         return QubitMap(self.source_bits + self.target_bits, 1)

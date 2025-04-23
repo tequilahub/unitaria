@@ -12,6 +12,12 @@ class ConstantVector(Node):
         assert 2 ** self.n_qubits == vec.shape[0]
         self.vec = vec
 
+    def children(self) -> list[Node]:
+        return []
+
+    def parameters(self) -> dict:
+        return { "vec": self.vec }
+
     def qubits_in(self) -> QubitMap:
         return QubitMap(0, self.n_qubits)
 
