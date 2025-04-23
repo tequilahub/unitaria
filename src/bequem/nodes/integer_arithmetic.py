@@ -54,10 +54,10 @@ class IntegerAddition(Node):
         return { "source_bits": self.source_bits, "target_bits": self.target_bits }
 
     def qubits_in(self) -> QubitMap:
-        return QubitMap(self.source_bits + self.target_bits, 1)
+        return QubitMap(self.source_bits + self.target_bits)
 
     def qubits_out(self) -> QubitMap:
-        return QubitMap(self.source_bits + self.target_bits, 1)
+        return QubitMap(self.source_bits + self.target_bits)
 
     def normalization(self) -> float:
         return 1

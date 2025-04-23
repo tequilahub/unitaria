@@ -49,4 +49,7 @@ class Circuit:
         return self
 
     def adjoint(self):
-        return Circuit(self.tq_circuit.dagger())
+        # TODO: this should maybe be included in tequila
+        adj = self.tq_circuit.dagger()
+        adj.n_qubits = self.tq_circuit.n_qubits
+        return Circuit(adj)

@@ -95,15 +95,31 @@ class Node(ABC):
     def __str__(self):
         return self.draw()
 
-    def verify(self) -> np.ndarray:
+    def verify_recursive(self, print_circuit: bool = True) -> np.ndarray:
+        for child in self.children():
+            child.verify_recursive(False)
+        return self.verify()
+
+    def verify(self, print_circuit: bool = True) -> np.ndarray:
         basis_in = self.qubits_in().enumerate_basis()
         basis_out = self.qubits_out().enumerate_basis()
         circuit = self.circuit()
+        if self.qubits_in().total_qubits == 0:
+            # TODO: Tequila does not support circuits without qubits
+            assert circuit.tq_circuit.n_qubits == 1
+            assert self.qubits_out().total_qubits == 0
+        else:
+            assert circuit.tq_circuit.n_qubits == self.qubits_in().total_qubits
+            assert circuit.tq_circuit.n_qubits == self.qubits_out().total_qubits
 
-        print(tq.draw(circuit.padded(), backend="cirq"))
+        if print_circuit:
+            print(self)
+            print(tq.draw(circuit.padded(), backend="cirq"))
 
         if not self.is_vector():
-            computed = np.eye(len(basis_out), len(basis_in), dtype=np.complex64)
+            computed = np.eye(len(basis_out),
+                              len(basis_in),
+                              dtype=np.complex64)
             simulated = np.zeros((len(basis_out), len(basis_in)),
                                  dtype=np.complex64)
             computed_m = self.compute(computed.T).T
