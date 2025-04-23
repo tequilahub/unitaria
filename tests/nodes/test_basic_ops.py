@@ -9,7 +9,8 @@ def test_tensor():
     B = Identity(QubitMap(1, 1))
 
     (A & B).verify()
-    (A & B).verify()
+    (A & A).verify()
+    (B & B).verify()
     (B & A).verify()
     (B & (A & B)).verify()
     ((B & A) & B).verify()

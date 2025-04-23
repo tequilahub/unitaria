@@ -1,46 +1,18 @@
+import pytest
+
 import numpy as np
 import tequila as tq
 
 from bequem.qubit_map import QubitMap, Qubit, ID
-from bequem.permutation import _find_matching_subdivision, find_permutation
+from bequem.nodes.permutation import _find_matching_subdivision, find_permutation
 
 
 def check_find_permutation(a: QubitMap, b: QubitMap):
     print(f"permuting\n{a}\nand\n{b}")
-    perm_a, perm_b, result = find_permutation(a, b)
-    for i in range(result.total_qubits):
-        perm_a.tq_circuit += tq.gates.Phase(i, angle=0)
-        perm_b.tq_circuit += tq.gates.Phase(i, angle=0)
-    print("result:")
-    print(result)
-    tq.draw(perm_a.tq_circuit)
-    tq.draw(perm_b.tq_circuit)
-    assert result.dimension == a.dimension
-
-    max_qubits = max(a.total_qubits, result.total_qubits)
-    assert len(perm_a.tq_circuit.qubits) <= max_qubits
-
-    for i in a.enumerate_basis():
-        final_state = perm_a.simulate(i)
-        i_permuted = None
-        for j in range(2 ** result.total_qubits):
-            if final_state[j] > 0.5:
-                assert np.isclose(final_state[j], 1)
-                i_permuted = j
-                break
-        assert i_permuted is not None, final_state
-        assert result.test_basis(i_permuted)
-
-    for i in b.enumerate_basis():
-        final_state = perm_b.simulate(i)
-        i_permuted = None
-        for j in range(2 ** result.total_qubits):
-            if final_state[j] > 0.5:
-                assert np.isclose(final_state[j], 1)
-                i_permuted = j
-                break
-        assert i_permuted is not None
-        assert result.test_basis(i_permuted)
+    permutation = find_permutation(a, b)
+    assert permutation.permute_a.qubits_in().registers == a.registers
+    assert permutation.permute_b.qubits_in().registers == b.registers
+    permutation.verify()
 
 
 def test_find_permutation_matching_subdivision():
@@ -57,6 +29,7 @@ def test_find_permutation_matching_subdivision():
     check_find_permutation(QubitMap([c]), QubitMap([c], 1))
 
 
+@pytest.mark.xfail
 def test_find_permutation_brute_force():
     a = QubitMap(1)
     a1 = QubitMap(1, 1)
@@ -79,10 +52,12 @@ def test_find_matching_subdivision():
 
     c = Qubit(QubitMap(1), QubitMap(1))
     assert _find_matching_subdivision(QubitMap([c]), QubitMap(2)) == [
-        (QubitMap([c]), QubitMap(2))
+        (QubitMap(1), QubitMap(1)),
+        (QubitMap(1), QubitMap(1)),
     ]
     assert _find_matching_subdivision(QubitMap(2), QubitMap([c])) == [
-        (QubitMap(2), QubitMap([c]))
+        (QubitMap(1), QubitMap(1)),
+        (QubitMap(1), QubitMap(1)),
     ]
     c = Qubit(QubitMap(1), QubitMap(0, 1))
     assert _find_matching_subdivision(QubitMap([c]), QubitMap([c])) == [

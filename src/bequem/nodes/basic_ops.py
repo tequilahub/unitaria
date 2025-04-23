@@ -5,28 +5,24 @@ import tequila as tq
 from bequem.circuit import Circuit
 from bequem.qubit_map import QubitMap
 from bequem.nodes.node import Node
-from bequem.permutation import find_permutation
 
-
-class Mul(Node):
+class UnsafeMul(Node):
     def __init__(self, A: Node, B: Node):
-        self.perm_A, self.perm_B, self.qubits_middle = find_permutation(
-            A.qubits_out(), B.qubits_in()
-        )
-        self.qubits_middle = QubitMap(
-            self.qubits_middle.registers, self.qubits_middle.zero_qubits + 1
-        )
+        if A.qubits_out().registers != B.qubits_in().registers:
+            raise ValueError(f"Non matching qubit maps {A.qubits_out()} and {B.qubits_in()}")
+
+        max_qubits = max(A.qubits_in().total_qubits, B.qubits_out().total_qubits)
         qubits_in_A = A.qubits_in()
         self._qubits_in = QubitMap(
             qubits_in_A.registers,
-            self.qubits_middle.total_qubits
+            max_qubits
             - qubits_in_A.total_qubits
             + qubits_in_A.zero_qubits,
         )
         qubits_out_B = B.qubits_out()
         self._qubits_out = QubitMap(
             qubits_out_B.registers,
-            self.qubits_middle.total_qubits
+            max_qubits
             - qubits_out_B.total_qubits
             + qubits_out_B.zero_qubits,
         )
@@ -46,9 +42,6 @@ class Mul(Node):
     def circuit(self) -> Circuit:
         circuit = Circuit()
         circuit += self.A.circuit()
-        circuit += self.perm_A
-        circuit += self.qubits_middle.circuit()
-        circuit.tq_circuit += self.perm_B.tq_circuit.dagger()
         circuit += self.B.circuit()
 
         return circuit
@@ -61,10 +54,6 @@ class Mul(Node):
 
     def normalization(self) -> float:
         return self.A.normalization() * self.B.normalization()
-
-
-Node.__matmul__ = lambda A, B: Mul(A, B)
-
 
 class Tensor(Node):
     def __init__(self, A: Node, B: Node):
@@ -121,6 +110,8 @@ class Tensor(Node):
             qubit2 = qubits_out_A.total_qubits - qubits_out_A.zero_qubits + i
             if qubit1 != qubit2:
                 circuit.tq_circuit += tq.gates.SWAP(qubit1, qubit2)
+
+        circuit.tq_circuit.n_qubits = qubits_in_A.total_qubits + qubits_in_B.total_qubits
 
         return circuit
 
@@ -180,12 +171,15 @@ class Scale(Node):
         scale_absolute=False,
     ):
         self.A = A
-        self.scale = scale
         # TODO: assert_efficiency not implemented yet
         assert remove_efficiency == 1
         self.remove_efficiency = remove_efficiency
-        # TODO: scale_absolute not implemented yet
-        assert not scale_absolute
+        if scale_absolute:
+            self.scale = self.A.normalization() / scale
+            self._absolute_scale = scale
+        else:
+            self.scale = scale
+            self._absolute_scale = scale * self.A.normalization()
         self.scale_absolute = scale_absolute
 
     def qubits_in(self) -> QubitMap:
@@ -195,7 +189,7 @@ class Scale(Node):
         return self.A.qubits_out()
 
     def normalization(self) -> float:
-        return self.scale * self.A.normalization()
+        return self._absolute_scale
 
     def compute(self, input: np.ndarray | None = None) -> np.ndarray:
         return self.scale * self.A.compute(input)

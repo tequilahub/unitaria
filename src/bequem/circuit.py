@@ -26,15 +26,20 @@ class Circuit:
         if isinstance(input, np.ndarray):
             input = tq.QubitWaveFunction.from_array(input, BitNumbering.LSB)
         elif isinstance(input, (int, np.integer)):
-            input = tq.QubitWaveFunction.from_basis_state(len(self.tq_circuit.qubits), input, BitNumbering.LSB)
+            input = tq.QubitWaveFunction.from_basis_state(self.tq_circuit.n_qubits, input, BitNumbering.LSB)
 
+        padded = self.padded()
+
+        result = tq.simulate(padded, initial_state=input, **kwargs)
+        return result.to_array(BitNumbering.LSB, copy=False)
+
+    # TODO: This function is necessary because tequila has problems with unused qubits
+    def padded(self) -> tq.QCircuit:
         copy = tq.QCircuit(gates=self.tq_circuit.gates.copy())
         for bit in range(self.tq_circuit.n_qubits):
             if bit not in self.tq_circuit.qubits:
                 copy += tq.gates.Phase(bit, angle=0)
-
-        result = tq.simulate(copy, initial_state=input, **kwargs)
-        return result.to_array(BitNumbering.LSB, copy=False)
+        return copy
 
     def __add__(self, other):
         return self.tq_circuit + other.tq_circuit

@@ -66,7 +66,7 @@ class Node(ABC):
         basis_out = self.qubits_out().enumerate_basis()
         circuit = self.circuit()
 
-        print(tq.draw(circuit.tq_circuit, backend="cirq"))
+        print(tq.draw(circuit.padded(), backend="cirq"))
 
         if not self.is_vector():
             computed = np.eye(len(basis_out), len(basis_in), dtype=np.complex64)
