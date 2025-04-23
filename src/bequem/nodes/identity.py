@@ -7,6 +7,7 @@ from bequem.nodes.node import Node
 
 
 class Identity(Node):
+
     def __init__(self, qubits: QubitMap):
         self.qubits = qubits
 
@@ -26,6 +27,8 @@ class Identity(Node):
         return input
 
     def circuit(self) -> Circuit:
-        circuit = tq.QCircuit()
-        circuit += tq.gates.Phase(target=list(range(self.qubits.total_qubits)), angle=0)
-        return Circuit(circuit)
+        circuit = Circuit()
+        # TODO: Hacky because tequila does not really support circuits without qubits
+        if self.qubits.total_qubits > 0:
+            circuit.tq_circuit.n_qubits = self.qubits.total_qubits
+        return circuit

@@ -20,8 +20,7 @@ class Circuit:
                 return input
             else:
                 assert isinstance(input, (int, np.integer))
-                dim = int(np.ceil(np.log2(input + 1)))
-                result = np.zeros(2 ** dim)
+                result = np.zeros(2 ** self.tq_circuit.n_qubits)
                 result[input] = 1
                 return result
         if isinstance(input, np.ndarray):
@@ -29,7 +28,12 @@ class Circuit:
         elif isinstance(input, (int, np.integer)):
             input = tq.QubitWaveFunction.from_basis_state(len(self.tq_circuit.qubits), input, BitNumbering.LSB)
 
-        result = tq.simulate(self.tq_circuit, initial_state=input, **kwargs)
+        copy = tq.QCircuit(gates=self.tq_circuit.gates.copy())
+        for bit in range(self.tq_circuit.n_qubits):
+            if bit not in self.tq_circuit.qubits:
+                copy += tq.gates.Phase(bit, angle=0)
+
+        result = tq.simulate(copy, initial_state=input, **kwargs)
         return result.to_array(BitNumbering.LSB, copy=False)
 
     def __add__(self, other):
