@@ -17,7 +17,13 @@ class QubitMap:
         for register in registers:
             if not isinstance(register, Register):
                 raise ValueError(f"{register} is not valid in a QubitMap")
-        self.registers = registers
+        simplified_registers = []
+        for register in registers:
+            if isinstance(register, Qubit):
+                simplified_registers += register.simplify()
+            else:
+                simplified_registers.append(register)
+        self.registers = simplified_registers
         self.zero_qubits = zero_qubits
         self._dimension = None
         self._total_qubits = None
@@ -43,9 +49,14 @@ class QubitMap:
         return self.registers == other.registers and self.zero_qubits == other.zero_qubits
 
     def __repr__(self) -> str:
+        registers = str(len(self.registers))
+        for register in self.registers:
+            if register != ID:
+                registers = str(self.registers)
+                break
         if self.zero_qubits == 0:
-            return f"QubitMap({self.registers})"
-        return f"QubitMap({self.registers}, zero_qubits={self.zero_qubits})"
+            return f"QubitMap({registers})"
+        return f"QubitMap({registers}, zero_qubits={self.zero_qubits})"
 
     def is_trivial(self) -> bool:
         return len(self.registers) == 0
@@ -106,14 +117,14 @@ class Qubit:
             if self.case_zero.registers[i] != self.case_one.registers[i]:
                 return self.case_zero.registers[:i] + [
                     Qubit(
-                        QubitMap(self.case_zero.registers[i:]),
-                        QubitMap(self.case_one.registers[i:]),
+                        QubitMap(self.case_zero.registers[i:], self.case_zero.zero_qubits),
+                        QubitMap(self.case_one.registers[i:], self.case_one.zero_qubits),
                     )
                 ]
         return self.case_zero.registers[:min_len] + [
             Qubit(
-                QubitMap(self.case_zero.registers[min_len:]),
-                QubitMap(self.case_one.registers[min_len:]),
+                QubitMap(self.case_zero.registers[min_len:], self.case_zero.zero_qubits),
+                QubitMap(self.case_one.registers[min_len:], self.case_one.zero_qubits),
             )
         ]
 
