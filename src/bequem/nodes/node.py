@@ -2,6 +2,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 
 import numpy as np
+import tequila as tq
 
 from bequem.qubit_map import QubitMap
 from bequem.circuit import Circuit
@@ -60,10 +61,12 @@ class Node(ABC):
     def circuit(self) -> Circuit:
         raise NotImplementedError
 
-    def verify(self):
+    def verify(self) -> np.ndarray:
         basis_in = self.qubits_in().enumerate_basis()
         basis_out = self.qubits_out().enumerate_basis()
         circuit = self.circuit()
+
+        print(tq.draw(circuit.tq_circuit, backend="cirq"))
 
         if not self.is_vector():
             computed = np.eye(len(basis_out), len(basis_in), dtype=np.complex64)
@@ -90,10 +93,15 @@ class Node(ABC):
             # verify compute_adjoint
             np.testing.assert_allclose(computed_adj_m, np.conj(computed_m).T)
             np.testing.assert_allclose(computed_adj, computed_adj_m)
+
+            return computed_m
         else:
             computed = self.compute(None)
+            if computed is None:
+                computed = np.array([1])
             simulated = self.normalization() * self.qubits_out().project(
                 circuit.simulate(0, backend="qulacs"))
 
             # verify circuit
             np.testing.assert_allclose(computed, simulated)
+            return computed
