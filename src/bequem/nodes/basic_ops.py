@@ -177,22 +177,20 @@ class Scale(Node):
         A: Node,
         scale: float = 1,
         remove_efficiency: float = 1,
-        scale_absolute=False,
+        absolute=False,
     ):
         self.A = A
         # TODO: assert_efficiency not implemented yet
         assert remove_efficiency == 1
         self.remove_efficiency = remove_efficiency
-        if scale_absolute:
-            self.scale = self.A.normalization() / scale
-            self._absolute_scale = scale
-        else:
-            self.scale = scale
-            self._absolute_scale = scale * self.A.normalization()
-        self.scale_absolute = scale_absolute
+        self.scale = scale
+        self.absolute = absolute
 
     def children(self) -> list[Node]:
         return [self.A]
+
+    def parameters(self) -> dict:
+        return {"scale": self.scale, "absolute": self.absolute}
 
     def qubits_in(self) -> QubitMap:
         return self.A.qubits_in()
@@ -201,13 +199,22 @@ class Scale(Node):
         return self.A.qubits_out()
 
     def normalization(self) -> float:
-        return self._absolute_scale
+        if self.absolute:
+            return self.scale
+        else:
+            return self.scale * self.A.normalization()
 
     def compute(self, input: np.ndarray | None = None) -> np.ndarray:
-        return self.scale * self.A.compute(input)
+        if self.absolute:
+            return self.scale / self.A.normalization() * self.A.compute(input)
+        else:
+            return self.scale * self.A.compute(input)
 
     def compute_adjoint(self, input: np.ndarray | None = None) -> np.ndarray:
-        return self.scale * self.A.compute(input)
+        if self.absolute:
+            return self.scale / self.A.normalization() * self.A.compute_adjoint(input)
+        else:
+            return self.scale * self.A.compute_adjoint(input)
 
     def circuit(self) -> Circuit:
         return self.A.circuit()

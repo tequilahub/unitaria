@@ -136,8 +136,8 @@ class Add(ProxyNode):
             self.A.qubits_out(), self.B.qubits_out()
         )
 
-        A_permuted = Scale(UnsafeMul(Adjoint(permutation_in.permute_a), UnsafeMul(self.A, permutation_out.permute_a)), scale_absolute=True)
-        B_permuted = Scale(UnsafeMul(Adjoint(permutation_in.permute_b), UnsafeMul(self.B, permutation_out.permute_b)), scale_absolute=True)
+        A_permuted = Scale(UnsafeMul(Adjoint(permutation_in.permute_a), UnsafeMul(self.A, permutation_out.permute_a)), absolute=True)
+        B_permuted = Scale(UnsafeMul(Adjoint(permutation_in.permute_b), UnsafeMul(self.B, permutation_out.permute_b)), absolute=True)
 
         diag = BlockDiagonal(A_permuted, B_permuted)
         simplify_in = SimplifyZeros(diag.qubits_in())
