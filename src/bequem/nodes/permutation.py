@@ -12,6 +12,10 @@ from bequem.qubit_map import QubitMap, Qubit
 from bequem.circuit import Circuit
 
 
+# TODO: Optimization of qubit use
+# TODO: Usable error messages
+
+
 def find_permutation(a: QubitMap,
                      b: QubitMap) -> Permutation:
     if a.dimension != b.dimension:
@@ -214,19 +218,29 @@ def _find_permutation_brute_force(
                 perm_b = UnsafeMul(perm_b, UnsafeMul(rot, simp))
             else:
                 # Left-right rotation
-                pivot2 = _right_child(pivot)
-                raise NotImplementedError
+                rot_l = QubitMapRotation(pivot, False)
+                rot_l = BlockDiagonal(rot_l, Identity(_right_child(perm_b.qubits_out())))
+                rot_l = UnsafeMul(Adjoint(SimplifyZeros(rot_l.qubits_in())), rot_l)
+                rot_r = QubitMapRotation(rot_l.qubits_out(), True)
+                simp = SimplifyZeros(rot_r.qubits_out())
+                temp = UnsafeMul(rot_l, UnsafeMul(rot_r, simp))
+                perm_b = UnsafeMul(perm_b, temp)
         else:
             pivot = _right_child(perm_b.qubits_out())
-            if _split_dimension(a) >= _split_dimension(pivot):
+            if a.dimension - _split_dimension(a) <= pivot.dimension - _split_dimension(pivot):
                 # Left rotation
                 rot = QubitMapRotation(perm_b.qubits_out(), False)
                 simp = SimplifyZeros(rot.qubits_out())
                 perm_b = UnsafeMul(perm_b, UnsafeMul(rot, simp))
             else:
                 # Right-left rotation
-                pivot2 = _left_child(pivot)
-                raise NotImplementedError
+                rot_r = QubitMapRotation(pivot, True)
+                rot_r = BlockDiagonal(Identity(_left_child(perm_b.qubits_out())), rot_r)
+                rot_r = UnsafeMul(Adjoint(SimplifyZeros(rot_r.qubits_in())), rot_r)
+                rot_l = QubitMapRotation(rot_r.qubits_out(), False)
+                simp = SimplifyZeros(rot_l.qubits_out())
+                temp = UnsafeMul(rot_r, UnsafeMul(rot_l, simp))
+                perm_b = UnsafeMul(perm_b, temp)
 
     b = perm_b.qubits_out()
 

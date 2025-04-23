@@ -8,7 +8,6 @@ from bequem.nodes.permutation import _find_matching_subdivision, find_permutatio
 
 
 def check_find_permutation(a: QubitMap, b: QubitMap):
-    print(f"permuting\n{a}\nand\n{b}")
     permutation = find_permutation(a, b)
     assert permutation.permute_a.qubits_in().registers == a.registers
     assert permutation.permute_b.qubits_in().registers == b.registers
@@ -40,11 +39,36 @@ def test_brute_force_1_simple_rotation():
 
 def test_brute_force_2_simple_rotations():
     a = QubitMap(2)
+
+    # Left
     b1 = QubitMap(1)
     b2 = QubitMap([Qubit(b1, QubitMap(0, 1))])
     b3 = QubitMap([Qubit(b2, QubitMap(0, 2))])
     check_find_permutation(a, b3)
     check_find_permutation(b3, a)
+
+    # Right
+    b1 = QubitMap(1)
+    b2 = QubitMap([Qubit(QubitMap(0, 1), b1)])
+    b3 = QubitMap([Qubit(QubitMap(0, 2), b2)])
+    check_find_permutation(a, b3)
+    check_find_permutation(b3, a)
+
+def test_brute_force_double_rotation_left_right():
+    a = QubitMap(2)
+
+    b1 = QubitMap(1)
+    b2 = QubitMap([Qubit(QubitMap(0, 1), b1)])
+    b3 = QubitMap([Qubit(b2, QubitMap(0, 2))])
+    check_find_permutation(a, b3)
+
+def test_brute_force_double_rotation_right_left():
+    a = QubitMap(2)
+
+    b1 = QubitMap(1)
+    b2 = QubitMap([Qubit(b1, QubitMap(0, 1))])
+    b3 = QubitMap([Qubit(QubitMap(0, 2), b2)])
+    check_find_permutation(a, b3)
 
 
 def test_find_matching_subdivision():
