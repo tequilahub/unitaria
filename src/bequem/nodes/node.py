@@ -5,6 +5,7 @@ import numpy as np
 import tequila as tq
 from rich.tree import Tree
 from rich.console import Console
+from rich.syntax import Syntax
 
 from bequem.qubit_map import QubitMap
 from bequem.circuit import Circuit
@@ -164,18 +165,21 @@ class Node(ABC):
                 try:
                     self.find_error()
                 except VerificationError as child_err:
-                    raise VerificationError(self) from child_err
-            raise VerificationError(self) from err
+                    raise VerificationError(self, circuit) from child_err
+            raise VerificationError(self, circuit) from err
 
 class VerificationError(Exception):
 
-    def __init__(self, node: Node):
+    def __init__(self, node: Node, circuit: Circuit):
         super().__init__()
         self.node = node
+        compiled = tq.simulators.simulator_api.compile_circuit(abstract_circuit=circuit.padded(), backend="cirq")
+        self.circuit = compiled.circuit.to_text_diagram()
 
     def __str__(self):
-        console = Console(width=80)
+        console = Console(width=60)
         with console.capture() as capture:
             console.print(self.node.tree())
+            console.print(Syntax(self.circuit, "text", background_color="default"))
         output = capture.get()
         return "\n" + output
