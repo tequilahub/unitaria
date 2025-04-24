@@ -99,67 +99,83 @@ class Node(ABC):
     def __str__(self):
         return self.draw()
 
-    def verify_recursive(self, print_circuit: bool = True) -> np.ndarray:
+    def find_error(self) -> np.ndarray:
         for child in self.children():
-            child.verify_recursive(False)
-        return self.verify()
+            child.find_error()
 
-    def verify(self, print_circuit: bool = True) -> np.ndarray:
+    def verify(self, drill: bool = True) -> np.ndarray:
         basis_in = self.qubits_in().enumerate_basis()
         basis_out = self.qubits_out().enumerate_basis()
         circuit = self.circuit()
-        if self.qubits_in().total_qubits == 0:
-            # TODO: Tequila does not support circuits without qubits
-            assert circuit.tq_circuit.n_qubits == 1
-            assert self.qubits_out().total_qubits == 0
-        else:
-            assert circuit.tq_circuit.n_qubits == self.qubits_in().total_qubits
-            assert circuit.tq_circuit.n_qubits == self.qubits_out().total_qubits
+        try:
+            if self.qubits_in().total_qubits == 0:
+                # TODO: Tequila does not support circuits without qubits
+                assert circuit.tq_circuit.n_qubits == 1
+                assert self.qubits_out().total_qubits == 0
+            else:
+                assert circuit.tq_circuit.n_qubits == self.qubits_in().total_qubits
+                assert circuit.tq_circuit.n_qubits == self.qubits_out().total_qubits
 
-        if print_circuit:
-            print(self)
-            print(tq.draw(circuit.padded(), backend="cirq"))
-
-        if not self.is_vector():
-            computed = np.eye(len(basis_out),
-                              len(basis_in),
-                              dtype=np.complex64)
-            simulated = np.zeros((len(basis_out), len(basis_in)),
-                                 dtype=np.complex64)
-            computed_m = self.compute(np.eye(len(basis_in))).T
-            computed_adj_m = self.compute_adjoint(np.eye(len(basis_out))).T
-            computed_adj = np.eye(len(basis_in),
-                                  len(basis_out),
+            if not self.is_vector():
+                computed = np.eye(len(basis_out),
+                                  len(basis_in),
                                   dtype=np.complex64)
+                simulated = np.zeros((len(basis_out), len(basis_in)),
+                                     dtype=np.complex64)
+                computed_m = self.compute(np.eye(len(basis_in))).T
+                computed_adj_m = self.compute_adjoint(np.eye(len(basis_out))).T
+                computed_adj = np.eye(len(basis_in),
+                                      len(basis_out),
+                                      dtype=np.complex64)
 
-            for (i, b) in enumerate(basis_in):
-                input = np.zeros(len(basis_in))
-                input[i] = 1
-                computed[:, i] = self.compute(input)
-                simulated[:, i] = self.normalization() * self.qubits_out(
-                ).project(circuit.simulate(b, backend="qulacs"))
+                for (i, b) in enumerate(basis_in):
+                    input = np.zeros(len(basis_in))
+                    input[i] = 1
+                    computed[:, i] = self.compute(input)
+                    simulated[:, i] = self.normalization() * self.qubits_out(
+                    ).project(circuit.simulate(b, backend="qulacs"))
 
-            for (i, b) in enumerate(basis_out):
-                input = np.zeros(len(basis_out))
-                input[i] = 1
-                computed_adj[:, i] = self.compute_adjoint(input)
+                for (i, b) in enumerate(basis_out):
+                    input = np.zeros(len(basis_out))
+                    input[i] = 1
+                    computed_adj[:, i] = self.compute_adjoint(input)
 
-            # verify compute with tensor valued input
-            np.testing.assert_allclose(computed, computed_m)
-            # verify circuit
-            np.testing.assert_allclose(computed, simulated)
-            # verify compute_adjoint
-            np.testing.assert_allclose(computed_adj_m, np.conj(computed_m).T)
-            np.testing.assert_allclose(computed_adj, computed_adj_m)
+                # verify compute with tensor valued input
+                np.testing.assert_allclose(computed, computed_m)
+                # verify circuit
+                np.testing.assert_allclose(computed, simulated)
+                # verify compute_adjoint
+                np.testing.assert_allclose(computed_adj_m, np.conj(computed_m).T)
+                np.testing.assert_allclose(computed_adj, computed_adj_m)
 
-            return computed_m
-        else:
-            computed = self.compute(None)
-            if computed is None:
-                computed = np.array([1])
-            simulated = self.normalization() * self.qubits_out().project(
-                circuit.simulate(0, backend="qulacs"))
+                return computed_m
+            else:
+                computed = self.compute(None)
+                if computed is None:
+                    computed = np.array([1])
+                simulated = self.normalization() * self.qubits_out().project(
+                    circuit.simulate(0, backend="qulacs"))
 
-            # verify circuit
-            np.testing.assert_allclose(computed, simulated)
-            return computed
+                # verify circuit
+                np.testing.assert_allclose(computed, simulated)
+                return computed
+        except AssertionError as err:
+            if drill:
+                try:
+                    self.find_error()
+                except VerificationError as child_err:
+                    raise VerificationError(self) from child_err
+            raise VerificationError(self) from err
+
+class VerificationError(Exception):
+
+    def __init__(self, node: Node):
+        super().__init__()
+        self.node = node
+
+    def __str__(self):
+        console = Console(width=80)
+        with console.capture() as capture:
+            console.print(self.node.tree())
+        output = capture.get()
+        return "\n" + output

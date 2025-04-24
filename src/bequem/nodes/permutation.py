@@ -318,12 +318,12 @@ class Permutation:
     def verify(self):
         assert self.permute_a.qubits_out().registers == self.permute_b.qubits_out().registers
         assert self.permute_a.normalization() == 1
-        A = self.permute_a.verify_recursive()
+        A = self.permute_a.verify()
         if len(A.shape) == 1:
             A = np.array([A])
         np.testing.assert_allclose(A, np.eye(A.shape[0]))
         assert self.permute_b.normalization() == 1
-        B = self.permute_b.verify_recursive()
+        B = self.permute_b.verify()
         if len(B.shape) == 1:
             B = np.array([B])
         np.testing.assert_allclose(B, np.eye(B.shape[0]))
