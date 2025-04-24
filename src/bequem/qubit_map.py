@@ -7,6 +7,17 @@ from bequem.circuit import Circuit
 
 
 class QubitMap:
+    # TODO: More documentation
+    """
+    Embedding of a vectorspace into the statespace of a number of qubits.
+
+    Attributes:
+        registers       List of registers, each describing an embedding. The
+                        total embedding of all registers is the tensor product
+                        of the individual embeddings.
+        zero_qubits     The number of additional qubits (always the most
+                        significant) which are always zero in the embedding
+    """
 
     zero_qubits: int
     registers: list[Register]
@@ -30,6 +41,9 @@ class QubitMap:
 
     @property
     def dimension(self) -> int:
+        """
+        The dimension of the embedded vector space
+        """
         if self._dimension is None:
             self._dimension = 1
             for register in self.registers:
@@ -39,6 +53,11 @@ class QubitMap:
 
     @property
     def total_qubits(self) -> int:
+        """
+        The number of qubits of the state space in which the embedding lives
+
+        The dimension of the state space is `2 ** total_qubits`
+        """
         if self._total_qubits is None:
             self._total_qubits = self.zero_qubits
             for register in self.registers:
@@ -59,9 +78,15 @@ class QubitMap:
         return f"QubitMap({registers}, zero_qubits={self.zero_qubits})"
 
     def is_trivial(self) -> bool:
+        """
+        Tests whether the embedded vector space only contains the `|0>` state
+        """
         return len(self.registers) == 0
 
     def test_basis(self, bits: int) -> bool:
+        """
+        Tests whether the given basis state is inside the embedding
+        """
         if bits >= 2 ** (self.total_qubits - self.zero_qubits):
             return False
         for register in self.registers:
@@ -83,14 +108,29 @@ class QubitMap:
         return True
 
     def enumerate_basis(self) -> np.ndarray:
+        """
+        Enumerates the basis states inside the embedding
+        """
         return np.fromiter(
             filter(self.test_basis, range(2**self.total_qubits)), dtype=np.int32
         )
 
     def project(self, vector: np.ndarray) -> np.ndarray:
+        """
+        Projects a state vector the embedding 
+        """
         return vector[self.enumerate_basis()]
 
     def circuit(self) -> Circuit:
+        """
+        A circuit which checks, whether a number of qubits represent a state
+        inside the embedding.
+
+        The result of the check will be stored in an additional qubit, meangin
+        the total number of qubits in the circuit is `total_qubits + 1`.
+        Specifically, the extra qubit will be flipped, if the other qubits
+        represent a state outside the embedded vector space.
+        """
         # TODO
         return Circuit()
 
