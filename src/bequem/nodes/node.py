@@ -126,19 +126,23 @@ class Node(ABC):
                               dtype=np.complex64)
             simulated = np.zeros((len(basis_out), len(basis_in)),
                                  dtype=np.complex64)
-            computed_m = self.compute(computed.T).T
-            computed_adj_m = self.compute_adjoint(computed).T
+            computed_m = self.compute(np.eye(len(basis_in))).T
+            computed_adj_m = self.compute_adjoint(np.eye(len(basis_out))).T
             computed_adj = np.eye(len(basis_in),
                                   len(basis_out),
                                   dtype=np.complex64)
 
             for (i, b) in enumerate(basis_in):
-                computed[:, i] = self.compute(computed[:, i])
+                input = np.zeros(len(basis_in))
+                input[i] = 1
+                computed[:, i] = self.compute(input)
                 simulated[:, i] = self.normalization() * self.qubits_out(
                 ).project(circuit.simulate(b, backend="qulacs"))
 
             for (i, b) in enumerate(basis_out):
-                computed_adj[:, i] = self.compute_adjoint(computed_adj[:, i])
+                input = np.zeros(len(basis_out))
+                input[i] = 1
+                computed_adj[:, i] = self.compute_adjoint(input)
 
             # verify compute with tensor valued input
             np.testing.assert_allclose(computed, computed_m)

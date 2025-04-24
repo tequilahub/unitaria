@@ -13,11 +13,11 @@ def test_block_diagonal():
     D.verify()
 
 
-def test_add():
-    A = Identity(QubitMap(1, 1))
-    B = Increment(1)
+def test_block_diagonal_with_permutation():
+    A = Identity(QubitMap(2))
+    B = Increment(2)
 
-    D = A + B
+    D = A | B
     D.verify()
-    D = B + A
+    D = B | A
     D.verify()

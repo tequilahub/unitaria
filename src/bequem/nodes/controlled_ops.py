@@ -88,10 +88,3 @@ class BlockDiagonal(Node):
 
 
 Node.__or__ = lambda A, B: BlockDiagonal(A, B)
-
-class BlockHorizontal(Node):
-    pass
-
-
-class BlockVertical(Node):
-    pass
