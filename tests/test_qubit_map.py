@@ -41,8 +41,8 @@ def test_basis():
     np.testing.assert_allclose(QubitMap(0).enumerate_basis(), np.array([0]))
     np.testing.assert_allclose(QubitMap(0, 1).enumerate_basis(), np.array([0]))
     np.testing.assert_allclose(QubitMap(1).enumerate_basis(), np.array([0, 1]))
+    np.testing.assert_allclose(QubitMap([Qubit(QubitMap(1), QubitMap(0, 1))]).enumerate_basis(), np.array([0, 1, 2]))
     # TODO
-    # np.testing.assert_allclose(QubitMap([Controlled(QubitMap(1), QubitMap(0, 1))]).enumerate_basis(), np.array([0, 1, 2]))
     # circuit = Circuit()
     # assert not QubitMap([Projection(circuit)]).enumerate_basis()
     np.testing.assert_allclose(

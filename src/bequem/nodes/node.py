@@ -73,7 +73,11 @@ class Node(ABC):
             label += str(parameters)
         return label
 
-    def tree(self, verbose: bool = False, tree: Tree | None = None):
+    def tree(self, verbose: bool = False, tree: Tree | None = None, holes: list[Node] = []):
+        for (i, hole) in enumerate(holes):
+            if hole is self:
+                return tree.add(f"child {i}")
+
         label = self.tree_label(verbose)
         if tree is None:
             subtree = Tree(label)
@@ -81,7 +85,7 @@ class Node(ABC):
             subtree = tree.add(label)
 
         for child in self.children():
-            child.tree(verbose, subtree)
+            child.tree(verbose, subtree, holes)
 
         return subtree
 

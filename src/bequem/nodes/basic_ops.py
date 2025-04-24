@@ -158,7 +158,7 @@ class Adjoint(Node):
         return self.A.qubits_in()
 
     def normalization(self) -> float:
-        # TODO: Should normalization be a complex number
+        # TODO: Should normalization be a complex number?
         return self.A.normalization()
 
     def compute(self, input: np.ndarray | None) -> np.ndarray:

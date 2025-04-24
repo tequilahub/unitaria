@@ -38,6 +38,11 @@ Vielleicht von Numpy inspirieren lassen
 
 ## TODOS
 
-1. Matthias: Tensor, Multiplikation; Oliver: Increment, Addition, Building blocks
-2. Laplace / Konvolution testen <-- für nächstes Treffen
-3. Ancillas, User interface (Operatorschreibweise), measurements
+1. Laplace / Konvolution testen <-- für nächstes Treffen
+2. Ancillas, measurements
+
+## Offene Fragen
+
+* Wie können wir mit Global Phase umgehen? Tequila kann das im Prinzip nicht
+  (Benötigt für `Add`, `ConstantVector`)
+* Soll normalization ein float oder complex sein?

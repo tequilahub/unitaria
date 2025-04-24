@@ -57,7 +57,7 @@ class ProxyNode(Node):
         else:
             if self._definition is None:
                 self._definition = self.definition()
-            return Panel(self._definition.tree(verbose=True), title=label)
+            return Panel(self._definition.tree(verbose=True, holes=self.children()), title=label, title_align="left")
 
 
 class ProjectionNode(Node):
