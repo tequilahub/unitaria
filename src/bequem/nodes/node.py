@@ -29,9 +29,23 @@ class Node(ABC):
 
     # TODO: How do we check that this is implemented properly
     def children(self) -> list[Node]:
+        """
+        The children nodes of this node
+
+        Mostly used for serialization and systematic verification of the
+        computational graph. Children and parameters together should fully
+        define the matrix encoded by any node.
+        """
         return []
 
     def parameters(self) -> dict:
+        """
+        The parameters of this graph
+
+        Mostly used for serialization and systematic verification of the
+        computational graph. Children and parameters together should fully
+        define the matrix encoded by any node.
+        """
         return {}
 
     # def uuid() -> Uuid:
@@ -42,39 +56,101 @@ class Node(ABC):
 
     @abstractmethod
     def qubits_in(self) -> QubitMap:
+        """
+        The embedding of the input vectorspace.
+
+        Specifically this specifies how the vectorspace is included in state
+        space nodes circuit, which has dimension 2^n where n is the number of qubits.
+        In other words, this defines whether a particular basis state is "valid" or "invalid".
+
+        In the formalism of block encodings this corresponds to the projection \Pi_1.
+        """
         raise NotImplementedError
 
     @abstractmethod
     def qubits_out(self) -> QubitMap:
+        """
+        The embedding of the output vectorspace.
+
+        Specifically this specifies how the vectorspace is included in state
+        space nodes circuit, which has dimension 2^n where n is the number of qubits.
+        In other words, this defines whether a particular basis state is "valid" or "invalid".
+
+        In the formalism of block encodings this corresponds to the projection \Pi_2.
+        """
         raise NotImplementedError
 
     @abstractmethod
     def normalization(self) -> float:
+        """
+        Normalization of the block encoding.
+
+        Non-negative number, which has to be multiplied with the outputs of the
+        circuit to ensure proper scaling of the result.
+        """
         raise NotImplementedError
 
     def is_vector(self) -> bool:
+        """
+        Tests whether this node encodes a vector or a matrix.
+        """
         return self.qubits_in().is_trivial()
 
     @abstractmethod
     def compute(self, input: np.ndarray | None = None) -> np.ndarray:
+        """
+        Apply the action of this nodes matrix to the input.
+
+        If this node encodes a vector, then `input = None` is valid, in which
+        case the method should simply return the encoded vector.
+
+        Input may be a vector or a higher order tensor. If it is a vector it
+        will have dimension equal to the dimension of `self.qubits_in()`. If
+        it is a tensor, the last dimension will be equal to the dimension of
+        `self.qubits_in()`. In this case, the operation should be applied to all
+        vectors input[i, j, ..., k, :] in parallel. The shape of the returned
+        array should match the input shape in all but the last dimension.
+        """
         raise NotImplementedError
 
     @abstractmethod
     def compute_adjoint(self, input: np.ndarray | None = None) -> np.ndarray:
+        """
+        Apply the adjoint action of this nodes matrix to the input.
+
+        See `compute` for input and output formats.
+        """
         raise NotImplementedError
 
     @abstractmethod
     def circuit(self) -> Circuit:
+        """
+        The circuit corresponding to the unitary of the block encoding.
+        """
         raise NotImplementedError
 
     def tree_label(self, verbose: bool = False):
+        """
+        Label by which this node should be represented in textual (debug)
+        output.
+
+        Defaults to the name of the nodes class plus its parameters.
+        """
         label = self.__class__.__name__
         parameters = self.parameters()
         if len(parameters) != 0:
             label += str(parameters)
         return label
 
-    def tree(self, verbose: bool = False, tree: Tree | None = None, holes: list[Node] = []):
+    def tree(self,
+             verbose: bool = False,
+             tree: Tree | None = None,
+             holes: list[Node] = []) -> Tree:
+        """
+        Method for rich text output of the computational graph.
+
+        Typically you should call `draw` instead of this method.
+        """
         for (i, hole) in enumerate(holes):
             if hole is self:
                 return tree.add(f"child {i}")
@@ -90,7 +166,14 @@ class Node(ABC):
 
         return subtree
 
-    def draw(self, verbose: bool = False):
+    def draw(self, verbose: bool = False) -> str:
+        """
+        Rich text output of the computational graph
+
+        Parameters:
+        verbose(bool): if set to `True`, the definition of `ProxyNode`s is inserted into
+        the output.
+        """
         console = Console()
         with console.capture() as capture:
             console.print(self.tree(verbose))
@@ -101,10 +184,26 @@ class Node(ABC):
         return self.draw()
 
     def find_error(self) -> np.ndarray:
+        """
+        Convenience function to recursively call `verify` on the children of
+        this node.
+
+        You should typically use `verify` instead.
+        """
         for child in self.children():
             child.find_error()
 
     def verify(self, drill: bool = True) -> np.ndarray:
+        """
+        Verify the correctness of this node.
+
+        Checks that the outputs of `qubits_in`, `qubits_out`, `normalization`,
+        and `circuit` are sensible and encode the same matrix.
+
+        Parameters:
+        drill(bool): If True and an error is found, recursivly test this nodes
+            children to find the smallest node which still contains the error.
+        """
         basis_in = self.qubits_in().enumerate_basis()
         basis_out = self.qubits_out().enumerate_basis()
         circuit = self.circuit()
@@ -114,8 +213,10 @@ class Node(ABC):
                 assert circuit.tq_circuit.n_qubits == 1
                 assert self.qubits_out().total_qubits == 0
             else:
-                assert circuit.tq_circuit.n_qubits == self.qubits_in().total_qubits
-                assert circuit.tq_circuit.n_qubits == self.qubits_out().total_qubits
+                assert circuit.tq_circuit.n_qubits == self.qubits_in(
+                ).total_qubits
+                assert circuit.tq_circuit.n_qubits == self.qubits_out(
+                ).total_qubits
 
             if not self.is_vector():
                 computed = np.eye(len(basis_out),
@@ -146,7 +247,8 @@ class Node(ABC):
                 # verify circuit
                 np.testing.assert_allclose(computed, simulated)
                 # verify compute_adjoint
-                np.testing.assert_allclose(computed_adj_m, np.conj(computed_m).T)
+                np.testing.assert_allclose(computed_adj_m,
+                                           np.conj(computed_m).T)
                 np.testing.assert_allclose(computed_adj, computed_adj_m)
 
                 return computed_m
@@ -168,18 +270,21 @@ class Node(ABC):
                     raise VerificationError(self, circuit) from child_err
             raise VerificationError(self, circuit) from err
 
+
 class VerificationError(Exception):
 
     def __init__(self, node: Node, circuit: Circuit):
         super().__init__()
         self.node = node
-        compiled = tq.simulators.simulator_api.compile_circuit(abstract_circuit=circuit.padded(), backend="cirq")
+        compiled = tq.simulators.simulator_api.compile_circuit(
+            abstract_circuit=circuit.padded(), backend="cirq")
         self.circuit = compiled.circuit.to_text_diagram()
 
     def __str__(self):
         console = Console(width=60)
         with console.capture() as capture:
             console.print(self.node.tree())
-            console.print(Syntax(self.circuit, "text", background_color="default"))
+            console.print(
+                Syntax(self.circuit, "text", background_color="default"))
         output = capture.get()
         return "\n" + output
