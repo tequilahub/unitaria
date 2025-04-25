@@ -131,12 +131,16 @@ class QubitMap:
         Specifically, the extra qubit will be flipped, if the other qubits
         represent a state outside the embedded vector space.
         """
-        # TODO
+        # TODO: Oliver
         return Circuit()
 
 
 @dataclass(frozen=True, repr=False)
 class Qubit:
+    """
+    Register where the most significant qubit determines the ...
+    """
+
     case_zero: QubitMap
     case_one: QubitMap
 

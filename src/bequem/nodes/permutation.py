@@ -16,8 +16,7 @@ from bequem.circuit import Circuit
 # TODO: Usable error messages
 
 
-def find_permutation(a: QubitMap,
-                     b: QubitMap) -> Permutation:
+def find_permutation(a: QubitMap, b: QubitMap) -> Permutation:
     if a.dimension != b.dimension:
         raise ValueError()
 
@@ -38,8 +37,9 @@ def find_permutation(a: QubitMap,
     return Permutation(perm_a, perm_b)
 
 
-def _find_matching_subdivision(a: QubitMap,
-                               b: QubitMap) -> list[tuple[QubitMap, QubitMap]]:
+def _find_matching_subdivision(
+    a: QubitMap, b: QubitMap
+) -> list[tuple[QubitMap, QubitMap]]:
     if a.registers == [] and b.registers == []:
         return []
 
@@ -75,7 +75,6 @@ def _find_matching_subdivision(a: QubitMap,
 
 
 class SimplifyZeros(Node):
-
     def __init__(self, qubits: QubitMap):
         assert len(qubits.registers) > 0 and isinstance(qubits.registers[-1], Qubit)
 
@@ -84,13 +83,16 @@ class SimplifyZeros(Node):
         self.common_zeros = min(case_zero.zero_qubits, case_one.zero_qubits)
         self.qubits = qubits
 
-        case_zero = QubitMap(case_zero.registers,
-                             case_zero.zero_qubits - self.common_zeros)
-        case_one = QubitMap(case_one.registers,
-                             case_one.zero_qubits - self.common_zeros)
+        case_zero = QubitMap(
+            case_zero.registers, case_zero.zero_qubits - self.common_zeros
+        )
+        case_one = QubitMap(
+            case_one.registers, case_one.zero_qubits - self.common_zeros
+        )
         self._qubits_out = QubitMap(
             self.qubits.registers[:-1] + [Qubit(case_zero, case_one)],
-            self.qubits.zero_qubits + self.common_zeros)
+            self.qubits.zero_qubits + self.common_zeros,
+        )
 
     def children(self) -> list[Node]:
         return []
@@ -120,15 +122,19 @@ class SimplifyZeros(Node):
             circuit += Circuit(
                 tq.gates.SWAP(
                     self.qubits.total_qubits - self.qubits.zero_qubits - 1,
-                    self.qubits.total_qubits - self.qubits.zero_qubits - self.common_zeros -
-                    1))
+                    self.qubits.total_qubits
+                    - self.qubits.zero_qubits
+                    - self.common_zeros
+                    - 1,
+                )
+            )
 
         circuit.tq_circuit.n_qubits = self.qubits.total_qubits
-        
+
         return circuit
 
-class QubitMapRotation(Node):
 
+class QubitMapRotation(Node):
     def __init__(self, qubits: QubitMap, right: bool):
         assert len(qubits.registers) > 0 and isinstance(qubits.registers[-1], Qubit)
 
@@ -190,17 +196,14 @@ class QubitMapRotation(Node):
                 [last_bit - 1, last_bit - 2],
                 last_bit,
             )
-            circuit.tq_circuit += tq.gates.CNOT(
-                last_bit, [last_bit-1, last_bit-2]
-            )
+            circuit.tq_circuit += tq.gates.CNOT(last_bit, [last_bit - 1, last_bit - 2])
 
         circuit.tq_circuit.n_qubits = self._qubits_out.total_qubits
 
         return circuit
 
 
-def _find_permutation_brute_force(
-        a: QubitMap, b: QubitMap) -> Permutation:
+def _find_permutation_brute_force(a: QubitMap, b: QubitMap) -> Permutation:
     assert a.dimension == b.dimension
     assert len(a.registers) != 0
     assert len(b.registers) != 0
@@ -219,7 +222,9 @@ def _find_permutation_brute_force(
             else:
                 # Left-right rotation
                 rot_l = QubitMapRotation(pivot, False)
-                rot_l = BlockDiagonal(rot_l, Identity(_right_child(perm_b.qubits_out())))
+                rot_l = BlockDiagonal(
+                    rot_l, Identity(_right_child(perm_b.qubits_out()))
+                )
                 rot_l = UnsafeMul(Adjoint(SimplifyZeros(rot_l.qubits_in())), rot_l)
                 rot_r = QubitMapRotation(rot_l.qubits_out(), True)
                 simp = SimplifyZeros(rot_r.qubits_out())
@@ -227,7 +232,9 @@ def _find_permutation_brute_force(
                 perm_b = UnsafeMul(perm_b, temp)
         else:
             pivot = _right_child(perm_b.qubits_out())
-            if a.dimension - _split_dimension(a) <= pivot.dimension - _split_dimension(pivot):
+            if a.dimension - _split_dimension(a) <= pivot.dimension - _split_dimension(
+                pivot
+            ):
                 # Left rotation
                 rot = QubitMapRotation(perm_b.qubits_out(), False)
                 simp = SimplifyZeros(rot.qubits_out())
@@ -285,7 +292,8 @@ def _left_child(qubits: QubitMap) -> QubitMap:
 
     return QubitMap(
         qubits.registers[:-1] + qubits.registers[-1].case_zero.registers,
-        qubits.zero_qubits + qubits.registers[-1].case_zero.zero_qubits)
+        qubits.zero_qubits + qubits.registers[-1].case_zero.zero_qubits,
+    )
 
 
 def _right_child(qubits: QubitMap) -> QubitMap:
@@ -294,7 +302,8 @@ def _right_child(qubits: QubitMap) -> QubitMap:
 
     return QubitMap(
         qubits.registers[:-1] + qubits.registers[-1].case_one.registers,
-        qubits.zero_qubits + qubits.registers[-1].case_one.zero_qubits)
+        qubits.zero_qubits + qubits.registers[-1].case_one.zero_qubits,
+    )
 
 
 def _extend_zeros(qubits: QubitMap, n: int) -> QubitMap:
@@ -316,7 +325,10 @@ class Permutation:
         return self.permute_a.qubits_out()
 
     def verify(self):
-        assert self.permute_a.qubits_out().registers == self.permute_b.qubits_out().registers
+        assert (
+            self.permute_a.qubits_out().registers
+            == self.permute_b.qubits_out().registers
+        )
         assert self.permute_a.normalization() == 1
         A = self.permute_a.verify()
         if len(A.shape) == 1:

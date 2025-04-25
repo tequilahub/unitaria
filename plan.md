@@ -9,37 +9,50 @@
 
 ## Wichtige Abstrakte Klassen
 
-* Node
-* QubitMap (bisher Projection)
-* Register (bisher AtomicProjection)
-* Projection (bisher custom projection) 
-* Circuit
-* (Vector)
+* [x] Node
+* [x] QubitMap (bisher Projection)
+* [x] Register (bisher AtomicProjection)
+* [ ] Projection (bisher custom projection) 
+* [x] Circuit
+* [ ] (Vector)
 
 ## Nodes
 
-* Multiply
-* Add
-* ~ConstantVector~ = ConstantMatrix
-* ConstantMatrix
-* TensorProduct
-* Invert, Solve
-* Adjoint
-* BlockDiagonal
-* AmplitudeAmplification
-* Scale, (IncreaseNormalization)
-* BlockHorizontal, (BlockVertical)
-* (Convolution) (bilinear), (ConstantIntegerAddition)
-* ElementwiseMultiplication (bilinear)
-* (AmplitudeEstimation, PhaseEstimation)
+* [y] Multiply
+* [x] Add
+* [x] ~ConstantVector~ = ConstantMatrix
+* [ ] ConstantUnitary
+* [ ] ConstantMatrix
+* [x] TensorProduct
+* [ ] Invert, Solve
+* [x] Adjoint
+* [ ] BlockDiagonal
+* [ ] AmplitudeAmplification
+* [x] Scale, (IncreaseNormalization)
+* [x] BlockHorizontal, (BlockVertical)
+* [x] (Convolution) (bilinear), (Increment)
+* [ ] ElementwiseMultiplication (bilinear)
+* [ ] (AmplitudeEstimation, PhaseEstimation)
 
 Vielleicht von Numpy inspirieren lassen
 
 
 ## TODOS
 
-1. Laplace / Konvolution testen <-- für nächstes Treffen
-2. Ancillas, measurements
+1. Global phase in tequila implementieren (Ram)
+2. Identity Gate (Ram)
+3. Circuit für QubitMap (Oliver)
+4. Componentwise Multiplication (Matthias)
+5. Circuit Synthesis (Matthias)
+6. Nonlinear Beispiel (Jessica)
+7. FEM Beispiel (Jessica)
+8. QSVT (Matthias)
+9. Laplace / Konvolution testen <-- für nächstes Treffen
+10. Ancillas, measurements
+11. CI
+12. Documentation
+13. plan.md nicht auf PyPi hochladen
+14. Verify mit zufälliger Basis
 
 ## Offene Fragen
 
