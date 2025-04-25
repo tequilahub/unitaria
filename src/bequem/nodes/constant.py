@@ -7,7 +7,19 @@ from bequem.qubit_map import QubitMap
 
 
 class ConstantVector(Node):
+    """
+    Node representing the given vector
+
+    :ivar vec:
+        The vector represented by this node
+    """
+    vec: np.ndarray
+
     def __init__(self, vec: np.ndarray):
+        """
+        :param vec:
+            The vector represented by this node
+        """
         self.n_qubits = round(np.log2(vec.shape[0]))
         assert 2 ** self.n_qubits == vec.shape[0]
         self.vec = vec

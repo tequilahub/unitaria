@@ -1,5 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass
+from abc import ABC, abstractmethod
 
 import numpy as np
 
@@ -11,12 +12,12 @@ class QubitMap:
     """
     Embedding of a vectorspace into the statespace of a number of qubits.
 
-    Attributes:
-        registers       List of registers, each describing an embedding. The
-                        total embedding of all registers is the tensor product
-                        of the individual embeddings.
-        zero_qubits     The number of additional qubits (always the most
-                        significant) which are always zero in the embedding
+    :ivar registers:
+        List of registers, each describing an embedding. The total embedding of
+        all registers is the tensor product of the individual embeddings.
+    :ivar zero_qubits:
+        The number of additional qubits (always the most significant) which are
+        always zero in the embedding
     """
 
     zero_qubits: int
@@ -56,7 +57,7 @@ class QubitMap:
         """
         The number of qubits of the state space in which the embedding lives
 
-        The dimension of the state space is `2 ** total_qubits`
+        The dimension of the state space is ``2 ** total_qubits``
         """
         if self._total_qubits is None:
             self._total_qubits = self.zero_qubits
@@ -79,7 +80,7 @@ class QubitMap:
 
     def is_trivial(self) -> bool:
         """
-        Tests whether the embedded vector space only contains the `|0>` state
+        Tests whether the embedded vector space only contains the ``|0>`` state
         """
         return len(self.registers) == 0
 
@@ -127,7 +128,7 @@ class QubitMap:
         inside the embedding.
 
         The result of the check will be stored in an additional qubit, meangin
-        the total number of qubits in the circuit is `total_qubits + 1`.
+        the total number of qubits in the circuit is ``total_qubits + 1``.
         Specifically, the extra qubit will be flipped, if the other qubits
         represent a state outside the embedded vector space.
         """
@@ -135,10 +136,35 @@ class QubitMap:
         return Circuit()
 
 
+class Register(ABC):
+
+    @abstractmethod
+    def total_qubits(self) -> int:
+        """
+        The number of qubits of the state space in which the embedding lives
+
+        The dimension of the state space is ``2 ** total_qubits``
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def dimension(self) -> int:
+        """
+        The dimension of the embedded vector space
+        """
+        raise NotImplementedError
+
+
 @dataclass(frozen=True, repr=False)
-class Qubit:
+class Qubit(Register):
     """
-    Register where the most significant qubit determines the ...
+    Register where the most significant qubit determines the embedding of the
+    lower qubits
+
+    :ivar case_zero:
+        Embedding of lower qubits, if highest qubit is ``|0>``
+    :ivar case_one:
+        Embedding of lower qubits, if highest qubit is ``|1>``
     """
 
     case_zero: QubitMap
@@ -156,6 +182,16 @@ class Qubit:
         return self.case_zero.dimension + self.case_one.dimension
 
     def simplify(self) -> list[Register]:
+        """
+        Returns a potentially simpler representation of this register
+
+        Specifically, if :py:attr:`case_one` and :py:attr:`case_zero` agree in a number of lowest
+        qubits, this common part can be factored out. E.g.
+
+            >>> from bequem.qubit_map import Qubit, QubitMap
+            >>> Qubit(QubitMap(2), QubitMap(1)).simplify()
+            [ID, Qubit(case_zero=QubitMap(1), case_one=QubitMap(0))]
+        """
         min_len = min(len(self.case_zero.registers), len(self.case_one.registers))
         for i in range(min_len):
             if self.case_zero.registers[i] != self.case_one.registers[i]:
@@ -177,11 +213,21 @@ ID = Qubit(QubitMap([]), QubitMap([]))
 
 
 @dataclass(frozen=True)
-class Projection:
+class Projection(Register):
+    """
+    Register in which the embedding is determined by a custom circuit.
+
+    The circuit should check whether a qubit is inside the embedded vector
+    space. See :py:func:`QubitMap.circuit`.
+
+    :ivar circuit:
+        The circuit of which checks inclusion in the vector space 
+    """
     circuit: Circuit
+    dim: int
 
     def total_qubits(self) -> int:
         return len(self.circuit.tq_circuit.qubits) - 1
 
-
-Register = Qubit | Projection
+    def dimension(self) -> int:
+        return self.dim

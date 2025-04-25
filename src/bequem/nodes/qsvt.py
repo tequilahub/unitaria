@@ -1,4 +1,6 @@
-from node import Node
+import numpy as np
+
+from bequem.nodes import Node
 
 
 class QSVT(Node):

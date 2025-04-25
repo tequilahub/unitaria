@@ -6,25 +6,49 @@ from bequem.circuit import Circuit
 from bequem.qubit_map import QubitMap
 from bequem.nodes.node import Node
 
-class UnsafeMul(Node):
-    def __init__(self, A: Node, B: Node):
-        if A.qubits_out().registers != B.qubits_in().registers:
-            raise ValueError(f"Non matching qubit maps {A.qubits_out()} and {B.qubits_in()}")
 
-        max_qubits = max(A.qubits_in().total_qubits, B.qubits_out().total_qubits)
+class UnsafeMul(Node):
+    """
+    Node for chaining the circuits of two nodes
+
+    This is mostly for internal usage. To properly multiply two matrices use
+    :py:class:`~bequem.nodes.prox_node.Mul` instead. The order of operations is
+    such that the first argument ``A`` is applied first.
+
+    :ivar A:
+        The first factor
+    :ivar B:
+        The second factor
+    """
+    A: Node
+    B: Node
+
+    def __init__(self, A: Node, B: Node):
+        """
+        The order of operations is such that the first argument ``A`` is applied
+        first.
+
+        :ivar A:
+            The first factor
+        :ivar B:
+            The second factor
+        """
+        if A.qubits_out().registers != B.qubits_in().registers:
+            raise ValueError(
+                f"Non matching qubit maps {A.qubits_out()} and {B.qubits_in()}"
+            )
+
+        max_qubits = max(A.qubits_in().total_qubits,
+                         B.qubits_out().total_qubits)
         qubits_in_A = A.qubits_in()
         self._qubits_in = QubitMap(
             qubits_in_A.registers,
-            max_qubits
-            - qubits_in_A.total_qubits
-            + qubits_in_A.zero_qubits,
+            max_qubits - qubits_in_A.total_qubits + qubits_in_A.zero_qubits,
         )
         qubits_out_B = B.qubits_out()
         self._qubits_out = QubitMap(
             qubits_out_B.registers,
-            max_qubits
-            - qubits_out_B.total_qubits
-            + qubits_out_B.zero_qubits,
+            max_qubits - qubits_out_B.total_qubits + qubits_out_B.zero_qubits,
         )
         self.A = A
         self.B = B
@@ -58,8 +82,38 @@ class UnsafeMul(Node):
     def normalization(self) -> float:
         return self.A.normalization() * self.B.normalization()
 
+
 class Tensor(Node):
+    """
+    Node representing the tensor product of two other nodes
+
+    The order of operations is such that ``A`` corresponds to the lower
+    significant digits of the index, i.e.
+
+    >>> from bequem.nodes import Tensor, Identity, Increment
+    >>> from bequem.qubit_map import QubitMap
+    >>> import numpy as np
+    >>> Tensor(Increment(1), Identity(QubitMap(1))).compute(np.eye(4))
+    array([[0., 1., 0., 0.],
+           [1., 0., 0., 0.],
+           [0., 0., 0., 1.],
+           [0., 0., 1., 0.]])
+
+    :ivar A:
+        The first factor
+    :ivar B:
+        The second factor
+    """
+    A: Node
+    B: Node
+
     def __init__(self, A: Node, B: Node):
+        """
+        :param A:
+            The first factor
+        :param B:
+            The second factor
+        """
         self.A = A
         self.B = B
 
@@ -69,8 +123,9 @@ class Tensor(Node):
     def compute(self, input: np.ndarray | None) -> np.ndarray:
         batch_shape = list(input.shape[:-1])
         input = input.reshape(
-            batch_shape + [self.B.qubits_in().dimension, self.A.qubits_in().dimension]
-        )
+            batch_shape +
+            [self.B.qubits_in().dimension,
+             self.A.qubits_in().dimension])
         input = self.A.compute(input)
         input = np.swapaxes(input, -1, -2)
         input = self.B.compute(input)
@@ -80,8 +135,9 @@ class Tensor(Node):
     def compute_adjoint(self, input: np.ndarray | None) -> np.ndarray:
         batch_shape = list(input.shape[:-1])
         input = input.reshape(
-            batch_shape + [self.B.qubits_out().dimension, self.A.qubits_out().dimension]
-        )
+            batch_shape +
+            [self.B.qubits_out().dimension,
+             self.A.qubits_out().dimension])
         input = self.A.compute_adjoint(input)
         input = np.swapaxes(input, -1, -2)
         input = self.B.compute_adjoint(input)
@@ -94,7 +150,8 @@ class Tensor(Node):
 
         circuit = Circuit()
 
-        for i in reversed(range(qubits_in_B.total_qubits - qubits_in_B.zero_qubits)):
+        for i in reversed(
+                range(qubits_in_B.total_qubits - qubits_in_B.zero_qubits)):
             qubit1 = qubits_in_A.total_qubits + i
             qubit2 = qubits_in_A.total_qubits - qubits_in_A.zero_qubits + i
             if qubit1 != qubit2:
@@ -102,9 +159,8 @@ class Tensor(Node):
 
         circuit_A = self.A.circuit().tq_circuit
         circuit.tq_circuit += circuit_A
-        qubit_map_B = dict(
-            [(i, i + qubits_in_A.total_qubits) for i in range(qubits_in_B.total_qubits)]
-        )
+        qubit_map_B = dict([(i, i + qubits_in_A.total_qubits)
+                            for i in range(qubits_in_B.total_qubits)])
         circuit_B = self.B.circuit().tq_circuit.map_qubits(qubit_map_B)
         circuit.tq_circuit += circuit_B
 
@@ -145,7 +201,19 @@ Node.__and__ = lambda A, B: Tensor(A, B)
 
 
 class Adjoint(Node):
+    """
+    Node representing the adjoint of another node
+
+    :ivar A:
+        The node of which to compute the adjoint
+    """
+    A: Node
+
     def __init__(self, A: Node):
+        """
+        :param A:
+            The node of which to compute the adjoint
+        """
         self.A = A
 
     def children(self) -> list[Node]:
@@ -172,13 +240,36 @@ class Adjoint(Node):
 
 
 class Scale(Node):
+    """
+    Node representing the product of a scalar and another node
+
+    :ivar A:
+        The node to scale
+    :ivar scale:
+        The scalar factor
+    :ivar absolute:
+        If ``True``, ``A`` is divided by its normalization first
+    """
+    A: Node
+    scale: float
+    absolute: bool
+    remove_efficiency: bool
+
     def __init__(
         self,
         A: Node,
         scale: float = 1,
         remove_efficiency: float = 1,
-        absolute=False,
+        absolute: bool = False,
     ):
+        """
+        :param A:
+            The node to scale
+        :param scale:
+            The scalar factor
+        :param absolute:
+            If ``True``, ``A`` is divided by its normalization first
+        """
         self.A = A
         # TODO: assert_efficiency not implemented yet
         assert remove_efficiency == 1
@@ -212,7 +303,8 @@ class Scale(Node):
 
     def compute_adjoint(self, input: np.ndarray | None = None) -> np.ndarray:
         if self.absolute:
-            return self.scale / self.A.normalization() * self.A.compute_adjoint(input)
+            return self.scale / self.A.normalization(
+            ) * self.A.compute_adjoint(input)
         else:
             return self.scale * self.A.compute_adjoint(input)
 

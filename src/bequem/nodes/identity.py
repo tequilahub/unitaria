@@ -1,5 +1,4 @@
 import numpy as np
-import tequila as tq
 
 from bequem.circuit import Circuit
 from bequem.qubit_map import QubitMap
@@ -7,8 +6,19 @@ from bequem.nodes.node import Node
 
 
 class Identity(Node):
+    """
+    Node representing the identity matrix on a given vectorspace
+
+    :ivar qubits:
+        The domain of the identity matrix
+    """
+    qubits: QubitMap
 
     def __init__(self, qubits: QubitMap):
+        """
+        :param qubits:
+            The domain of the identity matrix
+        """
         self.qubits = qubits
 
     def children(self) -> list[Node]:

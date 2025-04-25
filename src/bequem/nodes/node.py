@@ -18,8 +18,8 @@ class Node(ABC):
     Abstract class for all nodes in the computational graph
 
     The encoded vector or the action of the encoded matrix can be obtained
-    either through matrix arithmetic using `simulate` or as a quantum circuit
-    using `circuit`.
+    either through matrix arithmetic using :py:func:`compute` or as a
+    quantum circuit using :py:func:`circuit`.
     """
 
     # TODO
@@ -101,15 +101,16 @@ class Node(ABC):
         """
         Apply the action of this nodes matrix to the input.
 
-        If this node encodes a vector, then `input = None` is valid, in which
+        If this node encodes a vector, then ``input = None`` is valid, in which
         case the method should simply return the encoded vector.
 
         Input may be a vector or a higher order tensor. If it is a vector it
-        will have dimension equal to the dimension of `self.qubits_in()`. If
-        it is a tensor, the last dimension will be equal to the dimension of
-        `self.qubits_in()`. In this case, the operation should be applied to all
-        vectors input[i, j, ..., k, :] in parallel. The shape of the returned
-        array should match the input shape in all but the last dimension.
+        will have dimension equal to the dimension of :py:func:`qubits_in`.
+        If it is a tensor, the last dimension will be equal to the dimension
+        of :py:func:`qubits_in`. In this case, the operation should be applied
+        to all vectors ``input[i, j, ..., k, :]`` in parallel. The shape of
+        the returned array should match the input shape in all but the last
+        dimension.
         """
         raise NotImplementedError
 
@@ -118,7 +119,7 @@ class Node(ABC):
         """
         Apply the adjoint action of this nodes matrix to the input.
 
-        See `compute` for input and output formats.
+        See :py:func:`compute` for input and output formats.
         """
         raise NotImplementedError
 
@@ -149,7 +150,7 @@ class Node(ABC):
         """
         Method for rich text output of the computational graph.
 
-        Typically you should call `draw` instead of this method.
+        Typically you should call :py:func:`draw` instead of this method.
         """
         for (i, hole) in enumerate(holes):
             if hole is self:
@@ -170,9 +171,10 @@ class Node(ABC):
         """
         Rich text output of the computational graph
 
-        Parameters:
-        verbose(bool): if set to `True`, the definition of `ProxyNode`s is inserted into
-        the output.
+        :param verbose:
+            if set to ``True``, the definition of any
+            :py:class:`~bequem.nodes.proxy_node.ProxyNode` is inserted into
+            the output.
         """
         console = Console()
         with console.capture() as capture:
@@ -185,10 +187,10 @@ class Node(ABC):
 
     def find_error(self) -> np.ndarray:
         """
-        Convenience function to recursively call `verify` on the children of
-        this node.
+        Convenience function to recursively call :py:func:`verify` on the
+        children of this node.
 
-        You should typically use `verify` instead.
+        You should typically use :py:func:`verify` instead.
         """
         for child in self.children():
             child.find_error()
@@ -197,12 +199,13 @@ class Node(ABC):
         """
         Verify the correctness of this node.
 
-        Checks that the outputs of `qubits_in`, `qubits_out`, `normalization`,
-        and `circuit` are sensible and encode the same matrix.
+        Checks that the outputs of :py:func:`qubits_in`, :py:func:`qubits_out`,
+        :py:func:`normalization`, and :py:func:`circuit` are sensible and encode
+        the same matrix.
 
-        Parameters:
-        drill(bool): If True and an error is found, recursivly test this nodes
-            children to find the smallest node which still contains the error.
+        :param drill:
+            If True and an error is found, recursivly test this nodes children
+            to find the smallest node which still contains the error.
         """
         basis_in = self.qubits_in().enumerate_basis()
         basis_out = self.qubits_out().enumerate_basis()

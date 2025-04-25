@@ -13,11 +13,27 @@ from bequem.qubit_map import QubitMap
 from bequem.nodes.permutation import find_permutation, SimplifyZeros
 
 class ProxyNode(Node):
+    """
+    Abstract class for nodes that are defined in terms of other nodes
+
+    This is useful when the given definition is used in the construction of
+    the circuit or QubitMaps, but a simpler representation is avilable for
+    :py:func:`compute`. Additionally, the simpler structure is used for printing
+    and serialization.
+
+    For an example of how to use this class see :py:class:`Add` and
+    :py:class:`Mul`.
+    """
 
     _definition: Node | None = None
 
     @abstractmethod
     def definition(self) -> Node:
+        """
+        The definition of this node, which is used to implement all other
+        abstract methods of :py:class:`Node`. The other methods can be
+        overwritten to give a more efficient implementation.
+        """
         raise NotImplementedError
 
     def compute(self, input: np.ndarray | None) -> np.ndarray:
@@ -88,6 +104,20 @@ class ProjectionNode(Node):
 
 
 class Mul(ProxyNode):
+    """
+    Node for computing the product of two nodes
+
+    The order of operations is such that the first argument ``A`` is applied
+    first, i.e. this implements ``B @ A``.
+
+    :ivar A:
+        The first factor
+    :ivar B:
+        The second factor
+    """
+    A: Node
+    B: Node
+
     def __init__(self, A: Node, B: Node):
         self.A = A
         self.B = B
@@ -121,6 +151,17 @@ Node.__matmul__ = lambda A, B: Mul(A, B)
 
 
 class Add(ProxyNode):
+    """
+    Node for computing the sum of two nodes
+
+    :ivar A:
+        The first summand
+    :ivar B:
+        The second summand
+    """
+    A: Node
+    B: Node
+
     def __init__(self, A: Node, B: Node):
         self.A = A
         self.B = B
@@ -166,6 +207,17 @@ Node.__add__ = lambda A, B: Add(A, B)
 
 
 class BlockHorizontal(ProxyNode):
+    """
+    Node for block matrices of the form ``[A B]``
+
+    :ivar A:
+        The left block
+    :ivar B:
+        The right block
+    """
+    A: Node
+    B: Node
+
     def __init__(self, A: Node, B: Node):
         self.A = A
         self.B = B
@@ -203,6 +255,15 @@ class BlockHorizontal(ProxyNode):
 
 
 class BlockVertical(ProxyNode):
+    """
+    Node for block matrices of the form ``[A B]^T``
+
+    :ivar A:
+        The top block
+    :ivar B:
+        The bottom block
+    """
+
     def __init__(self, A: Node, B: Node):
         self.A = A
         self.B = B
