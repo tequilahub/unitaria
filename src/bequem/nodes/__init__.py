@@ -5,3 +5,4 @@ from bequem.nodes.proxy_node import Mul, Add, BlockHorizontal, BlockVertical
 from bequem.nodes.controlled_ops import BlockDiagonal
 from bequem.nodes.integer_arithmetic import Increment
 from bequem.nodes.identity import Identity
+from bequem.nodes.nonlinear import ComponentwiseMul
