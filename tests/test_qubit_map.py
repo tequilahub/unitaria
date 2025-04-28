@@ -24,11 +24,12 @@ def test_is_trivial():
     assert not QubitMap(1).is_trivial()
     assert not QubitMap([Qubit(QubitMap(1), QubitMap(0, 1))]).is_trivial()
     circuit = Circuit()
-    assert not QubitMap([Projection(circuit)]).is_trivial()
+    circuit.tq_circuit.n_qubits = 2
+    assert not QubitMap([Projection(circuit, 2)]).is_trivial()
     assert not QubitMap(
         [
             ID,
-            Projection(circuit),
+            Projection(circuit, 2),
             Qubit(QubitMap(0, 1), QubitMap(0, 1)),
         ], 2
     ).is_trivial()
@@ -63,14 +64,14 @@ def test_total_qubits():
     assert QubitMap(1).total_qubits == 1
     assert QubitMap([Qubit(QubitMap(1), QubitMap(0, 1))]).total_qubits == 2
     circuit = Circuit()
-    circuit.tq_circuit += tq.gates.X(target=0)
     circuit.tq_circuit += tq.gates.X(target=1)
-    assert QubitMap([Projection(circuit)]).total_qubits == 1
+    circuit.tq_circuit.n_qubits = 2
+    assert QubitMap([Projection(circuit, 0)]).total_qubits == 1
     assert (
         QubitMap(
             [
                 ID,
-                Projection(circuit),
+                Projection(circuit, 0),
                 Qubit(QubitMap(0, 1), QubitMap(0, 1)),
             ], 2
         ).total_qubits
