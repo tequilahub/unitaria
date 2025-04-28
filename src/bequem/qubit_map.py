@@ -227,7 +227,7 @@ class Projection(Register):
     dim: int
 
     def total_qubits(self) -> int:
-        return len(self.circuit.tq_circuit.qubits) - 1
+        return self.circuit.tq_circuit.n_qubits - 1
 
     def dimension(self) -> int:
         return self.dim
