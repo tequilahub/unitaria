@@ -1,7 +1,8 @@
 import numpy as np
+import tequila as tq
 
 from .node import Node
-from bequem.qubit_map import QubitMap, ID
+from bequem.qubit_map import QubitMap
 from bequem.circuit import Circuit
 from bequem.circuits.arithmetic import increment_circuit_single_ancilla, addition_circuit
 
@@ -19,10 +20,16 @@ class Increment(Node):
         return { "bits": self.bits }
 
     def qubits_in(self) -> QubitMap:
-        return QubitMap(self.bits, 1)
+        if self.bits <= 3:
+            return QubitMap(self.bits)
+        else:
+            return QubitMap(self.bits, 1)
 
     def qubits_out(self) -> QubitMap:
-        return QubitMap(self.bits, 1)
+        if self.bits <= 3:
+            return QubitMap(self.bits)
+        else:
+            return QubitMap(self.bits, 1)
 
     def normalization(self) -> float:
         return 1
@@ -34,8 +41,14 @@ class Increment(Node):
         return np.roll(input, -1, axis=-1)
 
     def circuit(self) -> Circuit:
-        circuit = increment_circuit_single_ancilla(target=list(reversed(range(self.bits))), ancilla=self.bits)
-        return Circuit(circuit)
+        if self.bits <= 3:
+            circuit = Circuit()
+            for i in reversed(range(self.bits)):
+                circuit.tq_circuit += tq.gates.X(target=i, control=list(range(i)))
+            return circuit
+        else:
+            circuit = increment_circuit_single_ancilla(target=list(reversed(range(self.bits))), ancilla=self.bits)
+            return Circuit(circuit)
 
 
 class IntegerAddition(Node):
