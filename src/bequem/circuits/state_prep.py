@@ -43,16 +43,4 @@ def prepare_state(
         if not np.allclose(np.array([phi[bit, i] for i in range(2 ** bit)]), 0.0):
             U += multiplexed_Rz(np.array([phi[bit, i] for i in range(2 ** bit)]), target=target[bit], controls=target[:bit])
 
-    # TODO: There is no global phase gate in tequila
-    # We can "fake" a global phase gate as follows, but tequila still does not give the correct result.
-    # I assume that it asserts in the compliation processs, that the global phase does not matter
-    # See also https://github.com/tequilahub/tequila/discussions/365
-    # 
-    # global_phase = np.angle(combined[0, 0])
-    # print(global_phase)
-    # U += tq.gates.Phase(0, angle=global_phase)
-    # U += tq.gates.X(0)
-    # U += tq.gates.Phase(0, angle=global_phase)
-    # U += tq.gates.X(0)
-
     return U

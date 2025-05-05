@@ -37,6 +37,8 @@ class ProxyNode(Node):
         raise NotImplementedError
 
     def compute(self, input: np.ndarray | None) -> np.ndarray:
+        # TODO: Use something more concise for lazy calculation, instead of manually
+        #  checking for None everywhere
         if self._definition is None:
             self._definition = self.definition()
         return self._definition.compute(input)
@@ -66,6 +68,11 @@ class ProxyNode(Node):
             self._definition = self.definition()
         return self._definition.normalization()
 
+    def phase(self) -> float:
+        if self._definition is None:
+            self._definition = self.definition()
+        return self._definition.phase()
+
     def tree_label(self, verbose: bool = False):
         label = super().tree_label()
         if not verbose:
@@ -91,6 +98,9 @@ class ProjectionNode(Node):
 
     def normalization(self) -> float:
         return 1
+
+    def phase(self) -> float:
+        return 0
 
     def compute(self, input: np.ndarray) -> np.ndarray:
         return input
@@ -146,6 +156,9 @@ class Mul(ProxyNode):
     def normalization(self) -> float:
         return self.A.normalization() * self.B.normalization()
 
+    def phase(self) -> float:
+        return self.A.phase() + self.B.phase()
+
 
 Node.__matmul__ = lambda A, B: Mul(A, B)
 
@@ -191,7 +204,6 @@ class Add(ProxyNode):
         rotation_out = Tensor(Identity(permutation_out.target()), ConstantVector(np.array([self.A.normalization() / sqrt_A, self.B.normalization() / sqrt_B])))
 
         return UnsafeMul(UnsafeMul(rotation_in, diag), Adjoint(rotation_out))
-
 
     def normalization(self) -> float:
         return self.A.normalization() + self.B.normalization()

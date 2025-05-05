@@ -82,6 +82,9 @@ class UnsafeMul(Node):
     def normalization(self) -> float:
         return self.A.normalization() * self.B.normalization()
 
+    def phase(self) -> float:
+        return self.A.phase() + self.B.phase()
+
 
 class Tensor(Node):
     """
@@ -196,6 +199,9 @@ class Tensor(Node):
     def normalization(self) -> float:
         return self.A.normalization() * self.B.normalization()
 
+    def phase(self) -> float:
+        return self.A.phase() + self.B.phase()
+
 
 Node.__and__ = lambda A, B: Tensor(A, B)
 
@@ -226,8 +232,10 @@ class Adjoint(Node):
         return self.A.qubits_in()
 
     def normalization(self) -> float:
-        # TODO: Should normalization be a complex number?
         return self.A.normalization()
+
+    def phase(self) -> float:
+        return -self.A.phase()
 
     def compute(self, input: np.ndarray | None) -> np.ndarray:
         return self.A.compute_adjoint(input)
@@ -274,7 +282,8 @@ class Scale(Node):
         # TODO: assert_efficiency not implemented yet
         assert remove_efficiency == 1
         self.remove_efficiency = remove_efficiency
-        self.scale = scale
+        self.scale = np.abs(scale)
+        self.global_phase = np.angle(scale)
         self.absolute = absolute
 
     def children(self) -> list[Node]:
@@ -294,6 +303,12 @@ class Scale(Node):
             return self.scale
         else:
             return self.scale * self.A.normalization()
+
+    def phase(self) -> float:
+        if self.absolute:
+            return np.angle(self.scale)
+        else:
+            return np.angle(self.scale) + self.A.phase()
 
     def compute(self, input: np.ndarray | None = None) -> np.ndarray:
         if self.absolute:

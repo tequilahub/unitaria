@@ -90,6 +90,17 @@ class Node(ABC):
         """
         raise NotImplementedError
 
+    @abstractmethod
+    def phase(self) -> float:
+        """
+        The global phase of the block encoding which can't be represented in the Tequila circuit.
+
+        If a global phase gate is added to Tequila in the future, that should be used instead.
+
+        The output of the circuit has to be multiplied with exp(i * phase) to get the correct result.
+        """
+        raise NotImplementedError
+
     def is_vector(self) -> bool:
         """
         Tests whether this node encodes a vector or a matrix.
@@ -237,7 +248,7 @@ class Node(ABC):
                     input = np.zeros(len(basis_in))
                     input[i] = 1
                     computed[:, i] = self.compute(input)
-                    simulated[:, i] = self.normalization() * self.qubits_out(
+                    simulated[:, i] = np.exp(self.phase() * 1j) * self.normalization() * self.qubits_out(
                     ).project(circuit.simulate(b, backend="qulacs"))
 
                 for (i, b) in enumerate(basis_out):
@@ -259,7 +270,7 @@ class Node(ABC):
                 computed = self.compute(None)
                 if computed is None:
                     computed = np.array([1])
-                simulated = self.normalization() * self.qubits_out().project(
+                simulated = np.exp(self.phase() * 1j) * self.normalization() * self.qubits_out().project(
                     circuit.simulate(0, backend="qulacs"))
 
                 # verify circuit
