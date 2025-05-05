@@ -24,6 +24,7 @@ class ConstantVector(Node):
         assert 2 ** self.n_qubits == vec.shape[0]
         self.vec = vec
         self._normalization = np.linalg.norm(vec)
+        self._phase = np.mean(np.angle(vec))
 
     def children(self) -> list[Node]:
         return []
@@ -38,8 +39,10 @@ class ConstantVector(Node):
         return QubitMap(self.n_qubits)
 
     def normalization(self) -> float:
-        return np.linalg.norm(self.vec)
         return self._normalization
+
+    def phase(self) -> float:
+        return self._phase
 
     def compute(self, input: np.ndarray | None = None) -> np.ndarray:
         return self.vec

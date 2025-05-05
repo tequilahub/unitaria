@@ -109,6 +109,9 @@ class SimplifyZeros(Node):
     def normalization(self) -> float:
         return 1
 
+    def phase(self) -> float:
+        return 0
+
     def compute(self, input: np.ndarray | None) -> np.ndarray:
         return input
 
@@ -168,6 +171,9 @@ class QubitMapRotation(Node):
 
     def normalization(self) -> float:
         return 1
+
+    def phase(self) -> float:
+        return 0
 
     def compute(self, input: np.ndarray | None) -> np.ndarray:
         return input

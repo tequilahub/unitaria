@@ -36,6 +36,9 @@ class Identity(Node):
     def normalization(self) -> float:
         return 1
 
+    def phase(self) -> float:
+        return 0
+
     def compute(self, input: np.ndarray) -> np.ndarray:
         return input
 

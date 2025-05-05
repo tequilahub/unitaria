@@ -57,6 +57,9 @@ class BlockDiagonal(Node):
     def normalization(self) -> float:
         return self.A.normalization()
 
+    def phase(self) -> float:
+        return self.A.phase()
+
     def compute(self, input: np.ndarray) -> np.ndarray:
         dim_A = self.A.qubits_in().dimension
         input_A, input_B = np.split(input, [dim_A], axis=-1)
@@ -82,6 +85,7 @@ class BlockDiagonal(Node):
         circuit += tq.gates.X(target=control_qubit)
         circuit += circuit_A
         circuit += tq.gates.X(target=control_qubit)
+        circuit += tq.gates.Phase(target=control_qubit, angle=self.B.phase() - self.A.phase())
         circuit += circuit_B
 
         return Circuit(circuit)

@@ -27,6 +27,9 @@ class Increment(Node):
     def normalization(self) -> float:
         return 1
 
+    def phase(self) -> float:
+        return 0
+
     def compute(self, input: np.ndarray) -> np.ndarray:
         return np.roll(input, 1, axis=-1)
 
@@ -61,6 +64,9 @@ class IntegerAddition(Node):
 
     def normalization(self) -> float:
         return 1
+
+    def phase(self) -> float:
+        return 0
 
     def compute(self, input: np.ndarray) -> np.ndarray:
         old_shape = input.shape
