@@ -10,11 +10,11 @@ class ComponentwiseMul(Node):
     """
     Node implementing the (bilinear) componentwise multiplication operator
 
-    More specifically this implements the bilinear map ´´(x, y) -> [x_1
-    y_1, ..., x_n, y_n]´´. Usually you will want the elementwise product of two
+    More specifically this implements the bilinear map ``(x, y) -> [x_1 * y_1,
+    ..., x_n * y_n]``. Usually you will want the elementwise product of two
     vectors, in which case the correct result will be obtained by building the
     tensor product of the vectors and then multiplying it with this operation,
-    i.e. ``Mul(Tensor(a, b), CompnentwiseMul(a.qubits_out()))``
+    i.e. ``Mul(Tensor(a, b), ComponentwiseMul(a.qubits_out()))``
 
     :ivar qubits:
         The vector space in which to perform the element-wise operation
