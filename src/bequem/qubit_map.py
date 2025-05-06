@@ -135,6 +135,24 @@ class QubitMap:
         # TODO: Oliver
         return Circuit()
 
+    def case_zero(self) -> QubitMap:
+        assert len(self.registers) != 0
+        assert isinstance(self.registers[-1], Qubit)
+
+        return QubitMap(
+            self.registers[:-1] + self.registers[-1].case_zero.registers,
+            self.zero_qubits + self.registers[-1].case_zero.zero_qubits,
+        )
+
+    def case_one(self) -> QubitMap:
+        assert len(self.registers) != 0
+        assert isinstance(self.registers[-1], Qubit)
+
+        return QubitMap(
+            self.registers[:-1] + self.registers[-1].case_one.registers,
+            self.zero_qubits + self.registers[-1].case_one.zero_qubits,
+        )
+
 
 class Register(ABC):
 

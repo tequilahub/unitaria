@@ -142,16 +142,16 @@ class QubitMapRotation(Node):
         assert len(qubits.registers) > 0 and isinstance(qubits.registers[-1], Qubit)
 
         if right:
-            pivot = _left_child(qubits)
-            l = _extend_zeros(_left_child(pivot), 2)
-            m = _extend_zeros(_right_child(pivot), 1)
-            r = _right_child(qubits)
+            pivot = qubits.case_zero()
+            l = _extend_zeros(pivot.case_zero(), 2)
+            m = _extend_zeros(pivot.case_one(), 1)
+            r = qubits.case_one()
             self._qubits_out = QubitMap([Qubit(l, QubitMap([Qubit(m, r)]))])
         else:
-            pivot = _right_child(qubits)
-            l = _left_child(qubits)
-            m = _extend_zeros(_left_child(pivot), 1)
-            r = _extend_zeros(_right_child(pivot), 2)
+            pivot = qubits.case_one()
+            l = qubits.case_zero()
+            m = _extend_zeros(pivot.case_zero(), 1)
+            r = _extend_zeros(pivot.case_one(), 2)
             self._qubits_out = QubitMap([Qubit(QubitMap([Qubit(l, m)]), r)])
 
         self.qubits = qubits
@@ -219,7 +219,7 @@ def _find_permutation_brute_force(a: QubitMap, b: QubitMap) -> Permutation:
 
     while _split_dimension(a) != _split_dimension(perm_b.qubits_out()):
         if _split_dimension(a) < _split_dimension(perm_b.qubits_out()):
-            pivot = _left_child(perm_b.qubits_out())
+            pivot = perm_b.qubits_out().case_zero()
             if _split_dimension(a) <= _split_dimension(pivot):
                 # Right rotation
                 rot = QubitMapRotation(perm_b.qubits_out(), True)
@@ -229,7 +229,7 @@ def _find_permutation_brute_force(a: QubitMap, b: QubitMap) -> Permutation:
                 # Left-right rotation
                 rot_l = QubitMapRotation(pivot, False)
                 rot_l = BlockDiagonal(
-                    rot_l, Identity(_right_child(perm_b.qubits_out()))
+                    rot_l, Identity(perm_b.qubits_out().case_one())
                 )
                 rot_l = UnsafeMul(Adjoint(SimplifyZeros(rot_l.qubits_in())), rot_l)
                 rot_r = QubitMapRotation(rot_l.qubits_out(), True)
@@ -237,7 +237,7 @@ def _find_permutation_brute_force(a: QubitMap, b: QubitMap) -> Permutation:
                 temp = UnsafeMul(rot_l, UnsafeMul(rot_r, simp))
                 perm_b = UnsafeMul(perm_b, temp)
         else:
-            pivot = _right_child(perm_b.qubits_out())
+            pivot = perm_b.qubits_out().case_one()
             if a.dimension - _split_dimension(a) <= pivot.dimension - _split_dimension(
                 pivot
             ):
@@ -248,7 +248,7 @@ def _find_permutation_brute_force(a: QubitMap, b: QubitMap) -> Permutation:
             else:
                 # Right-left rotation
                 rot_r = QubitMapRotation(pivot, True)
-                rot_r = BlockDiagonal(Identity(_left_child(perm_b.qubits_out())), rot_r)
+                rot_r = BlockDiagonal(Identity(perm_b.qubits_out().case_zero()), rot_r)
                 rot_r = UnsafeMul(Adjoint(SimplifyZeros(rot_r.qubits_in())), rot_r)
                 rot_l = QubitMapRotation(rot_r.qubits_out(), False)
                 simp = SimplifyZeros(rot_l.qubits_out())
@@ -257,10 +257,10 @@ def _find_permutation_brute_force(a: QubitMap, b: QubitMap) -> Permutation:
 
     b = perm_b.qubits_out()
 
-    a_zero = _left_child(a)
-    b_zero = _left_child(b)
-    a_one = _right_child(a)
-    b_one = _right_child(b)
+    a_zero = a.case_zero()
+    b_zero = b.case_zero()
+    a_one = a.case_one()
+    b_one = b.case_one()
 
     perm_zero = find_permutation(a_zero, b_zero)
 
@@ -290,26 +290,6 @@ def _split_dimension(qubits: QubitMap) -> int:
     one_dim = qubits.registers[-1].case_one.dimension
 
     return total_dim / (zero_dim + one_dim) * zero_dim
-
-
-def _left_child(qubits: QubitMap) -> QubitMap:
-    assert len(qubits.registers) != 0
-    assert isinstance(qubits.registers[-1], Qubit)
-
-    return QubitMap(
-        qubits.registers[:-1] + qubits.registers[-1].case_zero.registers,
-        qubits.zero_qubits + qubits.registers[-1].case_zero.zero_qubits,
-    )
-
-
-def _right_child(qubits: QubitMap) -> QubitMap:
-    assert len(qubits.registers) != 0
-    assert isinstance(qubits.registers[-1], Qubit)
-
-    return QubitMap(
-        qubits.registers[:-1] + qubits.registers[-1].case_one.registers,
-        qubits.zero_qubits + qubits.registers[-1].case_one.zero_qubits,
-    )
 
 
 def _extend_zeros(qubits: QubitMap, n: int) -> QubitMap:
