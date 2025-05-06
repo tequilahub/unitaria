@@ -25,6 +25,7 @@ extensions = [
     'sphinx.ext.doctest',
     'sphinx.ext.viewcode',
     'sphinx.ext.todo',
+    'sphinx.ext.autosummary',
 ]
 
 templates_path = ['_templates']

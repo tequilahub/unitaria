@@ -63,7 +63,7 @@ class Node(ABC):
         space nodes circuit, which has dimension 2^n where n is the number of qubits.
         In other words, this defines whether a particular basis state is "valid" or "invalid".
 
-        In the formalism of block encodings this corresponds to the projection \Pi_1.
+        In the formalism of block encodings this corresponds to the projection Pi_1.
         """
         raise NotImplementedError
 
@@ -76,7 +76,7 @@ class Node(ABC):
         space nodes circuit, which has dimension 2^n where n is the number of qubits.
         In other words, this defines whether a particular basis state is "valid" or "invalid".
 
-        In the formalism of block encodings this corresponds to the projection \Pi_2.
+        In the formalism of block encodings this corresponds to the projection Pi_2.
         """
         raise NotImplementedError
 
@@ -248,8 +248,10 @@ class Node(ABC):
                     input = np.zeros(len(basis_in))
                     input[i] = 1
                     computed[:, i] = self.compute(input)
-                    simulated[:, i] = np.exp(self.phase() * 1j) * self.normalization() * self.qubits_out(
-                    ).project(circuit.simulate(b, backend="qulacs"))
+                    simulated[:, i] = np.exp(
+                        self.phase() *
+                        1j) * self.normalization() * self.qubits_out().project(
+                            circuit.simulate(b, backend="qulacs"))
 
                 for (i, b) in enumerate(basis_out):
                     input = np.zeros(len(basis_out))
@@ -270,8 +272,10 @@ class Node(ABC):
                 computed = self.compute(None)
                 if computed is None:
                     computed = np.array([1])
-                simulated = np.exp(self.phase() * 1j) * self.normalization() * self.qubits_out().project(
-                    circuit.simulate(0, backend="qulacs"))
+                simulated = np.exp(
+                    self.phase() *
+                    1j) * self.normalization() * self.qubits_out().project(
+                        circuit.simulate(0, backend="qulacs"))
 
                 # verify circuit
                 np.testing.assert_allclose(computed, simulated)
@@ -301,4 +305,4 @@ class VerificationError(Exception):
             console.print(
                 Syntax(self.circuit, "text", background_color="default"))
         output = capture.get()
-        return "\n" + output
+        return "\n" + output + f"\nnormalization = {self.node.normalization()}, phase = {self.node.phase()}"
