@@ -325,3 +325,33 @@ class Scale(Node):
 
     def circuit(self) -> Circuit:
         return self.A.circuit()
+
+
+class ComputeProjection(Node):
+    def __init__(self, qubits: QubitMap):
+        self.qubits = QubitMap(qubits.registers, qubits.zero_qubits + 1)
+
+    def children(self) -> list[Node]:
+        return []
+
+    def qubits_in(self) -> QubitMap:
+        return self.qubits
+
+    def qubits_out(self) -> QubitMap:
+        return self.qubits
+
+    def normalization(self) -> float:
+        return 1
+
+    def phase(self) -> float:
+        return 0
+
+    def compute(self, input: np.ndarray) -> np.ndarray:
+        return input
+
+    def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
+        return input
+
+    def circuit(self) -> Circuit:
+        # TODO
+        return Circuit()
