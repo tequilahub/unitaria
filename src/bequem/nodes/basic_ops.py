@@ -3,7 +3,7 @@ import numpy as np
 import tequila as tq
 
 from bequem.circuit import Circuit
-from bequem.qubit_map import QubitMap
+from bequem.qubit_map import QubitMap, Qubit
 from bequem.nodes.node import Node
 
 
@@ -84,6 +84,11 @@ class UnsafeMul(Node):
 
     def phase(self) -> float:
         return self.A.phase() + self.B.phase()
+
+    def controlled(self) -> Node:
+        A_controlled = self.A.controlled()
+        B_controlled = self.B.controlled()
+        return UnsafeMul(A_controlled, B_controlled)
 
 
 class Tensor(Node):

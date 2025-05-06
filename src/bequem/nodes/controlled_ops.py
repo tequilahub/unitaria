@@ -1,42 +1,20 @@
 import numpy as np
 import tequila as tq
 
-from bequem.qubit_map import QubitMap, Qubit
+from bequem.qubit_map import QubitMap, padded_qubit
 from bequem.circuit import Circuit
-from bequem.nodes.node import Node
+from bequem.nodes.basic_ops import UnsafeMul
+from bequem.nodes.proxy_node import ProxyNode
+from bequem.nodes.node import Node, Controlled
 
 
-class BlockDiagonal(Node):
+class BlockDiagonal(ProxyNode):
+
+    A: Node
+    B: Node
+
     def __init__(self, A: Node, B: Node):
-        # TODO: Automatically use maximum normalization using Scale
         assert np.isclose(A.normalization(), B.normalization())
-        self.max_qubits = max(A.qubits_in().total_qubits, B.qubits_in().total_qubits)
-        qubits_in_A = A.qubits_in()
-        qubits_in_A = QubitMap(
-            qubits_in_A.registers,
-            self.max_qubits
-            - qubits_in_A.total_qubits
-        )
-        qubits_out_A = A.qubits_out()
-        qubits_out_A = QubitMap(
-            qubits_out_A.registers,
-            self.max_qubits
-            - qubits_out_A.total_qubits
-        )
-        qubits_in_B = B.qubits_in()
-        qubits_in_B = QubitMap(
-            qubits_in_B.registers,
-            self.max_qubits
-            - qubits_in_B.total_qubits
-        )
-        qubits_out_B = B.qubits_out()
-        qubits_out_B = QubitMap(
-            qubits_out_B.registers,
-            self.max_qubits
-            - qubits_out_B.total_qubits
-        )
-        self._qubits_in = QubitMap([Qubit(qubits_in_A, qubits_in_B)])
-        self._qubits_out = QubitMap([Qubit(qubits_out_A, qubits_out_B)])
 
         self.A = A
         self.B = B
@@ -44,17 +22,18 @@ class BlockDiagonal(Node):
     def children(self) -> list[Node]:
         return [self.A, self.B]
 
-    def qubits_in(self) -> QubitMap:
-        return self._qubits_in
+    def definition(self):
+        A_controlled = self.A.controlled() or Controlled(
+            self.A)
+        B_controlled = self.B.controlled() or Controlled(
+            self.B)
+        A_controlled_m = ModifyControl(self.A, A_controlled, B_controlled.qubits_in().case_one(), True)
+        B_controlled_m = ModifyControl(self.B, B_controlled, A_controlled.qubits_out().case_one(), False)
 
-    def qubits_out(self) -> QubitMap:
-        return self._qubits_out
+        return UnsafeMul(A_controlled_m, B_controlled_m)
 
     def normalization(self) -> float:
         return self.A.normalization()
-
-    def phase(self) -> float:
-        return self.A.phase()
 
     def compute(self, input: np.ndarray) -> np.ndarray:
         dim_A = self.A.qubits_in().dimension
@@ -70,21 +49,88 @@ class BlockDiagonal(Node):
         result_B = self.B.compute_adjoint(input_B)
         return np.concatenate((result_A, result_B), axis=-1)
 
-    def circuit(self) -> Circuit:
-        circuit_A = self.A.circuit().tq_circuit
-        circuit_B = self.B.circuit().tq_circuit
-        control_qubit = self.max_qubits
-        circuit_A.add_controls(control_qubit, inpl=True)
-        circuit_B.add_controls(control_qubit, inpl=True)
-
-        circuit = tq.QCircuit()
-        circuit += tq.gates.X(target=control_qubit)
-        circuit += circuit_A
-        circuit += tq.gates.X(target=control_qubit)
-        circuit += tq.gates.Phase(target=control_qubit, angle=self.B.phase() - self.A.phase())
-        circuit += circuit_B
-
-        return Circuit(circuit)
-
 
 Node.__or__ = lambda A, B: BlockDiagonal(A, B)
+
+
+class ModifyControl(Node):
+    A: Node
+    A_controlled: Node
+    qubits_B: QubitMap
+    swap_control_state: bool
+
+    def __init__(self, A: Node, A_controlled: Node, qubits_B: QubitMap, swap_control_state: bool):
+        self.A = A
+        self.A_controlled = A_controlled
+        self.qubits_B = qubits_B
+        self.swap_control_state = swap_control_state
+    
+    def children(self) -> list[Node]:
+        return [self.A]
+
+    def parameters(self) -> dict:
+        return {"qubits_B": self.qubits_B, "swap_control_state": self.swap_control_state}
+
+    def qubits_in(self) -> QubitMap:
+        # TODO: Verify
+        # assert qubits_in_A.registers == self.A.qubits_in().registers
+        # assert self.A_controlled.qubits_in().select_case_zero() == QubitMap(qubits_in_A.total_qubits)
+        qubits_in_A = self.A_controlled.qubits_in().case_one()
+
+        if self.swap_control_state:
+            return QubitMap([padded_qubit(qubits_in_A, self.qubits_B)])
+        else:
+            return QubitMap([padded_qubit(self.qubits_B, qubits_in_A)])
+
+    def qubits_out(self) -> QubitMap:
+        qubits_out_A = self.A_controlled.qubits_out().case_one()
+
+        if self.swap_control_state:
+            return QubitMap([padded_qubit(qubits_out_A, self.qubits_B)])
+        else:
+            return QubitMap([padded_qubit(self.qubits_B, qubits_out_A)])
+
+    def normalization(self) -> float:
+        return self.A_controlled.normalization()
+
+    def phase(self) -> float:
+        return self.A_controlled.phase()
+
+    def compute(self, input: np.ndarray) -> np.ndarray:
+        dim_A = self.A.qubits_in().dimension
+        if self.swap_control_state:
+            input_A, remainder = np.split(input, [dim_A], axis=-1)
+            result_A = self.A.compute(input_A)
+            return np.concatenate((result_A, remainder), axis=-1)
+        else:
+            remainder, input_A = np.split(input, [-dim_A], axis=-1)
+            result_A = self.A.compute(input_A)
+            return np.concatenate((remainder, result_A), axis=-1)
+
+    def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
+        dim_A = self.A.qubits_out().dimension
+        if self.swap_control_state:
+            input_A, remainder = np.split(input, [dim_A], axis=-1)
+            result_A = self.A.compute(input_A)
+            return np.concatenate_adojoint((result_A, remainder), axis=-1)
+        else:
+            remainder, input_A = np.split(input, [-dim_A], axis=-1)
+            result_A = self.A.compute_adjoint(input_A)
+            return np.concatenate((remainder, result_A), axis=-1)
+
+    def circuit(self) -> Circuit:
+        qubits_in_A_controlled = self.A_controlled.qubits_in()
+        control_qubit_pre = qubits_in_A_controlled.total_qubits - 1
+        control_qubit_post = self.qubits_in().total_qubits - 1
+
+        circuit = Circuit()
+        if self.swap_control_state:
+            circuit.tq_circuit += tq.gates.X(control_qubit_post)
+
+        qubit_map = dict([(i, i) for i in range(qubits_in_A_controlled.total_qubits)])
+        qubit_map[control_qubit_pre] = control_qubit_post
+        circuit.tq_circuit += self.A_controlled.circuit().tq_circuit.map_qubits(qubit_map)
+        if self.swap_control_state:
+            circuit.tq_circuit += tq.gates.X(control_qubit_post)
+        circuit.n_qubits = self.qubits_in().total_qubits
+        return circuit
