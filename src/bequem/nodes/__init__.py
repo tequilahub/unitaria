@@ -1,6 +1,6 @@
 from bequem.nodes.node import Node
 from bequem.nodes.basic_ops import Tensor, Adjoint, Scale
-from bequem.nodes.permutation import find_permutation
+from bequem.nodes.permutation import Permutation
 from bequem.nodes.controlled_ops import BlockDiagonal
 from bequem.nodes.ring_ops import Mul, Add
 from bequem.nodes.block_concatenation import BlockHorizontal, BlockVertical

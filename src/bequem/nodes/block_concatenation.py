@@ -4,7 +4,7 @@ from bequem.nodes.node import Node
 from bequem.nodes.basic_ops import Scale, Adjoint, UnsafeMul, Tensor
 from bequem.nodes.proxy_node import ProxyNode
 from bequem.nodes.controlled_ops import BlockDiagonal
-from bequem.nodes.permutation import SimplifyZeros, find_permutation
+from bequem.nodes.permutation import Permutation
 from bequem.nodes.constant import ConstantVector
 from bequem.nodes.identity import Identity
 
@@ -29,20 +29,17 @@ class BlockHorizontal(ProxyNode):
         return [self.A, self.B]
 
     def definition(self) -> Node:
-        permutation = find_permutation(self.A.qubits_out(),
-                                       self.B.qubits_out())
+        permutation = Permutation(self.A.qubits_out(),
+                                  self.B.qubits_out())
 
-        A_permuted = Scale(UnsafeMul(self.A, permutation.permute_a),
+        A_permuted = Scale(UnsafeMul(self.A, permutation),
                            absolute=True)
-        B_permuted = Scale(UnsafeMul(self.B, permutation.permute_b),
-                           absolute=True)
+        B_permuted = Scale(self.B, absolute=True)
 
         diag = BlockDiagonal(A_permuted, B_permuted)
-        simplify = SimplifyZeros(diag.qubits_out())
-        diag = UnsafeMul(diag, simplify)
 
         rotation_out = Tensor(
-            Identity(permutation.target()),
+            Identity(permutation.qubits_out()),
             ConstantVector(
                 np.array([self.A.normalization(),
                           self.B.normalization()])))
@@ -82,19 +79,16 @@ class BlockVertical(ProxyNode):
         return [self.A, self.B]
 
     def definition(self) -> Node:
-        permutation = find_permutation(self.A.qubits_in(), self.B.qubits_in())
+        permutation = Permutation(self.A.qubits_in(), self.B.qubits_in())
 
-        A_permuted = Scale(UnsafeMul(Adjoint(permutation.permute_a), self.A),
+        A_permuted = Scale(UnsafeMul(Adjoint(permutation), self.A),
                            absolute=True)
-        B_permuted = Scale(UnsafeMul(Adjoint(permutation.permute_b), self.B),
-                           absolute=True)
+        B_permuted = Scale(self.B, absolute=True)
 
         diag = BlockDiagonal(A_permuted, B_permuted)
-        simplify = SimplifyZeros(diag.qubits_in())
-        diag = UnsafeMul(Adjoint(simplify), diag)
 
         rotation_in = Tensor(
-            Identity(permutation.target()),
+            Identity(permutation.qubits_out()),
             ConstantVector(
                 np.array([self.A.normalization(),
                           self.B.normalization()])))

@@ -33,7 +33,7 @@ class UnsafeMul(Node):
         :ivar B:
             The second factor
         """
-        if A.qubits_out().registers != B.qubits_in().registers:
+        if not A.qubits_out().match_nonzero(B.qubits_in()):
             raise ValueError(
                 f"Non matching qubit maps {A.qubits_out()} and {B.qubits_in()}"
             )
@@ -43,12 +43,12 @@ class UnsafeMul(Node):
         qubits_in_A = A.qubits_in()
         self._qubits_in = QubitMap(
             qubits_in_A.registers,
-            max_qubits - qubits_in_A.total_qubits + qubits_in_A.zero_qubits,
+            max_qubits - qubits_in_A.total_qubits,
         )
         qubits_out_B = B.qubits_out()
         self._qubits_out = QubitMap(
             qubits_out_B.registers,
-            max_qubits - qubits_out_B.total_qubits + qubits_out_B.zero_qubits,
+            max_qubits - qubits_out_B.total_qubits,
         )
         self.A = A
         self.B = B
@@ -124,6 +124,8 @@ class Tensor(Node):
         return [self.A, self.B]
 
     def compute(self, input: np.ndarray | None) -> np.ndarray:
+        if input is None:
+            input = np.array([1])
         batch_shape = list(input.shape[:-1])
         input = input.reshape(
             batch_shape +
@@ -153,28 +155,12 @@ class Tensor(Node):
 
         circuit = Circuit()
 
-        for i in reversed(
-                range(qubits_in_B.total_qubits - qubits_in_B.zero_qubits)):
-            qubit1 = qubits_in_A.total_qubits + i
-            qubit2 = qubits_in_A.total_qubits - qubits_in_A.zero_qubits + i
-            if qubit1 != qubit2:
-                circuit.tq_circuit += tq.gates.SWAP(qubit1, qubit2)
-
         circuit_A = self.A.circuit().tq_circuit
         circuit.tq_circuit += circuit_A
         qubit_map_B = dict([(i, i + qubits_in_A.total_qubits)
                             for i in range(qubits_in_B.total_qubits)])
         circuit_B = self.B.circuit().tq_circuit.map_qubits(qubit_map_B)
         circuit.tq_circuit += circuit_B
-
-        qubits_out_A = self.A.qubits_out()
-        qubits_out_B = self.B.qubits_out()
-
-        for i in range(qubits_out_B.total_qubits - qubits_out_B.zero_qubits):
-            qubit1 = qubits_out_A.total_qubits + i
-            qubit2 = qubits_out_A.total_qubits - qubits_out_A.zero_qubits + i
-            if qubit1 != qubit2:
-                circuit.tq_circuit += tq.gates.SWAP(qubit1, qubit2)
 
         circuit.tq_circuit.n_qubits = qubits_in_A.total_qubits + qubits_in_B.total_qubits
 
@@ -185,7 +171,6 @@ class Tensor(Node):
         qubits_B = self.B.qubits_in()
         return QubitMap(
             qubits_A.registers + qubits_B.registers,
-            qubits_A.zero_qubits + qubits_B.zero_qubits,
         )
 
     def qubits_out(self) -> QubitMap:
@@ -193,7 +178,6 @@ class Tensor(Node):
         qubits_B = self.B.qubits_out()
         return QubitMap(
             qubits_A.registers + qubits_B.registers,
-            qubits_A.zero_qubits + qubits_B.zero_qubits,
         )
 
     def normalization(self) -> float:
@@ -329,7 +313,7 @@ class Scale(Node):
 
 class ComputeProjection(Node):
     def __init__(self, qubits: QubitMap):
-        self.qubits = QubitMap(qubits.registers, qubits.zero_qubits + 1)
+        self.qubits = QubitMap(qubits.registers, 1)
 
     def children(self) -> list[Node]:
         return []

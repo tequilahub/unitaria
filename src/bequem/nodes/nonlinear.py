@@ -25,11 +25,11 @@ class ComponentwiseMul(Node):
         self.qubits = qubits
 
     def qubits_in(self) -> QubitMap:
-        return QubitMap(self.qubits.registers * 2, self.qubits.zero_qubits * 2)
+        return QubitMap(self.qubits.registers * 2)
 
     def qubits_out(self) -> QubitMap:
         return QubitMap(
-            self.qubits.registers, self.qubits.zero_qubits + self.qubits.total_qubits
+            self.qubits.registers, self.qubits.total_qubits
         )
 
     def normalization(self) -> float:
@@ -55,12 +55,6 @@ class ComponentwiseMul(Node):
 
     def circuit(self) -> Circuit:
         circuit = Circuit()
-        for i in reversed(
-                range(self.qubits.total_qubits - self.qubits.zero_qubits)):
-            qubit1 = self.qubits.total_qubits + i
-            qubit2 = self.qubits.total_qubits - self.qubits.zero_qubits + i
-            if qubit1 != qubit2:
-                circuit.tq_circuit += tq.gates.SWAP(qubit1, qubit2)
 
         for i in range(self.qubits.total_qubits):
             circuit.tq_circuit += tq.gates.CNOT(i, i + self.qubits.total_qubits)

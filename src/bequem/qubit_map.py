@@ -20,7 +20,6 @@ class QubitMap:
         always zero in the embedding
     """
 
-    zero_qubits: int
     registers: list[Register]
 
     def __init__(self, registers: list[Register] | int, zero_qubits: int = 0):
@@ -35,8 +34,7 @@ class QubitMap:
                 simplified_registers += register.simplify()
             else:
                 simplified_registers.append(register)
-        self.registers = simplified_registers
-        self.zero_qubits = zero_qubits
+        self.registers = simplified_registers + [ZeroQubit()] * zero_qubits
         self._dimension = None
         self._total_qubits = None
 
@@ -60,36 +58,54 @@ class QubitMap:
         The dimension of the state space is ``2 ** total_qubits``
         """
         if self._total_qubits is None:
-            self._total_qubits = self.zero_qubits
+            self._total_qubits = 0
             for register in self.registers:
                 self._total_qubits += register.total_qubits()
         return self._total_qubits
 
     def __eq__(self, other) -> bool:
-        return self.registers == other.registers and self.zero_qubits == other.zero_qubits
+        return self.registers == other.registers
+
+    def match_nonzero(self, other: QubitMap) -> bool:
+        return self.nonzero_registers() == other.nonzero_registers()
 
     def __repr__(self) -> str:
-        registers = str(len(self.registers))
-        for register in self.registers:
+        trailing_zeros = self.trailing_zeros()
+        registers = self.nonzero_registers()
+        str_registers = str(len(registers))
+        for register in registers:
             if register != ID:
-                registers = str(self.registers)
+                str_registers = str(registers)
                 break
-        if self.zero_qubits == 0:
-            return f"QubitMap({registers})"
-        return f"QubitMap({registers}, zero_qubits={self.zero_qubits})"
+        if trailing_zeros == 0:
+            return f"QubitMap({str_registers})"
+        return f"QubitMap({str_registers}, zero_qubits={trailing_zeros})"
 
     def is_trivial(self) -> bool:
         """
         Tests whether the embedded vector space only contains the ``|0>`` state
         """
-        return len(self.registers) == 0
+        return self.trailing_zeros() == len(self.registers)
+
+    def trailing_zeros(self) -> int:
+        for i in reversed(range(len(self.registers))):
+            if not isinstance(self.registers[i], ZeroQubit):
+                return len(self.registers) - i - 1
+        return len(self.registers)
+
+    def nonzero_registers(self) -> list[Register]:
+        trailing_zeros = self.trailing_zeros()
+        if trailing_zeros == 0:
+            return self.registers
+        else:
+            return self.registers[:-trailing_zeros]
 
     def test_basis(self, bits: int) -> bool:
         """
         Tests whether the given basis state is inside the embedding
         """
-        if bits >= 2 ** (self.total_qubits - self.zero_qubits):
-            return False
+        if bits >= 2 ** self.total_qubits:
+            raise ValueError
         for register in self.registers:
             match register:
                 case Qubit(case_zero, case_one):
@@ -104,6 +120,10 @@ class QubitMap:
                     if not result:
                         return False
                     bits = bits >> (num_qubits + 1)
+                case ZeroQubit():
+                    if bits & 1 != 0:
+                        return False
+                    bits = bits >> 1
                 case _:
                     raise NotImplementedError
         return True
@@ -136,21 +156,19 @@ class QubitMap:
         return Circuit()
 
     def case_zero(self) -> QubitMap:
-        assert len(self.registers) != 0
-        assert isinstance(self.registers[-1], Qubit)
+        trailing_zeros = self.trailing_zeros()
+        assert isinstance(self.registers[-(trailing_zeros + 1)], Qubit)
 
         return QubitMap(
-            self.registers[:-1] + self.registers[-1].case_zero.registers,
-            self.zero_qubits + self.registers[-1].case_zero.zero_qubits,
+            self.registers[:-(trailing_zeros + 1)] + self.registers[-(trailing_zeros + 1)].case_zero.registers,
         )
 
     def case_one(self) -> QubitMap:
-        assert len(self.registers) != 0
-        assert isinstance(self.registers[-1], Qubit)
+        trailing_zeros = self.trailing_zeros()
+        assert isinstance(self.registers[-(trailing_zeros + 1)], Qubit)
 
         return QubitMap(
-            self.registers[:-1] + self.registers[-1].case_one.registers,
-            self.zero_qubits + self.registers[-1].case_one.zero_qubits,
+            self.registers[:-(trailing_zeros + 1)] + self.registers[-(trailing_zeros + 1)].case_one.registers,
         )
 
 
@@ -171,6 +189,16 @@ class Register(ABC):
         The dimension of the embedded vector space
         """
         raise NotImplementedError
+
+
+@dataclass(frozen=True)
+class ZeroQubit(Register):
+
+    def total_qubits(self) -> int:
+        return 1
+
+    def dimension(self) -> int:
+        return 1
 
 
 @dataclass(frozen=True, repr=False)
@@ -215,14 +243,14 @@ class Qubit(Register):
             if self.case_zero.registers[i] != self.case_one.registers[i]:
                 return self.case_zero.registers[:i] + [
                     Qubit(
-                        QubitMap(self.case_zero.registers[i:], self.case_zero.zero_qubits),
-                        QubitMap(self.case_one.registers[i:], self.case_one.zero_qubits),
+                        QubitMap(self.case_zero.registers[i:]),
+                        QubitMap(self.case_one.registers[i:]),
                     )
                 ]
         return self.case_zero.registers[:min_len] + [
             Qubit(
-                QubitMap(self.case_zero.registers[min_len:], self.case_zero.zero_qubits),
-                QubitMap(self.case_one.registers[min_len:], self.case_one.zero_qubits),
+                QubitMap(self.case_zero.registers[min_len:]),
+                QubitMap(self.case_one.registers[min_len:]),
             )
         ]
 

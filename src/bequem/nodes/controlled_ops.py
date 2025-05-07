@@ -16,28 +16,24 @@ class BlockDiagonal(Node):
             qubits_in_A.registers,
             self.max_qubits
             - qubits_in_A.total_qubits
-            + qubits_in_A.zero_qubits,
         )
         qubits_out_A = A.qubits_out()
         qubits_out_A = QubitMap(
             qubits_out_A.registers,
             self.max_qubits
             - qubits_out_A.total_qubits
-            + qubits_out_A.zero_qubits,
         )
         qubits_in_B = B.qubits_in()
         qubits_in_B = QubitMap(
             qubits_in_B.registers,
             self.max_qubits
             - qubits_in_B.total_qubits
-            + qubits_in_B.zero_qubits,
         )
         qubits_out_B = B.qubits_out()
         qubits_out_B = QubitMap(
             qubits_out_B.registers,
             self.max_qubits
             - qubits_out_B.total_qubits
-            + qubits_out_B.zero_qubits,
         )
         self._qubits_in = QubitMap([Qubit(qubits_in_A, qubits_in_B)])
         self._qubits_out = QubitMap([Qubit(qubits_out_A, qubits_out_B)])
