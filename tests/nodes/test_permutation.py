@@ -1,7 +1,7 @@
 import pytest
 
 from bequem.qubit_map import QubitMap, Qubit, ID, ZeroQubit
-from bequem.nodes.permutation import _find_matching_subdivision, Permutation
+from bequem.nodes.permutation import _find_matching_partitioning, Permutation, PermuteRegisters
 
 
 def test_find_permutation_trivial():
@@ -18,9 +18,9 @@ def test_find_permutation_trivial():
     Permutation(QubitMap([c]), QubitMap([c], 1)).verify()
 
 
-@pytest.mark.xfail
-def test_find_permutation_matching_subdivision():
+def test_find_permutation_matching_partitioning():
     Permutation(QubitMap([ZeroQubit(), ID]), QubitMap(1)).verify()
+    Permutation(QubitMap(1), QubitMap([ZeroQubit(), ID])).verify()
 
 
 @pytest.mark.xfail
@@ -70,33 +70,45 @@ def test_brute_force_double_rotation_right_left():
     Permutation(a, b3).verify()
 
 
-def test_find_matching_subdivision():
-    assert _find_matching_subdivision(QubitMap(0), QubitMap(0)) == []
-    assert _find_matching_subdivision(QubitMap(1), QubitMap(1)) == [
+def test_permute_registers():
+    PermuteRegisters(QubitMap(1), [0]).verify()
+    PermuteRegisters(QubitMap(2), [0, 1]).verify()
+    PermuteRegisters(QubitMap(2), [1, 0]).verify()
+    PermuteRegisters(QubitMap(3), [0, 1, 2]).verify()
+    PermuteRegisters(QubitMap(3), [0, 2, 1]).verify()
+    PermuteRegisters(QubitMap(3), [1, 0, 2]).verify()
+    PermuteRegisters(QubitMap(3), [1, 2, 0]).verify()
+    PermuteRegisters(QubitMap(3), [2, 0, 1]).verify()
+    PermuteRegisters(QubitMap(3), [2, 1, 0]).verify()
+
+
+def test_find_matching_partitioning():
+    assert _find_matching_partitioning(QubitMap(0), QubitMap(0)) == []
+    assert _find_matching_partitioning(QubitMap(1), QubitMap(1)) == [
         (QubitMap(1), QubitMap(1))
     ]
-    assert _find_matching_subdivision(QubitMap(2), QubitMap(2)) == [
+    assert _find_matching_partitioning(QubitMap(2), QubitMap(2)) == [
         (QubitMap(1), QubitMap(1)),
         (QubitMap(1), QubitMap(1)),
     ]
 
     c = Qubit(QubitMap(1), QubitMap(1))
-    assert _find_matching_subdivision(QubitMap([c]), QubitMap(2)) == [
+    assert _find_matching_partitioning(QubitMap([c]), QubitMap(2)) == [
         (QubitMap(1), QubitMap(1)),
         (QubitMap(1), QubitMap(1)),
     ]
-    assert _find_matching_subdivision(QubitMap(2), QubitMap([c])) == [
+    assert _find_matching_partitioning(QubitMap(2), QubitMap([c])) == [
         (QubitMap(1), QubitMap(1)),
         (QubitMap(1), QubitMap(1)),
     ]
     c = Qubit(QubitMap(1), QubitMap(0, 1))
-    assert _find_matching_subdivision(QubitMap([c]), QubitMap([c])) == [
+    assert _find_matching_partitioning(QubitMap([c]), QubitMap([c])) == [
         (QubitMap([c]), QubitMap([c]))
     ]
-    assert _find_matching_subdivision(QubitMap([ID, c]), QubitMap([c, ID])) == [
+    assert _find_matching_partitioning(QubitMap([ID, c]), QubitMap([c, ID])) == [
         (QubitMap([ID, c]), QubitMap([c, ID]))
     ]
-    assert _find_matching_subdivision(QubitMap([ID, c]), QubitMap([ID, c])) == [
+    assert _find_matching_partitioning(QubitMap([ID, c]), QubitMap([ID, c])) == [
         (QubitMap(1), QubitMap(1)),
         (QubitMap([c]), QubitMap([c])),
     ]
