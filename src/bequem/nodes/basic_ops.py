@@ -5,6 +5,7 @@ import tequila as tq
 from bequem.circuit import Circuit
 from bequem.qubit_map import QubitMap, Qubit
 from bequem.nodes.node import Node
+from bequem.nodes.identity import Identity
 
 
 class UnsafeMul(Node):
@@ -86,6 +87,13 @@ class UnsafeMul(Node):
 
     def phase(self) -> float:
         return self.A.phase() + self.B.phase()
+
+    def controlled(self) -> Node:
+        # TODO: This is to work around a circular import, can this be done
+        # better?
+        # TODO: Is skip_projection_check=True acutally correct?
+        from bequem.nodes.mul import Mul
+        return Mul(self.A.controlled(), self.B.controlled(), skip_projection_check=False)
 
 
 class Tensor(Node):
@@ -188,9 +196,8 @@ class Tensor(Node):
     def phase(self) -> float:
         return self.A.phase() + self.B.phase()
 
-    # TODO: Circular import needed
     # def controlled(self) -> float:
-    #     return Mul(
+    #     return UnsafeMul(
     #         ModifyControl(self.A.controlled(), self.B.qubits_in()),
     #         Tensor(Identity(self.A.qubits_out()), self.B.controlled()))
 
