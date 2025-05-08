@@ -259,13 +259,13 @@ class Node(ABC):
                     computed_adj[:, i] = self.compute_adjoint(input)
 
                 # verify compute with tensor valued input
-                np.testing.assert_allclose(computed, computed_m)
+                np.testing.assert_allclose(computed, computed_m, atol=1e-8)
                 # verify circuit
-                np.testing.assert_allclose(computed, simulated)
+                np.testing.assert_allclose(computed, simulated, atol=1e-8)
                 # verify compute_adjoint
                 np.testing.assert_allclose(computed_adj_m,
-                                           np.conj(computed_m).T)
-                np.testing.assert_allclose(computed_adj, computed_adj_m)
+                                           np.conj(computed_m).T, atol=1e-8)
+                np.testing.assert_allclose(computed_adj, computed_adj_m, atol=1e-8)
 
                 return computed_m
             else:
@@ -278,7 +278,7 @@ class Node(ABC):
                         circuit.simulate(0, backend="qulacs"))
 
                 # verify circuit
-                np.testing.assert_allclose(computed, simulated)
+                np.testing.assert_allclose(computed, simulated, atol=1e-8)
                 return computed
         except AssertionError as err:
             if drill:

@@ -55,3 +55,13 @@ class Circuit:
         adj = self.tq_circuit.dagger()
         adj.n_qubits = self.tq_circuit.n_qubits
         return Circuit(adj)
+
+    @staticmethod
+    def from_qiskit(circuit):
+        from qiskit.qasm2 import dumps
+        qasm = dumps(circuit)
+        qasm = qasm.replace("\nu(", "\nU(")
+        tq_circuit = tq.import_open_qasm(qasm)
+        if circuit.num_qubits > 0:
+            tq_circuit.n_qubits = circuit.num_qubits
+        return Circuit(tq_circuit)
