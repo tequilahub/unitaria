@@ -254,16 +254,6 @@ class Qubit(Register):
             )
         ]
 
-def padded_qubit(case_zero: QubitMap, case_one: QubitMap):
-    max_qubits = max(case_zero.total_qubits, case_one.total_qubits)
-    if case_zero.total_qubits < max_qubits:
-        case_zero = QubitMap(
-            case_zero.registers, max_qubits - case_zero.total_qubits)
-    if case_one.total_qubits < max_qubits:
-        case_one = QubitMap(
-            case_one.registers, max_qubits - case_one.total_qubits)
-    return Qubit(case_zero, case_one)
-
 
 ID = Qubit(QubitMap([]), QubitMap([]))
 
