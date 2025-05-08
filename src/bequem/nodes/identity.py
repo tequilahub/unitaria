@@ -69,9 +69,9 @@ class Identity(Node):
 
     def controlled(self) -> Node:
         if self.project_to is None:
-            return Identity(QubitMap([Qubit(QubitMap(self.qubits.total_qubits), self.qubits)]))
+            return Identity(QubitMap([Qubit(QubitMap(0, self.qubits.total_qubits), self.qubits)]))
         else:
             return Identity(
-                QubitMap([Qubit(QubitMap(self.qubits.total_qubits), self.qubits)]),
-                QubitMap([Qubit(QubitMap(self.qubits.total_qubits), self.project_to)])
+                QubitMap([Qubit(QubitMap(0, self.qubits.total_qubits), self.qubits)]),
+                QubitMap([Qubit(QubitMap(0, self.qubits.total_qubits), self.project_to)])
             )

@@ -71,6 +71,8 @@ class UnsafeMul(Node):
         circuit += self.A.circuit()
         circuit += self.B.circuit()
 
+        circuit.n_qubits = self.qubits_in().total_qubits
+
         return circuit
 
     def qubits_in(self) -> QubitMap:
@@ -84,11 +86,6 @@ class UnsafeMul(Node):
 
     def phase(self) -> float:
         return self.A.phase() + self.B.phase()
-
-    def controlled(self) -> Node:
-        A_controlled = self.A.controlled()
-        B_controlled = self.B.controlled()
-        return UnsafeMul(A_controlled, B_controlled)
 
 
 class Tensor(Node):
@@ -191,6 +188,12 @@ class Tensor(Node):
     def phase(self) -> float:
         return self.A.phase() + self.B.phase()
 
+    # TODO: Circular import needed
+    # def controlled(self) -> float:
+    #     return Mul(
+    #         ModifyControl(self.A.controlled(), self.B.qubits_in()),
+    #         Tensor(Identity(self.A.qubits_out()), self.B.controlled()))
+
 
 Node.__and__ = lambda A, B: Tensor(A, B)
 
@@ -234,6 +237,9 @@ class Adjoint(Node):
 
     def circuit(self) -> Circuit:
         return self.A.circuit().adjoint()
+
+    def controlled(self) -> Node:
+        return Adjoint(self.A.controlled())
 
 
 class Scale(Node):
@@ -315,6 +321,9 @@ class Scale(Node):
     def circuit(self) -> Circuit:
         return self.A.circuit()
 
+    def controlled(self) -> Node:
+        return Scale(self.A.controlled(), self.scale, self.remove_efficiency, self.absolute)
+
 
 class ComputeProjection(Node):
     def __init__(self, qubits: QubitMap):
@@ -344,3 +353,69 @@ class ComputeProjection(Node):
     def circuit(self) -> Circuit:
         # TODO
         return Circuit()
+
+
+class ModifyControl(Node):
+    A: Node
+    expand_control: QubitMap
+    swap_control_state: bool
+
+    def __init__(self, A: Node, expand_control: QubitMap | int = 0, swap_control_state: bool = False):
+        self.A = A
+        if not isinstance(expand_control, QubitMap):
+            expand_control = QubitMap(expand_control)
+        self.expand_control = expand_control
+        self.swap_control_state = swap_control_state
+    
+    def children(self) -> list[Node]:
+        return [self.A]
+
+    def parameters(self) -> dict:
+        return {"expand_control": self.expand_control, "swap_control_state": self.swap_control_state}
+
+    def qubits_in(self) -> QubitMap:
+        qubits_one = QubitMap(self.A.qubits_in().case_one().registers + self.expand_control.registers)
+        qubits_zero = QubitMap(0, qubits_one.total_qubits)
+
+        if self.swap_control_state:
+            return QubitMap([Qubit(qubits_one, qubits_zero)], self.A.qubits_in().trailing_zeros())
+        else:
+            return QubitMap([Qubit(qubits_zero, qubits_one)], self.A.qubits_in().trailing_zeros())
+
+    def qubits_out(self) -> QubitMap:
+        qubits_one = QubitMap(self.A.qubits_out().case_one().registers + self.expand_control.registers)
+        qubits_zero = QubitMap(0, qubits_one.total_qubits)
+
+        if self.swap_control_state:
+            return QubitMap([Qubit(qubits_one, qubits_zero)], self.A.qubits_out().trailing_zeros())
+        else:
+            return QubitMap([Qubit(qubits_zero, qubits_one)], self.A.qubits_out().trailing_zeros())
+
+    def normalization(self) -> float:
+        return self.A.normalization()
+
+    def phase(self) -> float:
+        return self.A.phase()
+
+    def compute(self, input: np.ndarray) -> np.ndarray:
+        raise NotImplementedError
+
+    def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
+        raise NotImplementedError
+
+    def circuit(self) -> Circuit:
+        qubits = self.A.qubits_in()
+        control_qubit_pre = qubits.total_qubits - 1
+        control_qubit_post = control_qubit_pre + self.expand_control.total_qubits
+
+        circuit = Circuit()
+        if self.swap_control_state:
+            circuit.tq_circuit += tq.gates.X(control_qubit_post)
+
+        qubit_map = dict([(i, i) for i in range(qubits.total_qubits)])
+        qubit_map[control_qubit_pre] = control_qubit_post
+        circuit.tq_circuit += self.A.circuit().tq_circuit.map_qubits(qubit_map)
+        if self.swap_control_state:
+            circuit.tq_circuit += tq.gates.X(control_qubit_post)
+        circuit.n_qubits = self.qubits_in().total_qubits
+        return circuit

@@ -1,12 +1,12 @@
 import numpy as np
-import tequila as tq
 
-from bequem.qubit_map import QubitMap, Qubit, ID
-from bequem.circuit import Circuit
-from bequem.nodes.basic_ops import UnsafeMul
+from bequem.qubit_map import QubitMap, Qubit
+from bequem.nodes.basic_ops import ModifyControl, Scale, Tensor, Adjoint
+from bequem.nodes.constant import ConstantVector
 from bequem.nodes.identity import Identity
 from bequem.nodes.proxy_node import ProxyNode
-from bequem.nodes.node import Node, Controlled
+from bequem.nodes.node import Node
+from bequem.nodes.mul import Mul
 
 
 class BlockDiagonal(ProxyNode):
@@ -34,24 +34,28 @@ class BlockDiagonal(ProxyNode):
 
         A_controlled = ModifyControl(
             A_controlled, max(0, controlled_bits_B - controlled_bits_A), True)
-        A_controlled = UnsafeMul(
-            UnsafeMul(
+        A_controlled = Mul(
+            Mul(
                 Identity(qubits_in, A_controlled.qubits_in()),
-                A_controlled
+                A_controlled,
+                skip_projection_check=True
             ),
             Identity(A_controlled.qubits_out(), qubits_mid),
+            skip_projection_check=True
         )
         B_controlled = ModifyControl(
             B_controlled, max(0, controlled_bits_A - controlled_bits_B), False)
-        B_controlled = UnsafeMul(
-            UnsafeMul(
+        B_controlled = Mul(
+            Mul(
                 Identity(qubits_in, B_controlled.qubits_in()),
-                B_controlled
+                B_controlled,
+                skip_projection_check=True
             ),
             Identity(B_controlled.qubits_out(), qubits_out),
+            skip_projection_check=True
         )
 
-        return UnsafeMul(A_controlled, B_controlled)
+        return Mul(A_controlled, B_controlled, skip_projection_check=True)
 
     def normalization(self) -> float:
         return self.A.normalization()
@@ -84,66 +88,150 @@ def _controlled_qubits(A_controlled: QubitMap, B_controlled: QubitMap) -> QubitM
 
 Node.__or__ = lambda A, B: BlockDiagonal(A, B)
 
+class Add(ProxyNode):
+    """
+    Node for computing the sum of two nodes
 
-class ModifyControl(Node):
+    :ivar A:
+        The first summand
+    :ivar B:
+        The second summand
+    """
     A: Node
-    expand_control: int
-    swap_control_state: bool
+    B: Node
 
-    def __init__(self, A: Node, expand_control: int = 0, swap_control_state: bool = False):
+    def __init__(self, A: Node, B: Node):
         self.A = A
-        self.expand_control = expand_control
-        self.swap_control_state = swap_control_state
-    
+        self.B = B
+
     def children(self) -> list[Node]:
-        return [self.A]
+        return [self.A, self.B]
 
-    def parameters(self) -> dict:
-        return {"expand_control": self.expand_control, "swap_control_state": self.swap_control_state}
+    def definition(self) -> Node:
+        A = Scale(self.A, absolute=True)
+        B = Scale(self.B, absolute=True)
 
-    def qubits_in(self) -> QubitMap:
-        qubits_zero = QubitMap(self.A.qubits_in().case_zero().registers + [ID] * self.expand_control)
-        qubits_one = QubitMap(self.A.qubits_in().case_one().registers + [ID] * self.expand_control)
+        diag = BlockDiagonal(A, B)
 
-        if self.swap_control_state:
-            return QubitMap([Qubit(qubits_one, qubits_zero)], self.A.qubits_in().trailing_zeros())
-        else:
-            return QubitMap([Qubit(qubits_zero, qubits_one)], self.A.qubits_in().trailing_zeros())
+        sqrt_A = np.sqrt(np.abs(self.A.normalization()))
+        sqrt_B = np.sqrt(np.abs(self.B.normalization()))
+        rotation_in = Tensor(Identity(self.A.qubits_in()),
+                             ConstantVector(np.array([sqrt_A, sqrt_B])))
+        rotation_out = Tensor(
+            Identity(self.A.qubits_out()),
+            ConstantVector(
+                np.array([
+                    self.A.normalization() / sqrt_A,
+                    self.B.normalization() / sqrt_B
+                ])))
 
-    def qubits_out(self) -> QubitMap:
-        qubits_zero = QubitMap(self.A.qubits_out().case_zero().registers + [ID] * self.expand_control)
-        qubits_one = QubitMap(self.A.qubits_out().case_one().registers + [ID] * self.expand_control)
-
-        if self.swap_control_state:
-            return QubitMap([Qubit(qubits_one, qubits_zero)], self.A.qubits_out().trailing_zeros())
-        else:
-            return QubitMap([Qubit(qubits_zero, qubits_one)], self.A.qubits_out().trailing_zeros())
+        return Mul(Mul(rotation_in, diag, skip_projection_check=True), Adjoint(rotation_out), skip_projection_check=True)
 
     def normalization(self) -> float:
-        return self.A.normalization()
-
-    def phase(self) -> float:
-        return self.A.phase()
+        return self.A.normalization() + self.B.normalization()
 
     def compute(self, input: np.ndarray) -> np.ndarray:
-        raise NotImplementedError
+        return self.A.compute(input) + self.B.compute(input)
 
     def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
-        raise NotImplementedError
+        return self.A.compute_adjoint(input) + self.B.compute_adjoint(input)
 
-    def circuit(self) -> Circuit:
-        qubits = self.A.qubits_in()
-        control_qubit_pre = qubits.total_qubits - 1
-        control_qubit_post = control_qubit_pre + self.expand_control
 
-        circuit = Circuit()
-        if self.swap_control_state:
-            circuit.tq_circuit += tq.gates.X(control_qubit_post)
+Node.__add__ = lambda A, B: Add(A, B)
 
-        qubit_map = dict([(i, i) for i in range(qubits.total_qubits)])
-        qubit_map[control_qubit_pre] = control_qubit_post
-        circuit.tq_circuit += self.A.circuit().tq_circuit.map_qubits(qubit_map)
-        if self.swap_control_state:
-            circuit.tq_circuit += tq.gates.X(control_qubit_post)
-        circuit.n_qubits = self.qubits_in().total_qubits
-        return circuit
+
+class BlockHorizontal(ProxyNode):
+    """
+    Node for block matrices of the form ``[A B]``
+
+    :ivar A:
+        The left block
+    :ivar B:
+        The right block
+    """
+    A: Node
+    B: Node
+
+    def __init__(self, A: Node, B: Node):
+        self.A = A
+        self.B = B
+
+    def children(self) -> list[Node]:
+        return [self.A, self.B]
+
+    def definition(self) -> Node:
+        A_permuted = Scale(self.A, absolute=True)
+        B_permuted = Scale(self.B, absolute=True)
+
+        diag = BlockDiagonal(A_permuted, B_permuted)
+
+        rotation_out = Tensor(
+            Identity(self.A.qubits_out()),
+            ConstantVector(
+                np.array([self.A.normalization(),
+                          self.B.normalization()])))
+
+        return Mul(diag, Adjoint(rotation_out), skip_projection_check=True)
+
+    def normalization(self) -> float:
+        return np.sqrt(
+            np.abs(self.A.normalization())**2 +
+            np.abs(self.B.normalization())**2)
+
+    def compute(self, input: np.ndarray) -> np.ndarray:
+        dim_A = self.A.qubits_in().dimension
+        input_A, input_B = np.split(input, [dim_A], axis=-1)
+        return self.A.compute(input_A) + self.B.compute(input_B)
+
+    def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
+        return np.concatenate(
+            (self.A.compute_adjoint(input), self.B.compute(input)), axis=-1)
+
+
+class BlockVertical(ProxyNode):
+    """
+    Node for block matrices of the form ``[A B]^T``
+
+    :ivar A:
+        The top block
+    :ivar B:
+        The bottom block
+    """
+
+    def __init__(self, A: Node, B: Node):
+        self.A = A
+        self.B = B
+
+    def children(self) -> list[Node]:
+        return [self.A, self.B]
+
+    def definition(self) -> Node:
+
+        A_permuted = Scale(self.A, absolute=True)
+        B_permuted = Scale(self.B, absolute=True)
+
+        diag = BlockDiagonal(A_permuted, B_permuted)
+
+        rotation_in = Tensor(
+            Identity(self.A.qubits_in()),
+            ConstantVector(
+                np.array([self.A.normalization(),
+                          self.B.normalization()])))
+
+        return Mul(rotation_in, diag, skip_projection_check=True)
+
+    def normalization(self) -> float:
+        return np.sqrt(
+            np.abs(self.A.normalization())**2 +
+            np.abs(self.B.normalization())**2)
+
+    def compute(self, input: np.ndarray) -> np.ndarray:
+        return np.concatenate((self.A.compute(input), self.B.compute(input)),
+                              axis=-1)
+
+    def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
+        dim_A = self.A.qubits_in().dimension
+        input_A, input_B = np.split(input, [dim_A], axis=-1)
+        return self.A.compute_adjoint(input_A) + self.B.compute_adjoint(
+            input_B)
+

@@ -332,11 +332,11 @@ class Controlled(Node):
 
     def qubits_in(self) -> QubitMap:
         qubits_in_A = self.A.qubits_in()
-        return QubitMap([Qubit(QubitMap(qubits_in_A.total_qubits), qubits_in_A)])
+        return QubitMap([Qubit(QubitMap(0, qubits_in_A.total_qubits), qubits_in_A)])
 
     def qubits_out(self) -> QubitMap:
         qubits_out_A = self.A.qubits_out()
-        return QubitMap([Qubit(QubitMap(qubits_out_A.total_qubits), qubits_out_A)])
+        return QubitMap([Qubit(QubitMap(0, qubits_out_A.total_qubits), qubits_out_A)])
 
     def normalization(self) -> float:
         return self.A.normalization()
@@ -345,16 +345,10 @@ class Controlled(Node):
         return 0
 
     def compute(self, input: np.ndarray) -> np.ndarray:
-        dim_A = self.A.qubits_in().dimension
-        remainder, input_A = np.split(input, [dim_A], axis=-1)
-        result_A = self.A.compute(input_A)
-        return np.concatenate((remainder, result_A), axis=-1)
+        return input
 
     def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
-        dim_A = self.A.qubits_in().dimension
-        remainder, input_A = np.split(input, [-dim_A], axis=-1)
-        result_A = self.A.compute_adjoint(input_A)
-        return np.concatenate((remainder, result_A), axis=-1)
+        return input
 
     def circuit(self) -> Circuit:
         control_qubit = self.A.qubits_in().total_qubits

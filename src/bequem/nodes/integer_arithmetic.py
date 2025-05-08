@@ -8,11 +8,10 @@ from bequem.circuits.arithmetic import increment_circuit_single_ancilla, additio
 
 
 class Increment(Node):
-    def __init__(self, bits: int, control_bits: int=0):
+    def __init__(self, bits: int):
         if bits < 1:
             raise ValueError()
         self.bits = bits
-        self.control_bits = control_bits
 
     def children(self) -> list[Node]:
         return []
@@ -21,18 +20,16 @@ class Increment(Node):
         return { "bits": self.bits }
 
     def qubits_in(self) -> QubitMap:
-        total_bits = self.bits + self.control_bits
-        if total_bits <= 3:
-            return QubitMap(total_bits)
+        if self.bits <= 3:
+            return QubitMap(self.bits)
         else:
-            return QubitMap(total_bits, 1)
+            return QubitMap(self.bits, 1)
 
     def qubits_out(self) -> QubitMap:
-        total_bits = self.bits + self.control_bits
-        if total_bits <= 3:
-            return QubitMap(total_bits)
+        if self.bits <= 3:
+            return QubitMap(self.bits)
         else:
-            return QubitMap(total_bits, 1)
+            return QubitMap(self.bits, 1)
 
     def normalization(self) -> float:
         return 1
@@ -41,39 +38,20 @@ class Increment(Node):
         return 0
 
     def compute(self, input: np.ndarray) -> np.ndarray:
-        remainder, controlled = np.split(input, [-2**self.bits], axis=-1)
-        controlled = np.roll(controlled, 1, axis=-1)
-        return np.concatenate((remainder, controlled), axis=-1)
+        return np.roll(input, 1, axis=-1)
 
     def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
-        remainder, controlled = np.split(input, [-2**self.bits], axis=-1)
-        controlled = np.roll(controlled, -1, axis=-1)
-        return np.concatenate((remainder, controlled), axis=-1)
+        return np.roll(input, -1, axis=-1)
 
     def circuit(self) -> Circuit:
-        total_bits = self.bits + self.control_bits
-        if total_bits <= 3:
+        if self.bits <= 3:
             circuit = tq.QCircuit()
-            for i in reversed(range(total_bits)):
+            for i in reversed(range(self.bits)):
                 circuit += tq.gates.X(target=i, control=list(range(i)))
         else:
-            circuit = increment_circuit_single_ancilla(target=list(reversed(range(total_bits))), ancilla=total_bits)
+            circuit = increment_circuit_single_ancilla(target=list(reversed(range(self.bits))), ancilla=self.bits)
 
-        if self.control_bits == 0:
-            return Circuit(circuit)
-        else:
-            controlled_circuit = Circuit()
-            qubit_map = dict(
-                [(i, i + self.bits) for i in range(self.control_bits)] +
-                [(i + self.control_bits, i) for i in range(self.bits)] + 
-                [(total_bits, total_bits)]
-            )
-            controlled_circuit.tq_circuit += circuit.map_qubits(qubit_map)
-            controlled_circuit.tq_circuit += tq.gates.X(target=list(range(self.bits, total_bits)))
-            return controlled_circuit
-
-    def controlled(self) -> Node:
-        return Increment(self.bits, self.control_bits + 1)
+        return Circuit(circuit)
 
 
 class IntegerAddition(Node):

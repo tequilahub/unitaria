@@ -1,4 +1,4 @@
-from bequem.nodes.block_concatenation import BlockHorizontal, BlockVertical
+from bequem.nodes.controlled_ops import BlockHorizontal, BlockVertical
 from bequem.nodes.integer_arithmetic import Increment
 from bequem.nodes.identity import Identity
 from bequem.qubit_map import QubitMap
