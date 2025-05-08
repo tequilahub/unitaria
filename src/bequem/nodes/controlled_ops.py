@@ -1,7 +1,6 @@
 import numpy as np
 
-from bequem.qubit_map import QubitMap, Qubit
-from bequem.nodes.basic_ops import ModifyControl, Scale, Tensor, Adjoint
+from bequem.nodes.basic_ops import Scale, Tensor, Adjoint
 from bequem.nodes.constant import ConstantVector
 from bequem.nodes.identity import Identity
 from bequem.nodes.proxy_node import ProxyNode

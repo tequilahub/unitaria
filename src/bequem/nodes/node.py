@@ -7,7 +7,7 @@ from rich.tree import Tree
 from rich.console import Console
 from rich.syntax import Syntax
 
-from bequem.qubit_map import QubitMap, Qubit
+from bequem.qubit_map import QubitMap
 from bequem.circuit import Circuit
 
 Uuid = str
@@ -140,18 +140,6 @@ class Node(ABC):
         The circuit corresponding to the unitary of the block encoding.
         """
         raise NotImplementedError
-
-    def controlled(self) -> Node:
-        """
-        The controlled version of this node, or ``None`` if a default implementation
-        should be used.
-
-        It should hold that ``controlled().qubits_in().registers ==
-        [Qubit(qubits_in(), QubitMap(total_qubits))]`` and similarly for
-        ``qubits_out``. The added qubit should be the control qubit.
-        """
-
-        return Controlled(self)
 
     def tree_label(self, verbose: bool = False):
         """
@@ -318,42 +306,3 @@ class VerificationError(Exception):
                 Syntax(self.circuit, "text", background_color="default"))
         output = capture.get()
         return "\n" + output + f"\nnormalization = {self.node.normalization()}, phase = {self.node.phase()}"
-
-
-class Controlled(Node):
-
-    A: Node
-
-    def __init__(self, A: Node):
-        self.A = A
-
-    def children(self) -> list[Node]:
-        return [self.A]
-
-    def qubits_in(self) -> QubitMap:
-        qubits_in_A = self.A.qubits_in()
-        return QubitMap([Qubit(QubitMap(0, qubits_in_A.total_qubits), qubits_in_A)])
-
-    def qubits_out(self) -> QubitMap:
-        qubits_out_A = self.A.qubits_out()
-        return QubitMap([Qubit(QubitMap(0, qubits_out_A.total_qubits), qubits_out_A)])
-
-    def normalization(self) -> float:
-        return self.A.normalization()
-
-    def phase(self) -> float:
-        return 0
-
-    def compute(self, input: np.ndarray) -> np.ndarray:
-        return input
-
-    def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
-        return input
-
-    def circuit(self) -> Circuit:
-        control_qubit = self.A.qubits_in().total_qubits
-        circuit = self.A.circuit().tq_circuit
-        circuit = circuit.add_controls(control_qubit)
-        circuit += tq.gates.Phase(target=control_qubit, angle=self.A.phase())
-        circuit.n_qubits = control_qubit + 1
-        return Circuit(circuit)

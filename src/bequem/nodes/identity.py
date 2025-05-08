@@ -1,7 +1,7 @@
 import numpy as np
 
 from bequem.circuit import Circuit
-from bequem.qubit_map import QubitMap, Qubit
+from bequem.qubit_map import QubitMap
 from bequem.nodes.node import Node
 
 
@@ -66,12 +66,3 @@ class Identity(Node):
         if self.qubits.total_qubits > 0:
             circuit.tq_circuit.n_qubits = self.qubits.total_qubits
         return circuit
-
-    def controlled(self) -> Node:
-        if self.project_to is None:
-            return Identity(QubitMap([Qubit(QubitMap(0, self.qubits.total_qubits), self.qubits)]))
-        else:
-            return Identity(
-                QubitMap([Qubit(QubitMap(0, self.qubits.total_qubits), self.qubits)]),
-                QubitMap([Qubit(QubitMap(0, self.qubits.total_qubits), self.project_to)])
-            )

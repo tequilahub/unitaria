@@ -1,10 +1,12 @@
 import numpy as np
+import tequila as tq
 
 from bequem.qubit_map import QubitMap, Qubit
-from bequem.nodes.basic_ops import ModifyControl, UnsafeMul
+from bequem.nodes.basic_ops import UnsafeMul
 from bequem.nodes.identity import Identity
 from bequem.nodes.proxy_node import ProxyNode
 from bequem.nodes.node import Node
+from bequem.circuit import Circuit
 
 
 class BlockDiagonal(ProxyNode):
@@ -22,8 +24,8 @@ class BlockDiagonal(ProxyNode):
         return [self.A, self.B]
 
     def definition(self):
-        A_controlled = self.A.controlled()
-        B_controlled = self.B.controlled()
+        A_controlled = Controlled(self.A)
+        B_controlled = Controlled(self.B)
         qubits_in = _controlled_qubits(A_controlled.qubits_in(), B_controlled.qubits_in())
         qubits_mid = _controlled_qubits(A_controlled.qubits_out(), B_controlled.qubits_in())
         qubits_out = _controlled_qubits(A_controlled.qubits_out(), B_controlled.qubits_out())
@@ -81,3 +83,108 @@ def _controlled_qubits(A_controlled: QubitMap, B_controlled: QubitMap) -> QubitM
 
 
 Node.__or__ = lambda A, B: BlockDiagonal(A, B)
+
+
+class Controlled(Node):
+
+    A: Node
+
+    def __init__(self, A: Node):
+        self.A = A
+
+    def children(self) -> list[Node]:
+        return [self.A]
+
+    def qubits_in(self) -> QubitMap:
+        qubits_in_A = self.A.qubits_in()
+        return QubitMap([Qubit(QubitMap(0, qubits_in_A.total_qubits), qubits_in_A)])
+
+    def qubits_out(self) -> QubitMap:
+        qubits_out_A = self.A.qubits_out()
+        return QubitMap([Qubit(QubitMap(0, qubits_out_A.total_qubits), qubits_out_A)])
+
+    def normalization(self) -> float:
+        return self.A.normalization()
+
+    def phase(self) -> float:
+        return 0
+
+    def compute(self, input: np.ndarray) -> np.ndarray:
+        return input
+
+    def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
+        return input
+
+    def circuit(self) -> Circuit:
+        control_qubit = self.A.qubits_in().total_qubits
+        circuit = self.A.circuit().tq_circuit
+        circuit = circuit.add_controls(control_qubit)
+        circuit += tq.gates.Phase(target=control_qubit, angle=self.A.phase())
+        circuit.n_qubits = control_qubit + 1
+        return Circuit(circuit)
+
+
+class ModifyControl(Node):
+    A: Node
+    expand_control: QubitMap
+    swap_control_state: bool
+
+    def __init__(self, A: Node, expand_control: QubitMap | int = 0, swap_control_state: bool = False):
+        self.A = A
+        if not isinstance(expand_control, QubitMap):
+            expand_control = QubitMap(expand_control)
+        self.expand_control = expand_control
+        self.swap_control_state = swap_control_state
+    
+    def children(self) -> list[Node]:
+        return [self.A]
+
+    def parameters(self) -> dict:
+        return {"expand_control": self.expand_control, "swap_control_state": self.swap_control_state}
+
+    def qubits_in(self) -> QubitMap:
+        qubits_one = QubitMap(self.A.qubits_in().case_one().registers + self.expand_control.registers)
+        qubits_zero = QubitMap(0, qubits_one.total_qubits)
+
+        if self.swap_control_state:
+            return QubitMap([Qubit(qubits_one, qubits_zero)], self.A.qubits_in().trailing_zeros())
+        else:
+            return QubitMap([Qubit(qubits_zero, qubits_one)], self.A.qubits_in().trailing_zeros())
+
+    def qubits_out(self) -> QubitMap:
+        qubits_one = QubitMap(self.A.qubits_out().case_one().registers + self.expand_control.registers)
+        qubits_zero = QubitMap(0, qubits_one.total_qubits)
+
+        if self.swap_control_state:
+            return QubitMap([Qubit(qubits_one, qubits_zero)], self.A.qubits_out().trailing_zeros())
+        else:
+            return QubitMap([Qubit(qubits_zero, qubits_one)], self.A.qubits_out().trailing_zeros())
+
+    def normalization(self) -> float:
+        return self.A.normalization()
+
+    def phase(self) -> float:
+        return self.A.phase()
+
+    def compute(self, input: np.ndarray) -> np.ndarray:
+        raise NotImplementedError
+
+    def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
+        raise NotImplementedError
+
+    def circuit(self) -> Circuit:
+        qubits = self.A.qubits_in()
+        control_qubit_pre = qubits.total_qubits - 1
+        control_qubit_post = control_qubit_pre + self.expand_control.total_qubits
+
+        circuit = Circuit()
+        if self.swap_control_state:
+            circuit.tq_circuit += tq.gates.X(control_qubit_post)
+
+        qubit_map = dict([(i, i) for i in range(qubits.total_qubits)])
+        qubit_map[control_qubit_pre] = control_qubit_post
+        circuit.tq_circuit += self.A.circuit().tq_circuit.map_qubits(qubit_map)
+        if self.swap_control_state:
+            circuit.tq_circuit += tq.gates.X(control_qubit_post)
+        circuit.n_qubits = self.qubits_in().total_qubits
+        return circuit

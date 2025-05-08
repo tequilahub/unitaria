@@ -68,9 +68,6 @@ class Mul(ProxyNode):
     def phase(self) -> float:
         return self.A.phase() + self.B.phase()
 
-    def controlled(self):
-        return Mul(self.A.controlled(), self.B.controlled(), self.skip_projection_check)
-
 
 Node.__matmul__ = lambda A, B: Mul(A, B)
 
