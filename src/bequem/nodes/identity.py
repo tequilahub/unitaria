@@ -14,24 +14,29 @@ class Identity(Node):
     """
     qubits: QubitMap
 
-    def __init__(self, qubits: QubitMap):
+    def __init__(self, qubits: QubitMap, project_to: QubitMap | None = None):
         """
         :param qubits:
             The domain of the identity matrix
         """
         self.qubits = qubits
+        self.project_to = project_to
 
     def children(self) -> list[Node]:
         return []
 
     def parameters(self) -> dict:
-        return { "qubits": self.qubits }
+        params = {}
+        params["qubits"] = self.qubits
+        if self.project_to is not None:
+            params["project_to"] = self.project_to
+        return params
 
     def qubits_in(self) -> QubitMap:
         return self.qubits
 
     def qubits_out(self) -> QubitMap:
-        return self.qubits
+        return self.project_to or self.qubits
 
     def normalization(self) -> float:
         return 1
@@ -40,10 +45,20 @@ class Identity(Node):
         return 0
 
     def compute(self, input: np.ndarray) -> np.ndarray:
-        return input
+        if self.project_to is None:
+            return input
+        else:
+            expanded = np.zeros(2 ** self.qubits.total_qubits)
+            expanded[self.qubits.enumerate_basis()] = input
+            return expanded[self.project_to.enumerate_basis()]
 
     def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
-        return input
+        if self.project_to is None:
+            return input
+        else:
+            expanded = np.zeros(2 ** self.qubits.total_qubits)
+            expanded[self.project_to.enumerate_basis()] = input
+            return expanded[self.qubits.enumerate_basis()]
 
     def circuit(self) -> Circuit:
         circuit = Circuit()
