@@ -19,13 +19,13 @@ class Increment(Node):
     def parameters(self) -> dict:
         return { "bits": self.bits }
 
-    def qubits_in(self) -> Subspace:
+    def subspace_in(self) -> Subspace:
         if self.bits <= 3:
             return Subspace(self.bits)
         else:
             return Subspace(self.bits, 1)
 
-    def qubits_out(self) -> Subspace:
+    def subspace_out(self) -> Subspace:
         if self.bits <= 3:
             return Subspace(self.bits)
         else:
@@ -69,10 +69,10 @@ class IntegerAddition(Node):
     def parameters(self) -> dict:
         return { "source_bits": self.source_bits, "target_bits": self.target_bits }
 
-    def qubits_in(self) -> Subspace:
+    def subspace_in(self) -> Subspace:
         return Subspace(self.source_bits + self.target_bits)
 
-    def qubits_out(self) -> Subspace:
+    def subspace_out(self) -> Subspace:
         return Subspace(self.source_bits + self.target_bits)
 
     def normalization(self) -> float:

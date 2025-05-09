@@ -12,14 +12,14 @@ class Identity(Node):
     :ivar qubits:
         The domain of the identity matrix
     """
-    qubits: Subspace
+    subspace: Subspace
 
-    def __init__(self, qubits: Subspace, project_to: Subspace | None = None):
+    def __init__(self, subspace: Subspace, project_to: Subspace | None = None):
         """
         :param qubits:
             The domain of the identity matrix
         """
-        self.qubits = qubits
+        self.subspace = subspace
         self.project_to = project_to
 
     def children(self) -> list[Node]:
@@ -27,16 +27,16 @@ class Identity(Node):
 
     def parameters(self) -> dict:
         params = {}
-        params["qubits"] = self.qubits
+        params["qubits"] = self.subspace
         if self.project_to is not None:
             params["project_to"] = self.project_to
         return params
 
-    def qubits_in(self) -> Subspace:
-        return self.qubits
+    def subspace_in(self) -> Subspace:
+        return self.subspace
 
-    def qubits_out(self) -> Subspace:
-        return self.project_to or self.qubits
+    def subspace_out(self) -> Subspace:
+        return self.project_to or self.subspace
 
     def normalization(self) -> float:
         return 1
@@ -48,21 +48,21 @@ class Identity(Node):
         if self.project_to is None:
             return input
         else:
-            expanded = np.zeros(2 ** self.qubits.total_qubits)
-            expanded[self.qubits.enumerate_basis()] = input
+            expanded = np.zeros(2 ** self.subspace.total_qubits)
+            expanded[self.subspace.enumerate_basis()] = input
             return expanded[self.project_to.enumerate_basis()]
 
     def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
         if self.project_to is None:
             return input
         else:
-            expanded = np.zeros(2 ** self.qubits.total_qubits)
+            expanded = np.zeros(2 ** self.subspace.total_qubits)
             expanded[self.project_to.enumerate_basis()] = input
-            return expanded[self.qubits.enumerate_basis()]
+            return expanded[self.subspace.enumerate_basis()]
 
     def circuit(self) -> Circuit:
         circuit = Circuit()
         # TODO: Hacky because tequila does not really support circuits without qubits
-        if self.qubits.total_qubits > 0:
-            circuit.tq_circuit.n_qubits = self.qubits.total_qubits
+        if self.subspace.total_qubits > 0:
+            circuit.tq_circuit.n_qubits = self.subspace.total_qubits
         return circuit

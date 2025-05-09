@@ -55,7 +55,7 @@ class Node(ABC):
     #     return None
 
     @abstractmethod
-    def qubits_in(self) -> Subspace:
+    def subspace_in(self) -> Subspace:
         """
         The embedding of the input vectorspace.
 
@@ -68,7 +68,7 @@ class Node(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def qubits_out(self) -> Subspace:
+    def subspace_out(self) -> Subspace:
         """
         The embedding of the output vectorspace.
 
@@ -105,7 +105,7 @@ class Node(ABC):
         """
         Tests whether this node encodes a vector or a matrix.
         """
-        return self.qubits_in().is_trivial()
+        return self.subspace_in().is_trivial()
 
     @abstractmethod
     def compute(self, input: np.ndarray | None = None) -> np.ndarray:
@@ -218,18 +218,18 @@ class Node(ABC):
             If True and an error is found, recursivly test this nodes children
             to find the smallest node which still contains the error.
         """
-        basis_in = self.qubits_in().enumerate_basis()
-        basis_out = self.qubits_out().enumerate_basis()
+        basis_in = self.subspace_in().enumerate_basis()
+        basis_out = self.subspace_out().enumerate_basis()
         circuit = self.circuit()
         try:
-            if self.qubits_in().total_qubits == 0:
+            if self.subspace_in().total_qubits == 0:
                 # TODO: Tequila does not support circuits without qubits
                 assert circuit.tq_circuit.n_qubits == 1
-                assert self.qubits_out().total_qubits == 0
+                assert self.subspace_out().total_qubits == 0
             else:
-                assert circuit.tq_circuit.n_qubits == self.qubits_in(
+                assert circuit.tq_circuit.n_qubits == self.subspace_in(
                 ).total_qubits
-                assert circuit.tq_circuit.n_qubits == self.qubits_out(
+                assert circuit.tq_circuit.n_qubits == self.subspace_out(
                 ).total_qubits
 
             if not self.is_vector():
@@ -250,7 +250,7 @@ class Node(ABC):
                     computed[:, i] = self.compute(input)
                     simulated[:, i] = np.exp(
                         self.phase() *
-                        1j) * self.normalization() * self.qubits_out().project(
+                        1j) * self.normalization() * self.subspace_out().project(
                             circuit.simulate(b, backend="qulacs"))
 
                 for (i, b) in enumerate(basis_out):
@@ -274,7 +274,7 @@ class Node(ABC):
                     computed = np.array([1])
                 simulated = np.exp(
                     self.phase() *
-                    1j) * self.normalization() * self.qubits_out().project(
+                    1j) * self.normalization() * self.subspace_out().project(
                         circuit.simulate(0, backend="qulacs"))
 
                 # verify circuit

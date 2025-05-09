@@ -48,15 +48,15 @@ class ProxyNode(Node):
             self._definition = self.definition()
         return self._definition.circuit()
 
-    def qubits_in(self) -> Subspace:
+    def subspace_in(self) -> Subspace:
         if self._definition is None:
             self._definition = self.definition()
-        return self._definition.qubits_in()
+        return self._definition.subspace_in()
 
-    def qubits_out(self) -> Subspace:
+    def subspace_out(self) -> Subspace:
         if self._definition is None:
             self._definition = self.definition()
-        return self._definition.qubits_out()
+        return self._definition.subspace_out()
 
     def normalization(self) -> float:
         if self._definition is None:

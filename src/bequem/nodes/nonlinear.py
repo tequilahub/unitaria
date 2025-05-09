@@ -14,22 +14,22 @@ class ComponentwiseMul(Node):
     ..., x_n * y_n]``. Usually you will want the elementwise product of two
     vectors, in which case the correct result will be obtained by building the
     tensor product of the vectors and then multiplying it with this operation,
-    i.e. ``Mul(Tensor(a, b), ComponentwiseMul(a.qubits_out()))``
+    i.e. ``Mul(Tensor(a, b), ComponentwiseMul(a.subspace_out()))``
 
     :ivar qubits:
         The vector space in which to perform the element-wise operation
     """
-    qubits: Subspace
+    subspace: Subspace
 
-    def __init__(self, qubits: Subspace):
-        self.qubits = qubits
+    def __init__(self, subspace: Subspace):
+        self.subspace = subspace
 
-    def qubits_in(self) -> Subspace:
-        return Subspace(self.qubits.registers * 2)
+    def subspace_in(self) -> Subspace:
+        return Subspace(self.subspace.registers * 2)
 
-    def qubits_out(self) -> Subspace:
+    def subspace_out(self) -> Subspace:
         return Subspace(
-            self.qubits.registers, self.qubits.total_qubits
+            self.subspace.registers, self.subspace.total_qubits
         )
 
     def normalization(self) -> float:
@@ -40,7 +40,7 @@ class ComponentwiseMul(Node):
 
     def compute(self, input: np.ndarray) -> np.ndarray:
         shape = list(input.shape[:-1])
-        dim = self.qubits.dimension
+        dim = self.subspace.dimension
         input_reshaped = input.reshape(shape + [dim, dim])
         return np.diagonal(input_reshaped, axis1=-2, axis2=-1)
 
@@ -56,7 +56,7 @@ class ComponentwiseMul(Node):
     def circuit(self) -> Circuit:
         circuit = Circuit()
 
-        for i in range(self.qubits.total_qubits):
-            circuit.tq_circuit += tq.gates.CNOT(i, i + self.qubits.total_qubits)
+        for i in range(self.subspace.total_qubits):
+            circuit.tq_circuit += tq.gates.CNOT(i, i + self.subspace.total_qubits)
 
         return circuit

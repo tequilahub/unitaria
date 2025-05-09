@@ -32,10 +32,10 @@ class ConstantVector(Node):
     def parameters(self) -> dict:
         return {"vec": self.vec}
 
-    def qubits_in(self) -> Subspace:
+    def subspace_in(self) -> Subspace:
         return Subspace(0, self.n_qubits)
 
-    def qubits_out(self) -> Subspace:
+    def subspace_out(self) -> Subspace:
         return Subspace(self.n_qubits)
 
     def normalization(self) -> float:
@@ -74,10 +74,10 @@ class ConstantUnitary(Node):
     def parameters(self) -> dict:
         return {"unitary": self.unitary}
 
-    def qubits_in(self) -> Subspace:
+    def subspace_in(self) -> Subspace:
         return Subspace(self.bits)
 
-    def qubits_out(self) -> Subspace:
+    def subspace_out(self) -> Subspace:
         return Subspace(self.bits)
 
     def normalization(self) -> Subspace:

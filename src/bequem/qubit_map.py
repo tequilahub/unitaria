@@ -10,14 +10,11 @@ from bequem.circuit import Circuit
 class Subspace:
     # TODO: More documentation
     """
-    Embedding of a vectorspace into the statespace of a number of qubits.
+    Subspace of the statespace of a number of qubits.
 
     :ivar registers:
-        List of registers, each describing an embedding. The total embedding of
-        all registers is the tensor product of the individual embeddings.
-    :ivar zero_qubits:
-        The number of additional qubits (always the most significant) which are
-        always zero in the embedding
+        List of registers, each describing a subspace. The total subspace of
+        all registers is the tensor product of the individual subspaces.
     """
 
     registers: list[Register]
@@ -27,7 +24,7 @@ class Subspace:
             registers = [ID] * registers
         for register in registers:
             if not isinstance(register, Register):
-                raise ValueError(f"{register} is not valid in a QubitMap")
+                raise ValueError(f"{register} is not a valid register in a Subspace")
         simplified_registers = []
         for register in registers:
             if isinstance(register, ControlledSubspace):
@@ -41,7 +38,7 @@ class Subspace:
     @property
     def dimension(self) -> int:
         """
-        The dimension of the embedded vector space
+        The dimension of the subspace
         """
         if self._dimension is None:
             self._dimension = 1
@@ -53,7 +50,7 @@ class Subspace:
     @property
     def total_qubits(self) -> int:
         """
-        The number of qubits of the state space in which the embedding lives
+        The number of qubits of the state space in which the subspace lives
 
         The dimension of the state space is ``2 ** total_qubits``
         """
@@ -83,7 +80,7 @@ class Subspace:
 
     def is_trivial(self) -> bool:
         """
-        Tests whether the embedded vector space only contains the ``|0>`` state
+        Tests whether the subspace only contains the ``|0>`` state
         """
         return self.trailing_zeros() == len(self.registers)
 
@@ -102,7 +99,7 @@ class Subspace:
 
     def test_basis(self, bits: int) -> bool:
         """
-        Tests whether the given basis state is inside the embedding
+        Tests whether the given basis state is inside the subspace
         """
         if bits >= 2 ** self.total_qubits:
             raise ValueError
@@ -130,7 +127,7 @@ class Subspace:
 
     def enumerate_basis(self) -> np.ndarray:
         """
-        Enumerates the basis states inside the embedding
+        Enumerates the basis states inside the subspace
         """
         return np.fromiter(
             filter(self.test_basis, range(2**self.total_qubits)), dtype=np.int32
@@ -145,7 +142,7 @@ class Subspace:
     def circuit(self) -> Circuit:
         """
         A circuit which checks, whether a number of qubits represent a state
-        inside the embedding.
+        inside the subspace.
 
         The result of the check will be stored in an additional qubit, meangin
         the total number of qubits in the circuit is ``total_qubits + 1``.
@@ -177,7 +174,7 @@ class Register(ABC):
     @abstractmethod
     def total_qubits(self) -> int:
         """
-        The number of qubits of the state space in which the embedding lives
+        The number of qubits of the state space in which the subspace lives
 
         The dimension of the state space is ``2 ** total_qubits``
         """
@@ -186,7 +183,7 @@ class Register(ABC):
     @abstractmethod
     def dimension(self) -> int:
         """
-        The dimension of the embedded vector space
+        The dimension of the subspace
         """
         raise NotImplementedError
 
@@ -204,8 +201,8 @@ class ZeroQubit(Register):
 @dataclass(frozen=True, repr=False)
 class ControlledSubspace(Register):
     """
-    Register where the most significant qubit determines the embedding of the
-    lower qubits
+    Register where the most significant qubit determines the subspace
+    corresponding to lower qubits
 
     :ivar case_zero:
         Embedding of lower qubits, if highest qubit is ``|0>``

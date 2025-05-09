@@ -11,32 +11,32 @@ from bequem.circuit import Circuit
 
 class Permutation(ProxyNode):
 
-    qubits_from: Subspace
-    qubits_to: Subspace
+    subspace_from: Subspace
+    subspace_to: Subspace
 
-    def __init__(self, qubits_from: Subspace, qubits_to: Subspace):
-        if qubits_from.dimension != qubits_to.dimension:
+    def __init__(self, subspace_from: Subspace, subspace_to: Subspace):
+        if subspace_from.dimension != subspace_to.dimension:
             raise ValueError
-        self.qubits_from = qubits_from
-        self.qubits_to = qubits_to
+        self.subspace_from = subspace_from
+        self.subspace_to = subspace_to
 
     def definition(self):
-        perm_in = move_zeros_to_end(self.qubits_from)
-        perm_out = move_zeros_to_end(self.qubits_to)
-        if perm_in.qubits_out().match_nonzero(perm_out.qubits_out()):
+        perm_in = move_zeros_to_end(self.subspace_from)
+        perm_out = move_zeros_to_end(self.subspace_to)
+        if perm_in.subspace_out().match_nonzero(perm_out.subspace_out()):
             return UnsafeMul(perm_in, Adjoint(perm_out))
         raise NotImplementedError
 
     def parameters(self) -> dict:
-        return { "qubits_from": self.qubits_from, "qubits_to": self.qubits_to }
+        return { "subspace_from": self.subspace_from, "subspace_to": self.subspace_to }
 
-    def qubits_in(self) -> Subspace:
-        max_qubits = max(self.qubits_from.total_qubits, self.qubits_to.total_qubits)
-        return Subspace(self.qubits_from.registers, max_qubits - self.qubits_from.total_qubits)
+    def subspace_in(self) -> Subspace:
+        max_qubits = max(self.subspace_from.total_qubits, self.subspace_to.total_qubits)
+        return Subspace(self.subspace_from.registers, max_qubits - self.subspace_from.total_qubits)
 
-    def qubits_out(self) -> Subspace:
-        max_qubits = max(self.qubits_from.total_qubits, self.qubits_to.total_qubits)
-        return Subspace(self.qubits_to.registers, max_qubits - self.qubits_to.total_qubits)
+    def subspace_out(self) -> Subspace:
+        max_qubits = max(self.subspace_from.total_qubits, self.subspace_to.total_qubits)
+        return Subspace(self.subspace_to.registers, max_qubits - self.subspace_to.total_qubits)
 
     def normalization(self) -> float:
         return 1
@@ -79,10 +79,10 @@ class PermuteRegisters(Node):
     def parameters(self) -> dict:
         return { "qubits": self.qubits, "permutation_map": self.permutation_map }
 
-    def qubits_in(self) -> Subspace:
+    def subspace_in(self) -> Subspace:
         return self.qubits
 
-    def qubits_out(self) -> Subspace:
+    def subspace_out(self) -> Subspace:
         return Subspace([self.qubits.registers[i] for i in self.permutation_map])
 
     def normalization(self) -> float:
@@ -102,7 +102,7 @@ class PermuteRegisters(Node):
 
     def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
         outer_shape = list(input.shape[:-1])
-        register_shape = [r.dimension() for r in self.qubits_out().registers]
+        register_shape = [r.dimension() for r in self.subspace_out().registers]
         total_shape = outer_shape + register_shape
         input = input.reshape(outer_shape + register_shape)
         perm = list(range(len(outer_shape))) + [len(total_shape) - i - 1 for i in reversed(self.permutation_map)]

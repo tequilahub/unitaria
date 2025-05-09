@@ -29,8 +29,8 @@ class BlockHorizontal(ProxyNode):
         return [self.A, self.B]
 
     def definition(self) -> Node:
-        permutation = Permutation(self.A.qubits_out(),
-                                  self.B.qubits_out())
+        permutation = Permutation(self.A.subspace_out(),
+                                  self.B.subspace_out())
 
         A_permuted = Scale(UnsafeMul(self.A, permutation),
                            absolute=True)
@@ -39,7 +39,7 @@ class BlockHorizontal(ProxyNode):
         diag = BlockDiagonal(A_permuted, B_permuted)
 
         rotation_out = Tensor(
-            Identity(permutation.qubits_out()),
+            Identity(permutation.subspace_out()),
             ConstantVector(
                 np.array([self.A.normalization(),
                           self.B.normalization()])))
@@ -52,7 +52,7 @@ class BlockHorizontal(ProxyNode):
             np.abs(self.B.normalization())**2)
 
     def compute(self, input: np.ndarray) -> np.ndarray:
-        dim_A = self.A.qubits_in().dimension
+        dim_A = self.A.subspace_in().dimension
         input_A, input_B = np.split(input, [dim_A], axis=-1)
         return self.A.compute(input_A) + self.B.compute(input_B)
 
@@ -79,7 +79,7 @@ class BlockVertical(ProxyNode):
         return [self.A, self.B]
 
     def definition(self) -> Node:
-        permutation = Permutation(self.A.qubits_in(), self.B.qubits_in())
+        permutation = Permutation(self.A.subspace_in(), self.B.subspace_in())
 
         A_permuted = Scale(UnsafeMul(Adjoint(permutation), self.A),
                            absolute=True)
@@ -88,7 +88,7 @@ class BlockVertical(ProxyNode):
         diag = BlockDiagonal(A_permuted, B_permuted)
 
         rotation_in = Tensor(
-            Identity(permutation.qubits_out()),
+            Identity(permutation.subspace_out()),
             ConstantVector(
                 np.array([self.A.normalization(),
                           self.B.normalization()])))
@@ -105,7 +105,7 @@ class BlockVertical(ProxyNode):
                               axis=-1)
 
     def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
-        dim_A = self.A.qubits_in().dimension
+        dim_A = self.A.subspace_in().dimension
         input_A, input_B = np.split(input, [dim_A], axis=-1)
         return self.A.compute_adjoint(input_A) + self.B.compute_adjoint(
             input_B)
