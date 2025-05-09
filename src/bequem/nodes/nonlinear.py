@@ -48,7 +48,7 @@ class ComponentwiseMul(Node):
         if input.ndim == 1:
             result = np.diag(input)
         else:
-            result = np.zeros(list(input.shape[:-1]) + [input.shape[-1]] * 2)
+            result = np.zeros(list(input.shape[:-1]) + [input.shape[-1]] * 2, dtype=np.complex128)
             indices = np.arange(input.shape[-1])
             result[:, indices, indices] = input[:, indices]
         return result.reshape(list(input.shape[:-1]) + [input.shape[-1] ** 2])

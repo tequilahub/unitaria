@@ -145,7 +145,7 @@ class Node(ABC):
         return self.subspace_in.is_trivial()
 
     @abstractmethod
-    def compute(self, input: np.ndarray | None = None) -> np.ndarray:
+    def compute(self, input: np.ndarray) -> np.ndarray:
         """
         Apply the action of this nodes matrix to the input.
 
@@ -163,7 +163,7 @@ class Node(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def compute_adjoint(self, input: np.ndarray | None = None) -> np.ndarray:
+    def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
         """
         Apply the adjoint action of this nodes matrix to the input.
 
@@ -252,7 +252,7 @@ class Node(ABC):
         for child in self.children():
             child.find_error()
 
-    def verify(self, drill: bool = True) -> np.ndarray:
+    def verify(self, drill: bool = True, up_to_phase: bool = False) -> np.ndarray:
         """
         Verify the correctness of this node.
 
@@ -279,17 +279,17 @@ class Node(ABC):
             if not self.is_vector():
                 computed = np.eye(len(basis_out),
                                   len(basis_in),
-                                  dtype=np.complex64)
+                                  dtype=np.complex128)
                 simulated = np.zeros((len(basis_out), len(basis_in)),
-                                     dtype=np.complex64)
-                computed_m = self.compute(np.eye(len(basis_in))).T
-                computed_adj_m = self.compute_adjoint(np.eye(len(basis_out))).T
+                                     dtype=np.complex128)
+                computed_m = self.compute(np.eye(len(basis_in), dtype=np.complex128)).T
+                computed_adj_m = self.compute_adjoint(np.eye(len(basis_out), dtype=np.complex128)).T
                 computed_adj = np.eye(len(basis_in),
                                       len(basis_out),
-                                      dtype=np.complex64)
+                                      dtype=np.complex128)
 
                 for (i, b) in enumerate(basis_in):
-                    input = np.zeros(len(basis_in))
+                    input = np.zeros(len(basis_in), dtype=np.complex128)
                     input[i] = 1
                     computed[:, i] = self.compute(input)
                     simulated[:, i] = np.exp(
@@ -298,9 +298,15 @@ class Node(ABC):
                             circuit.simulate(b, backend="qulacs"))
 
                 for (i, b) in enumerate(basis_out):
-                    input = np.zeros(len(basis_out))
+                    input = np.zeros(len(basis_out), dtype=np.complex128)
                     input[i] = 1
                     computed_adj[:, i] = self.compute_adjoint(input)
+
+                if up_to_phase:
+                    computed_m = bring_to_same_phase(computed, computed_m)
+                    simulated = bring_to_same_phase(computed, simulated)
+                    computed_adj_m = bring_to_same_phase(np.conj(computed).T, computed_adj_m)
+                    computed_adj = bring_to_same_phase(np.conj(computed).T, computed_adj)
 
                 # verify compute with tensor valued input
                 np.testing.assert_allclose(computed, computed_m, atol=1e-8)
@@ -313,13 +319,13 @@ class Node(ABC):
 
                 return computed_m
             else:
-                computed = self.compute(None)
-                if computed is None:
-                    computed = np.array([1])
+                computed = self.compute(np.array([1], dtype=np.complex128))
                 simulated = np.exp(
                     self.phase *
                     1j) * self.normalization * self.subspace_out.project(
                         circuit.simulate(0, backend="qulacs"))
+                if up_to_phase:
+                    simulated = bring_to_same_phase(computed, simulated)
 
                 # verify circuit
                 np.testing.assert_allclose(computed, simulated, atol=1e-8)
@@ -331,6 +337,11 @@ class Node(ABC):
                 except VerificationError as child_err:
                     raise VerificationError(self, circuit) from child_err
             raise VerificationError(self, circuit) from err
+
+def bring_to_same_phase(a: np.ndarray, b: np.ndarray):
+    b_f = b.flatten()
+    i = np.argmax(np.abs(b_f))
+    return a.flatten()[i] / b_f[i] * b
 
 
 class VerificationError(Exception):

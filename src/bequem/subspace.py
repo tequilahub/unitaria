@@ -175,7 +175,7 @@ class Subspace:
         min_bits = int(np.ceil(np.log2(dim)))
         case_zero = Subspace(min_bits - 1)
         case_one = Subspace.from_dim(dim - 2 ** (min_bits - 1), min_bits - 1)
-        return Subspace([Qubit(case_zero, case_one)], bits - min_bits)
+        return Subspace([ControlledSubspace(case_zero, case_one)], bits - min_bits)
 
 
 class Register(ABC):

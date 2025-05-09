@@ -48,7 +48,7 @@ class Add(ProxyNode):
 
         sqrt_A = np.sqrt(np.abs(self.A.normalization))
         sqrt_B = np.sqrt(np.abs(self.B.normalization))
-        rotation_in = Tensor(Identity(permutation_in.subspace_out),
+        rotation_in = Tensor(Identity(permutation_in.subspace_in),
                              ConstantVector(np.array([sqrt_A, sqrt_B])))
         rotation_out = Tensor(
             Identity(permutation_out.subspace_out),

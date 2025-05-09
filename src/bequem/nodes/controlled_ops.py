@@ -45,7 +45,7 @@ class BlockDiagonal(ProxyNode):
             B_controlled, max(0, controlled_bits_A - controlled_bits_B), False)
         B_controlled = UnsafeMul(
             UnsafeMul(
-                Identity(subspace_in, B_controlled.subspace_in),
+                Identity(subspace_mid, B_controlled.subspace_in),
                 B_controlled,
             ),
             Identity(B_controlled.subspace_out, subspace_out),

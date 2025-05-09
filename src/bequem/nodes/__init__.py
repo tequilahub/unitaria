@@ -1,4 +1,5 @@
 from bequem.nodes.node import Node
+from bequem.nodes.constant import ConstantVector, ConstantUnitary
 from bequem.nodes.basic_ops import Tensor, Adjoint, Scale
 from bequem.nodes.permutation import Permutation
 from bequem.nodes.controlled_ops import BlockDiagonal

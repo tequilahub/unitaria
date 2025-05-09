@@ -50,17 +50,21 @@ class Identity(Node):
         if self.project_to is None:
             return input
         else:
-            expanded = np.zeros(2 ** self.subspace.total_qubits)
-            expanded[self.subspace.enumerate_basis()] = input
-            return expanded[self.project_to.enumerate_basis()]
+            outer_shape = list(input.shape[:-1])
+            input = input.reshape([-1, self.subspace_in.dimension])
+            expanded = np.zeros((input.shape[0], 2 ** self.subspace_in.total_qubits), dtype=np.complex128)
+            expanded[:, self.subspace_in.enumerate_basis()] = input
+            return expanded[:, self.subspace_out.enumerate_basis()].reshape(outer_shape + [-1])
 
     def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
         if self.project_to is None:
             return input
         else:
-            expanded = np.zeros(2 ** self.subspace.total_qubits)
-            expanded[self.project_to.enumerate_basis()] = input
-            return expanded[self.subspace.enumerate_basis()]
+            outer_shape = list(input.shape[:-1])
+            input = input.reshape([-1, self.subspace_out.dimension])
+            expanded = np.zeros((input.shape[0], 2 ** self.subspace_out.total_qubits), dtype=np.complex128)
+            expanded[:, self.subspace_out.enumerate_basis()] = input
+            return expanded[:, self.subspace_in.enumerate_basis()].reshape(outer_shape + [-1])
 
     def _circuit(self) -> Circuit:
         circuit = Circuit()

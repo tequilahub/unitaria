@@ -125,25 +125,39 @@ class Tensor(Node):
         if input is None:
             input = np.array([1])
         batch_shape = list(input.shape[:-1])
+        input = input.reshape([-1, self.A.subspace_in.dimension])
+        input = self.A.compute(input)
         input = input.reshape(
             batch_shape +
             [self.B.subspace_in.dimension,
-             self.A.subspace_in.dimension])
-        input = self.A.compute(input)
+             self.A.subspace_out.dimension])
         input = np.swapaxes(input, -1, -2)
+        input = input.reshape([-1, self.B.subspace_in.dimension])
         input = self.B.compute(input)
+        input = input.reshape(
+            batch_shape +
+            [self.A.subspace_out.dimension,
+             self.B.subspace_out.dimension])
         input = np.swapaxes(input, -1, -2)
         return np.reshape(input, batch_shape + [-1])
 
     def compute_adjoint(self, input: np.ndarray | None) -> np.ndarray:
+        if input is None:
+            input = np.array([1])
         batch_shape = list(input.shape[:-1])
+        input = input.reshape([-1, self.A.subspace_out.dimension])
+        input = self.A.compute_adjoint(input)
         input = input.reshape(
             batch_shape +
             [self.B.subspace_out.dimension,
-             self.A.subspace_out.dimension])
-        input = self.A.compute_adjoint(input)
+             self.A.subspace_in.dimension])
         input = np.swapaxes(input, -1, -2)
+        input = input.reshape([-1, self.B.subspace_out.dimension])
         input = self.B.compute_adjoint(input)
+        input = input.reshape(
+            batch_shape +
+            [self.A.subspace_in.dimension,
+             self.B.subspace_in.dimension])
         input = np.swapaxes(input, -1, -2)
         return np.reshape(input, batch_shape + [-1])
 
