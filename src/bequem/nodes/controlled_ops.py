@@ -1,7 +1,7 @@
 import numpy as np
 import tequila as tq
 
-from bequem.qubit_map import Subspace, ControlledSubspace
+from bequem.subspace import Subspace, ControlledSubspace
 from bequem.nodes.basic_ops import UnsafeMul
 from bequem.nodes.identity import Identity
 from bequem.nodes.proxy_node import ProxyNode

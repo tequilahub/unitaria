@@ -75,8 +75,8 @@ class Subspace:
                 str_registers = str(registers)
                 break
         if trailing_zeros == 0:
-            return f"QubitMap({str_registers})"
-        return f"QubitMap({str_registers}, zero_qubits={trailing_zeros})"
+            return f"Subspace({str_registers})"
+        return f"Subspace({str_registers}, zero_qubits={trailing_zeros})"
 
     def is_trivial(self) -> bool:
         """
@@ -168,6 +168,15 @@ class Subspace:
             self.registers[:-(trailing_zeros + 1)] + self.registers[-(trailing_zeros + 1)].case_one.registers,
         )
 
+    @staticmethod
+    def from_dim(dim: int, bits: int) -> Subspace:
+        if dim == 1:
+            return Subspace(0, bits)
+        min_bits = int(np.ceil(np.log2(dim)))
+        case_zero = Subspace(min_bits - 1)
+        case_one = Subspace.from_dim(dim - 2 ** (min_bits - 1), min_bits - 1)
+        return Subspace([Qubit(case_zero, case_one)], bits - min_bits)
+
 
 class Register(ABC):
 
@@ -231,9 +240,9 @@ class ControlledSubspace(Register):
         Specifically, if :py:attr:`case_one` and :py:attr:`case_zero` agree in a number of lowest
         qubits, this common part can be factored out. E.g.
 
-            >>> from bequem.qubit_map import Qubit, QubitMap
-            >>> Qubit(QubitMap(2), QubitMap(1)).simplify()
-            [ID, Qubit(case_zero=QubitMap(1), case_one=QubitMap(0))]
+            >>> from bequem.qubit_map import Qubit, Subspace
+            >>> Qubit(Subspace(2), Subspace(1)).simplify()
+            [ID, Qubit(case_zero=Subspace(1), case_one=Subspace(0))]
         """
         min_len = min(len(self.case_zero.registers), len(self.case_one.registers))
         for i in range(min_len):

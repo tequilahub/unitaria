@@ -1,7 +1,7 @@
 import numpy as np
 
 from bequem.circuit import Circuit
-from bequem.qubit_map import Subspace
+from bequem.subspace import Subspace
 from bequem.nodes.node import Node
 
 
@@ -21,6 +21,8 @@ class Identity(Node):
         """
         self.subspace = subspace
         self.project_to = project_to
+        if project_to is not None and subspace.total_qubits != project_to.total_qubits:
+            raise ValueError
 
     def children(self) -> list[Node]:
         return []

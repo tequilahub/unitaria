@@ -6,7 +6,7 @@ from bequem.nodes.controlled_ops import BlockDiagonal
 from bequem.nodes.permutation import Permutation
 from bequem.nodes.constant import ConstantVector
 from bequem.nodes.identity import Identity
-from bequem.qubit_map import Subspace
+from bequem.subspace import Subspace
 
 
 class Add(ProxyNode):
@@ -22,6 +22,10 @@ class Add(ProxyNode):
     B: Node
 
     def __init__(self, A: Node, B: Node):
+        if A.subspace_in.dimension != B.subspace_in.dimension:
+            raise ValueError(f"dimensions {A.subspace_in.dimension} and {B.subspace_in.dimension} do not match")
+        if A.subspace_out.dimension != B.subspace_out.dimension:
+            raise ValueError(f"dimensions {A.subspace_out.dimension} and {B.subspace_out.dimension} do not match")
         self.A = A
         self.B = B
 
@@ -68,6 +72,8 @@ class Add(ProxyNode):
 
 Node.__add__ = lambda A, B: Add(A, B)
 
+Node.__sub__ = lambda A, B: Add(A, Scale(B, -1))
+
 
 class Mul(ProxyNode):
     """
@@ -85,6 +91,8 @@ class Mul(ProxyNode):
     B: Node
 
     def __init__(self, A: Node, B: Node):
+        if A.subspace_out.dimension != B.subspace_in.dimension:
+            raise ValueError(f"dimensions {A.subspace_out.dimension} and {B.subspace_in.dimension} do not match")
         self.A = A
         self.B = B
 
@@ -118,4 +126,4 @@ class Mul(ProxyNode):
         return self.A.phase + self.B.phase
 
 
-Node.__matmul__ = lambda A, B: Mul(A, B)
+Node.__matmul__ = lambda A, B: Mul(B, A)

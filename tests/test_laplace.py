@@ -1,7 +1,7 @@
 import pytest
 
 from bequem.nodes import Increment, Identity, Add, Scale, Adjoint
-from bequem.qubit_map import Subspace
+from bequem.subspace import Subspace
 
 
 @pytest.mark.parametrize("n", range(1, 5))

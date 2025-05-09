@@ -3,7 +3,7 @@ import numpy as np
 import tequila as tq
 
 from bequem.circuit import Circuit
-from bequem.qubit_map import Subspace
+from bequem.subspace import Subspace
 from bequem.nodes.node import Node
 
 
@@ -303,6 +303,8 @@ class Scale(Node):
 
     def _circuit(self) -> Circuit:
         return self.A.circuit
+
+Node.__rmul__ = lambda A, s: Scale(A, s)
 
 
 class ComputeProjection(Node):

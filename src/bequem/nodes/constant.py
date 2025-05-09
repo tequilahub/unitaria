@@ -3,7 +3,7 @@ import numpy as np
 from bequem.circuit import Circuit
 from bequem.circuits.state_prep import prepare_state
 from bequem.nodes.node import Node
-from bequem.qubit_map import Subspace
+from bequem.subspace import Subspace
 
 
 class ConstantVector(Node):

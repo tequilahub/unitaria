@@ -1,5 +1,5 @@
 from bequem.nodes import ComponentwiseMul
-from bequem.qubit_map import Subspace, ControlledSubspace, ID
+from bequem.subspace import Subspace, ControlledSubspace, ID
 
 
 def test_componentwise_mul():

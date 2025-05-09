@@ -8,7 +8,7 @@ from rich.tree import Tree
 from rich.console import Console
 from rich.syntax import Syntax
 
-from bequem.qubit_map import Subspace
+from bequem.subspace import Subspace
 from bequem.circuit import Circuit
 
 Uuid = str

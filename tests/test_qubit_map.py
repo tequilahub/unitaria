@@ -1,7 +1,7 @@
 import numpy as np
 import tequila as tq
 
-from bequem.qubit_map import Subspace, ControlledSubspace, ID
+from bequem.subspace import Subspace, ControlledSubspace, ID
 from bequem.circuit import Circuit
 
 

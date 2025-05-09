@@ -4,7 +4,7 @@ import numpy as np
 import tequila as tq
 from bequem.nodes.node import Node
 from bequem.nodes.proxy_node import ProxyNode
-from bequem.qubit_map import Subspace, ZeroQubit
+from bequem.subspace import Subspace, ZeroQubit
 from bequem.nodes.basic_ops import UnsafeMul, Adjoint
 from bequem.circuit import Circuit
 
@@ -16,7 +16,7 @@ class Permutation(ProxyNode):
 
     def __init__(self, subspace_from: Subspace, subspace_to: Subspace):
         if subspace_from.dimension != subspace_to.dimension:
-            raise ValueError
+            raise ValueError(f"dimensions {subspace_from.dimension} and {subspace_to.dimension} do not match")
         self.subspace_from = subspace_from
         self.subspace_to = subspace_to
 

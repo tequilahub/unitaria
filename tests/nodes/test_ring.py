@@ -1,6 +1,6 @@
 from bequem.nodes.integer_arithmetic import Increment
 from bequem.nodes.identity import Identity
-from bequem.qubit_map import Subspace
+from bequem.subspace import Subspace
 
 
 def test_add():

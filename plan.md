@@ -39,7 +39,7 @@ Vielleicht von Numpy inspirieren lassen
 
 ## TODOS
 
-1. [ ] Caching
+1. [x] Caching
 1. [ ] Check dass case_one.total_qubits = case_zero.total_qubits
 1. [ ] Alles in Datein aufspalten
 1. [ ] Dependencies qulacs, cirq, qiskit
