@@ -2,7 +2,7 @@ import numpy as np
 import tequila as tq
 
 from .node import Node
-from bequem.qubit_map import QubitMap
+from bequem.qubit_map import Subspace
 from bequem.circuit import Circuit
 from bequem.circuits.arithmetic import increment_circuit_single_ancilla, addition_circuit
 
@@ -19,17 +19,17 @@ class Increment(Node):
     def parameters(self) -> dict:
         return { "bits": self.bits }
 
-    def qubits_in(self) -> QubitMap:
+    def qubits_in(self) -> Subspace:
         if self.bits <= 3:
-            return QubitMap(self.bits)
+            return Subspace(self.bits)
         else:
-            return QubitMap(self.bits, 1)
+            return Subspace(self.bits, 1)
 
-    def qubits_out(self) -> QubitMap:
+    def qubits_out(self) -> Subspace:
         if self.bits <= 3:
-            return QubitMap(self.bits)
+            return Subspace(self.bits)
         else:
-            return QubitMap(self.bits, 1)
+            return Subspace(self.bits, 1)
 
     def normalization(self) -> float:
         return 1
@@ -69,11 +69,11 @@ class IntegerAddition(Node):
     def parameters(self) -> dict:
         return { "source_bits": self.source_bits, "target_bits": self.target_bits }
 
-    def qubits_in(self) -> QubitMap:
-        return QubitMap(self.source_bits + self.target_bits)
+    def qubits_in(self) -> Subspace:
+        return Subspace(self.source_bits + self.target_bits)
 
-    def qubits_out(self) -> QubitMap:
-        return QubitMap(self.source_bits + self.target_bits)
+    def qubits_out(self) -> Subspace:
+        return Subspace(self.source_bits + self.target_bits)
 
     def normalization(self) -> float:
         return 1

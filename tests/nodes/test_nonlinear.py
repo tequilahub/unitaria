@@ -1,8 +1,8 @@
 from bequem.nodes import ComponentwiseMul
-from bequem.qubit_map import QubitMap, Qubit, ID
+from bequem.qubit_map import Subspace, ControlledSubspace, ID
 
 
 def test_componentwise_mul():
-    ComponentwiseMul(QubitMap(1)).verify()
-    ComponentwiseMul(QubitMap(1, 1)).verify()
-    ComponentwiseMul(QubitMap([ID, Qubit(QubitMap(1), QubitMap(0, 1))])).verify()
+    ComponentwiseMul(Subspace(1)).verify()
+    ComponentwiseMul(Subspace(1, 1)).verify()
+    ComponentwiseMul(Subspace([ID, ControlledSubspace(Subspace(1), Subspace(0, 1))])).verify()

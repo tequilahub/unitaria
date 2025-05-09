@@ -1,7 +1,7 @@
 import numpy as np
 
 from bequem.circuit import Circuit
-from bequem.qubit_map import QubitMap
+from bequem.qubit_map import Subspace
 from bequem.nodes.node import Node
 
 
@@ -12,9 +12,9 @@ class Identity(Node):
     :ivar qubits:
         The domain of the identity matrix
     """
-    qubits: QubitMap
+    qubits: Subspace
 
-    def __init__(self, qubits: QubitMap, project_to: QubitMap | None = None):
+    def __init__(self, qubits: Subspace, project_to: Subspace | None = None):
         """
         :param qubits:
             The domain of the identity matrix
@@ -32,10 +32,10 @@ class Identity(Node):
             params["project_to"] = self.project_to
         return params
 
-    def qubits_in(self) -> QubitMap:
+    def qubits_in(self) -> Subspace:
         return self.qubits
 
-    def qubits_out(self) -> QubitMap:
+    def qubits_out(self) -> Subspace:
         return self.project_to or self.qubits
 
     def normalization(self) -> float:

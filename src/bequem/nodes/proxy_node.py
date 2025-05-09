@@ -5,7 +5,7 @@ from rich.panel import Panel
 
 from bequem.nodes.node import Node
 from bequem.circuit import Circuit
-from bequem.qubit_map import QubitMap
+from bequem.qubit_map import Subspace
 
 class ProxyNode(Node):
     """
@@ -48,12 +48,12 @@ class ProxyNode(Node):
             self._definition = self.definition()
         return self._definition.circuit()
 
-    def qubits_in(self) -> QubitMap:
+    def qubits_in(self) -> Subspace:
         if self._definition is None:
             self._definition = self.definition()
         return self._definition.qubits_in()
 
-    def qubits_out(self) -> QubitMap:
+    def qubits_out(self) -> Subspace:
         if self._definition is None:
             self._definition = self.definition()
         return self._definition.qubits_out()

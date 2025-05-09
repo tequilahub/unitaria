@@ -7,7 +7,7 @@ from rich.tree import Tree
 from rich.console import Console
 from rich.syntax import Syntax
 
-from bequem.qubit_map import QubitMap
+from bequem.qubit_map import Subspace
 from bequem.circuit import Circuit
 
 Uuid = str
@@ -55,7 +55,7 @@ class Node(ABC):
     #     return None
 
     @abstractmethod
-    def qubits_in(self) -> QubitMap:
+    def qubits_in(self) -> Subspace:
         """
         The embedding of the input vectorspace.
 
@@ -68,7 +68,7 @@ class Node(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def qubits_out(self) -> QubitMap:
+    def qubits_out(self) -> Subspace:
         """
         The embedding of the output vectorspace.
 

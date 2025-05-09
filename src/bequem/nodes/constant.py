@@ -3,7 +3,7 @@ import numpy as np
 from bequem.circuit import Circuit
 from bequem.circuits.state_prep import prepare_state
 from bequem.nodes.node import Node
-from bequem.qubit_map import QubitMap
+from bequem.qubit_map import Subspace
 
 
 class ConstantVector(Node):
@@ -32,11 +32,11 @@ class ConstantVector(Node):
     def parameters(self) -> dict:
         return {"vec": self.vec}
 
-    def qubits_in(self) -> QubitMap:
-        return QubitMap(0, self.n_qubits)
+    def qubits_in(self) -> Subspace:
+        return Subspace(0, self.n_qubits)
 
-    def qubits_out(self) -> QubitMap:
-        return QubitMap(self.n_qubits)
+    def qubits_out(self) -> Subspace:
+        return Subspace(self.n_qubits)
 
     def normalization(self) -> float:
         return self._normalization
@@ -74,16 +74,16 @@ class ConstantUnitary(Node):
     def parameters(self) -> dict:
         return {"unitary": self.unitary}
 
-    def qubits_in(self) -> QubitMap:
-        return QubitMap(self.bits)
+    def qubits_in(self) -> Subspace:
+        return Subspace(self.bits)
 
-    def qubits_out(self) -> QubitMap:
-        return QubitMap(self.bits)
+    def qubits_out(self) -> Subspace:
+        return Subspace(self.bits)
 
-    def normalization(self) -> QubitMap:
+    def normalization(self) -> Subspace:
         return 1
 
-    def phase(self) -> QubitMap:
+    def phase(self) -> Subspace:
         return 0
 
     def compute(self, input: np.ndarray) -> np.ndarray:

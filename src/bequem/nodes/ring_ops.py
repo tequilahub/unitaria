@@ -6,7 +6,7 @@ from bequem.nodes.controlled_ops import BlockDiagonal
 from bequem.nodes.permutation import Permutation
 from bequem.nodes.constant import ConstantVector
 from bequem.nodes.identity import Identity
-from bequem.qubit_map import QubitMap
+from bequem.qubit_map import Subspace
 
 
 class Add(ProxyNode):
@@ -94,9 +94,9 @@ class Mul(ProxyNode):
     def definition(self) -> Node:
         permutation = Permutation(self.A.qubits_out(), self.B.qubits_in())
         A_permuted = Tensor(self.A,
-                            Identity(QubitMap(0, 1)))
+                            Identity(Subspace(0, 1)))
         B_permuted = Tensor(UnsafeMul(permutation, self.B),
-                            Identity(QubitMap(0, 1)))
+                            Identity(Subspace(0, 1)))
         return UnsafeMul(
             UnsafeMul(A_permuted, ComputeProjection(self.A.qubits_out())),
             B_permuted)

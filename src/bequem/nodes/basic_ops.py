@@ -3,7 +3,7 @@ import numpy as np
 import tequila as tq
 
 from bequem.circuit import Circuit
-from bequem.qubit_map import QubitMap
+from bequem.qubit_map import Subspace
 from bequem.nodes.node import Node
 
 
@@ -41,12 +41,12 @@ class UnsafeMul(Node):
         max_qubits = max(A.qubits_in().total_qubits,
                          B.qubits_out().total_qubits)
         qubits_in_A = A.qubits_in()
-        self._qubits_in = QubitMap(
+        self._qubits_in = Subspace(
             qubits_in_A.registers,
             max_qubits - qubits_in_A.total_qubits,
         )
         qubits_out_B = B.qubits_out()
-        self._qubits_out = QubitMap(
+        self._qubits_out = Subspace(
             qubits_out_B.registers,
             max_qubits - qubits_out_B.total_qubits,
         )
@@ -73,10 +73,10 @@ class UnsafeMul(Node):
 
         return circuit
 
-    def qubits_in(self) -> QubitMap:
+    def qubits_in(self) -> Subspace:
         return self._qubits_in
 
-    def qubits_out(self) -> QubitMap:
+    def qubits_out(self) -> Subspace:
         return self._qubits_out
 
     def normalization(self) -> float:
@@ -166,17 +166,17 @@ class Tensor(Node):
 
         return circuit
 
-    def qubits_in(self) -> QubitMap:
+    def qubits_in(self) -> Subspace:
         qubits_A = self.A.qubits_in()
         qubits_B = self.B.qubits_in()
-        return QubitMap(
+        return Subspace(
             qubits_A.registers + qubits_B.registers,
         )
 
-    def qubits_out(self) -> QubitMap:
+    def qubits_out(self) -> Subspace:
         qubits_A = self.A.qubits_out()
         qubits_B = self.B.qubits_out()
-        return QubitMap(
+        return Subspace(
             qubits_A.registers + qubits_B.registers,
         )
 
@@ -209,10 +209,10 @@ class Adjoint(Node):
     def children(self) -> list[Node]:
         return [self.A]
 
-    def qubits_in(self) -> QubitMap:
+    def qubits_in(self) -> Subspace:
         return self.A.qubits_out()
 
-    def qubits_out(self) -> QubitMap:
+    def qubits_out(self) -> Subspace:
         return self.A.qubits_in()
 
     def normalization(self) -> float:
@@ -276,10 +276,10 @@ class Scale(Node):
     def parameters(self) -> dict:
         return {"scale": self.scale, "absolute": self.absolute}
 
-    def qubits_in(self) -> QubitMap:
+    def qubits_in(self) -> Subspace:
         return self.A.qubits_in()
 
-    def qubits_out(self) -> QubitMap:
+    def qubits_out(self) -> Subspace:
         return self.A.qubits_out()
 
     def normalization(self) -> float:
@@ -312,16 +312,16 @@ class Scale(Node):
 
 
 class ComputeProjection(Node):
-    def __init__(self, qubits: QubitMap):
-        self.qubits = QubitMap(qubits.registers, 1)
+    def __init__(self, qubits: Subspace):
+        self.qubits = Subspace(qubits.registers, 1)
 
     def children(self) -> list[Node]:
         return []
 
-    def qubits_in(self) -> QubitMap:
+    def qubits_in(self) -> Subspace:
         return self.qubits
 
-    def qubits_out(self) -> QubitMap:
+    def qubits_out(self) -> Subspace:
         return self.qubits
 
     def normalization(self) -> float:

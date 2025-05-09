@@ -1,10 +1,10 @@
 from bequem.nodes.identity import Identity
-from bequem.qubit_map import QubitMap
+from bequem.qubit_map import Subspace
 
 
 def test_identity():
 
-    I = Identity(QubitMap(1))
+    I = Identity(Subspace(1))
     I.verify()
-    I = Identity(QubitMap(0))
+    I = Identity(Subspace(0))
     I.verify()

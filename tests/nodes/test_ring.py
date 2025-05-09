@@ -1,10 +1,10 @@
 from bequem.nodes.integer_arithmetic import Increment
 from bequem.nodes.identity import Identity
-from bequem.qubit_map import QubitMap
+from bequem.qubit_map import Subspace
 
 
 def test_add():
-    A = Identity(QubitMap(1, 1))
+    A = Identity(Subspace(1, 1))
     B = Increment(1)
 
     D = A + B

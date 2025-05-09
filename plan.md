@@ -39,20 +39,26 @@ Vielleicht von Numpy inspirieren lassen
 
 ## TODOS
 
-1. Global phase in tequila implementieren (Ram)
-2. Identity Gate (Ram)
-3. Circuit für QubitMap (Oliver)
-4. Componentwise Multiplication (Matthias)
-5. Circuit Synthesis (Matthias)
-6. Nonlinear Beispiel (Jessica)
-7. FEM Beispiel (Jessica)
-8. QSVT (Matthias)
-9. Laplace / Konvolution testen <-- für nächstes Treffen
-10. Ancillas, measurements
-11. CI
-12. Documentation
-13. plan.md nicht auf PyPi hochladen
-14. Verify mit zufälliger Basis
+1. [ ] Caching
+1. [ ] Check dass case_one.total_qubits = case_zero.total_qubits
+1. [ ] Alles in Datein aufspalten
+1. [ ] Dependencies qulacs, cirq, qiskit
+1. [ ] Global phase in tequila implementieren (Ram)
+2. [ ] Identity Gate (Ram)
+3. [ ] Circuit für QubitMap (Oliver)
+3. [x] phase (Oliver)
+4. [x] Componentwise Multiplication (Matthias)
+5. [x] Circuit Synthesis (Matthias)
+6. [ ] Nonlinear Beispiel (Jessica)
+7. [ ] FEM Beispiel (Matthias)
+8. [ ] QSVT (Matthias)
+9. [ ] Laplace / Konvolution testen <-- für nächstes Treffen
+10. [ ] Ancillas (Oliver)
+10. [ ] Measurements
+11. [ ] CI
+12. [ ] Documentation
+13. [ ] plan.md nicht auf PyPi hochladen
+14. [ ] Verify mit zufälliger Basis
 
 ## Offene Fragen
 

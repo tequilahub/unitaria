@@ -4,17 +4,17 @@ import numpy as np
 import tequila as tq
 from bequem.nodes.node import Node
 from bequem.nodes.proxy_node import ProxyNode
-from bequem.qubit_map import QubitMap, ZeroQubit
+from bequem.qubit_map import Subspace, ZeroQubit
 from bequem.nodes.basic_ops import UnsafeMul, Adjoint
 from bequem.circuit import Circuit
 
 
 class Permutation(ProxyNode):
 
-    qubits_from: QubitMap
-    qubits_to: QubitMap
+    qubits_from: Subspace
+    qubits_to: Subspace
 
-    def __init__(self, qubits_from: QubitMap, qubits_to: QubitMap):
+    def __init__(self, qubits_from: Subspace, qubits_to: Subspace):
         if qubits_from.dimension != qubits_to.dimension:
             raise ValueError
         self.qubits_from = qubits_from
@@ -30,13 +30,13 @@ class Permutation(ProxyNode):
     def parameters(self) -> dict:
         return { "qubits_from": self.qubits_from, "qubits_to": self.qubits_to }
 
-    def qubits_in(self) -> QubitMap:
+    def qubits_in(self) -> Subspace:
         max_qubits = max(self.qubits_from.total_qubits, self.qubits_to.total_qubits)
-        return QubitMap(self.qubits_from.registers, max_qubits - self.qubits_from.total_qubits)
+        return Subspace(self.qubits_from.registers, max_qubits - self.qubits_from.total_qubits)
 
-    def qubits_out(self) -> QubitMap:
+    def qubits_out(self) -> Subspace:
         max_qubits = max(self.qubits_from.total_qubits, self.qubits_to.total_qubits)
-        return QubitMap(self.qubits_to.registers, max_qubits - self.qubits_to.total_qubits)
+        return Subspace(self.qubits_to.registers, max_qubits - self.qubits_to.total_qubits)
 
     def normalization(self) -> float:
         return 1
@@ -48,7 +48,7 @@ class Permutation(ProxyNode):
         return input
 
 
-def move_zeros_to_end(qubits: QubitMap) -> PermuteRegisters:
+def move_zeros_to_end(qubits: Subspace) -> PermuteRegisters:
     nonzero_registers = []
     zero_registers = []
     for (i, register) in enumerate(qubits.registers):
@@ -69,21 +69,21 @@ class PermuteRegisters(Node):
     ``qubits.registers[permutation_map[i]]``.
     """
 
-    qubits: QubitMap
+    qubits: Subspace
     permutation_map: list[int]
 
-    def __init__(self, qubits: QubitMap, permutation_map: list[int]):
+    def __init__(self, qubits: Subspace, permutation_map: list[int]):
         self.qubits = qubits
         self.permutation_map = permutation_map
 
     def parameters(self) -> dict:
         return { "qubits": self.qubits, "permutation_map": self.permutation_map }
 
-    def qubits_in(self) -> QubitMap:
+    def qubits_in(self) -> Subspace:
         return self.qubits
 
-    def qubits_out(self) -> QubitMap:
-        return QubitMap([self.qubits.registers[i] for i in self.permutation_map])
+    def qubits_out(self) -> Subspace:
+        return Subspace([self.qubits.registers[i] for i in self.permutation_map])
 
     def normalization(self) -> float:
         return 1
@@ -148,8 +148,8 @@ class PermuteRegisters(Node):
 
 
 def _find_matching_partitioning(
-    a: QubitMap, b: QubitMap
-) -> list[tuple[QubitMap, QubitMap]]:
+    a: Subspace, b: Subspace
+) -> list[tuple[Subspace, Subspace]]:
     """
     Finds a partitoning of a and b, such that the ith subdivision of either
     partitioning has the same dimension.
@@ -165,8 +165,8 @@ def _find_matching_partitioning(
     last_breakpoint_b = 0
     i_a = 1
     i_b = 1
-    submap_a = QubitMap(a.registers[last_breakpoint_a:i_a])
-    submap_b = QubitMap(b.registers[last_breakpoint_b:i_b])
+    submap_a = Subspace(a.registers[last_breakpoint_a:i_a])
+    submap_b = Subspace(b.registers[last_breakpoint_b:i_b])
     while i_a < len(a.registers) and i_b < len(b.registers):
         if submap_a.dimension == submap_b.dimension:
             subdivisions.append((submap_a, submap_b))
@@ -174,17 +174,17 @@ def _find_matching_partitioning(
             last_breakpoint_b = i_b
             i_a += 1
             i_b += 1
-            submap_a = QubitMap(a.registers[last_breakpoint_a:i_a])
-            submap_b = QubitMap(b.registers[last_breakpoint_b:i_b])
+            submap_a = Subspace(a.registers[last_breakpoint_a:i_a])
+            submap_b = Subspace(b.registers[last_breakpoint_b:i_b])
         elif submap_a.dimension < submap_b.dimension:
             i_a += 1
-            submap_a = QubitMap(a.registers[last_breakpoint_a:i_a])
+            submap_a = Subspace(a.registers[last_breakpoint_a:i_a])
         else:
             i_b += 1
-            submap_b = QubitMap(b.registers[last_breakpoint_b:i_b])
+            submap_b = Subspace(b.registers[last_breakpoint_b:i_b])
 
-    submap_a = QubitMap(a.registers[last_breakpoint_a:])
-    submap_b = QubitMap(b.registers[last_breakpoint_b:])
+    submap_a = Subspace(a.registers[last_breakpoint_a:])
+    submap_b = Subspace(b.registers[last_breakpoint_b:])
     subdivisions.append((submap_a, submap_b))
 
     return subdivisions

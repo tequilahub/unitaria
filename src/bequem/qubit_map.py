@@ -7,7 +7,7 @@ import numpy as np
 from bequem.circuit import Circuit
 
 
-class QubitMap:
+class Subspace:
     # TODO: More documentation
     """
     Embedding of a vectorspace into the statespace of a number of qubits.
@@ -30,7 +30,7 @@ class QubitMap:
                 raise ValueError(f"{register} is not valid in a QubitMap")
         simplified_registers = []
         for register in registers:
-            if isinstance(register, Qubit):
+            if isinstance(register, ControlledSubspace):
                 simplified_registers += register.simplify()
             else:
                 simplified_registers.append(register)
@@ -66,7 +66,7 @@ class QubitMap:
     def __eq__(self, other) -> bool:
         return self.registers == other.registers
 
-    def match_nonzero(self, other: QubitMap) -> bool:
+    def match_nonzero(self, other: Subspace) -> bool:
         return self.nonzero_registers() == other.nonzero_registers()
 
     def __repr__(self) -> str:
@@ -108,7 +108,7 @@ class QubitMap:
             raise ValueError
         for register in self.registers:
             match register:
-                case Qubit(case_zero, case_one):
+                case ControlledSubspace(case_zero, case_one):
                     num_qubits = case_zero.total_qubits
                     relevant_bits = bits & ((1 << num_qubits) - 1)
                     control_bit = (bits >> num_qubits) & 1
@@ -155,19 +155,19 @@ class QubitMap:
         # TODO: Oliver
         return Circuit()
 
-    def case_zero(self) -> QubitMap:
+    def case_zero(self) -> Subspace:
         trailing_zeros = self.trailing_zeros()
-        assert isinstance(self.registers[-(trailing_zeros + 1)], Qubit)
+        assert isinstance(self.registers[-(trailing_zeros + 1)], ControlledSubspace)
 
-        return QubitMap(
+        return Subspace(
             self.registers[:-(trailing_zeros + 1)] + self.registers[-(trailing_zeros + 1)].case_zero.registers,
         )
 
-    def case_one(self) -> QubitMap:
+    def case_one(self) -> Subspace:
         trailing_zeros = self.trailing_zeros()
-        assert isinstance(self.registers[-(trailing_zeros + 1)], Qubit)
+        assert isinstance(self.registers[-(trailing_zeros + 1)], ControlledSubspace)
 
-        return QubitMap(
+        return Subspace(
             self.registers[:-(trailing_zeros + 1)] + self.registers[-(trailing_zeros + 1)].case_one.registers,
         )
 
@@ -202,7 +202,7 @@ class ZeroQubit(Register):
 
 
 @dataclass(frozen=True, repr=False)
-class Qubit(Register):
+class ControlledSubspace(Register):
     """
     Register where the most significant qubit determines the embedding of the
     lower qubits
@@ -213,8 +213,8 @@ class Qubit(Register):
         Embedding of lower qubits, if highest qubit is ``|1>``
     """
 
-    case_zero: QubitMap
-    case_one: QubitMap
+    case_zero: Subspace
+    case_one: Subspace
 
     def __repr__(self) -> str:
         if self == ID:
@@ -242,38 +242,17 @@ class Qubit(Register):
         for i in range(min_len):
             if self.case_zero.registers[i] != self.case_one.registers[i]:
                 return self.case_zero.registers[:i] + [
-                    Qubit(
-                        QubitMap(self.case_zero.registers[i:]),
-                        QubitMap(self.case_one.registers[i:]),
+                    ControlledSubspace(
+                        Subspace(self.case_zero.registers[i:]),
+                        Subspace(self.case_one.registers[i:]),
                     )
                 ]
         return self.case_zero.registers[:min_len] + [
-            Qubit(
-                QubitMap(self.case_zero.registers[min_len:]),
-                QubitMap(self.case_one.registers[min_len:]),
+            ControlledSubspace(
+                Subspace(self.case_zero.registers[min_len:]),
+                Subspace(self.case_one.registers[min_len:]),
             )
         ]
 
 
-ID = Qubit(QubitMap([]), QubitMap([]))
-
-
-@dataclass(frozen=True)
-class Projection(Register):
-    """
-    Register in which the embedding is determined by a custom circuit.
-
-    The circuit should check whether a qubit is inside the embedded vector
-    space. See :py:func:`QubitMap.circuit`.
-
-    :ivar circuit:
-        The circuit of which checks inclusion in the vector space 
-    """
-    circuit: Circuit
-    dim: int
-
-    def total_qubits(self) -> int:
-        return self.circuit.tq_circuit.n_qubits - 1
-
-    def dimension(self) -> int:
-        return self.dim
+ID = ControlledSubspace(Subspace([]), Subspace([]))

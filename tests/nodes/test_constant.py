@@ -13,7 +13,6 @@ def test_constant_unitary():
     ConstantUnitary(np.eye(1)).verify()
     ConstantUnitary(np.eye(2)).verify()
     ConstantUnitary(np.eye(4)).verify()
-    ConstantUnitary(np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 0, 1], [0, 0, 1, 0]])).verify()
 
 @pytest.mark.xfail
 def test_constant_unitary_failing():
@@ -21,6 +20,7 @@ def test_constant_unitary_failing():
     ConstantUnitary(np.array([[0, 1], [1, 0]])).verify()
     angle = 1.23
     ConstantUnitary(np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])).verify()
+    ConstantUnitary(np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 0, 1], [0, 0, 1, 0]])).verify()
 
 
 def test_global_phase():

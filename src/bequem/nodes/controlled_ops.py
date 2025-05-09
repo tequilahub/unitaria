@@ -1,7 +1,7 @@
 import numpy as np
 import tequila as tq
 
-from bequem.qubit_map import QubitMap, Qubit
+from bequem.qubit_map import Subspace, ControlledSubspace
 from bequem.nodes.basic_ops import UnsafeMul
 from bequem.nodes.identity import Identity
 from bequem.nodes.proxy_node import ProxyNode
@@ -70,16 +70,16 @@ class BlockDiagonal(ProxyNode):
         result_B = self.B.compute_adjoint(input_B)
         return np.concatenate((result_A, result_B), axis=-1)
 
-def _controlled_qubits(A_controlled: QubitMap, B_controlled: QubitMap) -> QubitMap:
+def _controlled_qubits(A_controlled: Subspace, B_controlled: Subspace) -> Subspace:
     zeros = max(A_controlled.trailing_zeros(), B_controlled.trailing_zeros())
     A = A_controlled.case_one()
     B = B_controlled.case_one()
     controlled_qubits = max(A.total_qubits, B.total_qubits)
-    case_zero = QubitMap(
+    case_zero = Subspace(
         A.registers, max(0, controlled_qubits - A.total_qubits))
-    case_one = QubitMap(
+    case_one = Subspace(
         B.registers, max(0, controlled_qubits - B.total_qubits))
-    return QubitMap([Qubit(case_zero, case_one)], zeros)
+    return Subspace([ControlledSubspace(case_zero, case_one)], zeros)
 
 
 Node.__or__ = lambda A, B: BlockDiagonal(A, B)
@@ -95,13 +95,13 @@ class Controlled(Node):
     def children(self) -> list[Node]:
         return [self.A]
 
-    def qubits_in(self) -> QubitMap:
+    def qubits_in(self) -> Subspace:
         qubits_in_A = self.A.qubits_in()
-        return QubitMap([Qubit(QubitMap(0, qubits_in_A.total_qubits), qubits_in_A)])
+        return Subspace([ControlledSubspace(Subspace(0, qubits_in_A.total_qubits), qubits_in_A)])
 
-    def qubits_out(self) -> QubitMap:
+    def qubits_out(self) -> Subspace:
         qubits_out_A = self.A.qubits_out()
-        return QubitMap([Qubit(QubitMap(0, qubits_out_A.total_qubits), qubits_out_A)])
+        return Subspace([ControlledSubspace(Subspace(0, qubits_out_A.total_qubits), qubits_out_A)])
 
     def normalization(self) -> float:
         return self.A.normalization()
@@ -126,13 +126,13 @@ class Controlled(Node):
 
 class ModifyControl(Node):
     A: Node
-    expand_control: QubitMap
+    expand_control: Subspace
     swap_control_state: bool
 
-    def __init__(self, A: Node, expand_control: QubitMap | int = 0, swap_control_state: bool = False):
+    def __init__(self, A: Node, expand_control: Subspace | int = 0, swap_control_state: bool = False):
         self.A = A
-        if not isinstance(expand_control, QubitMap):
-            expand_control = QubitMap(expand_control)
+        if not isinstance(expand_control, Subspace):
+            expand_control = Subspace(expand_control)
         self.expand_control = expand_control
         self.swap_control_state = swap_control_state
     
@@ -142,23 +142,23 @@ class ModifyControl(Node):
     def parameters(self) -> dict:
         return {"expand_control": self.expand_control, "swap_control_state": self.swap_control_state}
 
-    def qubits_in(self) -> QubitMap:
-        qubits_one = QubitMap(self.A.qubits_in().case_one().registers + self.expand_control.registers)
-        qubits_zero = QubitMap(0, qubits_one.total_qubits)
+    def qubits_in(self) -> Subspace:
+        qubits_one = Subspace(self.A.qubits_in().case_one().registers + self.expand_control.registers)
+        qubits_zero = Subspace(0, qubits_one.total_qubits)
 
         if self.swap_control_state:
-            return QubitMap([Qubit(qubits_one, qubits_zero)], self.A.qubits_in().trailing_zeros())
+            return Subspace([ControlledSubspace(qubits_one, qubits_zero)], self.A.qubits_in().trailing_zeros())
         else:
-            return QubitMap([Qubit(qubits_zero, qubits_one)], self.A.qubits_in().trailing_zeros())
+            return Subspace([ControlledSubspace(qubits_zero, qubits_one)], self.A.qubits_in().trailing_zeros())
 
-    def qubits_out(self) -> QubitMap:
-        qubits_one = QubitMap(self.A.qubits_out().case_one().registers + self.expand_control.registers)
-        qubits_zero = QubitMap(0, qubits_one.total_qubits)
+    def qubits_out(self) -> Subspace:
+        qubits_one = Subspace(self.A.qubits_out().case_one().registers + self.expand_control.registers)
+        qubits_zero = Subspace(0, qubits_one.total_qubits)
 
         if self.swap_control_state:
-            return QubitMap([Qubit(qubits_one, qubits_zero)], self.A.qubits_out().trailing_zeros())
+            return Subspace([ControlledSubspace(qubits_one, qubits_zero)], self.A.qubits_out().trailing_zeros())
         else:
-            return QubitMap([Qubit(qubits_zero, qubits_one)], self.A.qubits_out().trailing_zeros())
+            return Subspace([ControlledSubspace(qubits_zero, qubits_one)], self.A.qubits_out().trailing_zeros())
 
     def normalization(self) -> float:
         return self.A.normalization()

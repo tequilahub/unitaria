@@ -2,7 +2,7 @@ import numpy as np
 import tequila as tq
 
 from bequem.nodes import Node
-from bequem.qubit_map import QubitMap
+from bequem.qubit_map import Subspace
 from bequem.circuit import Circuit
 
 
@@ -19,16 +19,16 @@ class ComponentwiseMul(Node):
     :ivar qubits:
         The vector space in which to perform the element-wise operation
     """
-    qubits: QubitMap
+    qubits: Subspace
 
-    def __init__(self, qubits: QubitMap):
+    def __init__(self, qubits: Subspace):
         self.qubits = qubits
 
-    def qubits_in(self) -> QubitMap:
-        return QubitMap(self.qubits.registers * 2)
+    def qubits_in(self) -> Subspace:
+        return Subspace(self.qubits.registers * 2)
 
-    def qubits_out(self) -> QubitMap:
-        return QubitMap(
+    def qubits_out(self) -> Subspace:
+        return Subspace(
             self.qubits.registers, self.qubits.total_qubits
         )
 
