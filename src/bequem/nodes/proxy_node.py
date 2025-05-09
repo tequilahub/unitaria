@@ -43,30 +43,30 @@ class ProxyNode(Node):
             self._definition = self.definition()
         return self._definition.compute_adjoint(input)
 
-    def circuit(self) -> Circuit:
+    def _circuit(self) -> Circuit:
         if self._definition is None:
             self._definition = self.definition()
-        return self._definition.circuit()
+        return self._definition.circuit
 
-    def subspace_in(self) -> Subspace:
+    def _subspace_in(self) -> Subspace:
         if self._definition is None:
             self._definition = self.definition()
-        return self._definition.subspace_in()
+        return self._definition.subspace_in
 
-    def subspace_out(self) -> Subspace:
+    def _subspace_out(self) -> Subspace:
         if self._definition is None:
             self._definition = self.definition()
-        return self._definition.subspace_out()
+        return self._definition.subspace_out
 
-    def normalization(self) -> float:
+    def _normalization(self) -> float:
         if self._definition is None:
             self._definition = self.definition()
-        return self._definition.normalization()
+        return self._definition.normalization
 
-    def phase(self) -> float:
+    def _phase(self) -> float:
         if self._definition is None:
             self._definition = self.definition()
-        return self._definition.phase()
+        return self._definition.phase
 
     def tree_label(self, verbose: bool = False):
         label = super().tree_label()

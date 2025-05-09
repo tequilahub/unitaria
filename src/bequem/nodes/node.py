@@ -1,5 +1,6 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
+from functools import cached_property
 
 import numpy as np
 import tequila as tq
@@ -54,7 +55,7 @@ class Node(ABC):
     # def serialize_data(self) -> str | None:
     #     return None
 
-    @abstractmethod
+    @cached_property
     def subspace_in(self) -> Subspace:
         """
         The embedding of the input vectorspace.
@@ -65,9 +66,18 @@ class Node(ABC):
 
         In the formalism of block encodings this corresponds to the projection Pi_1.
         """
-        raise NotImplementedError
+        return self._subspace_in()
 
     @abstractmethod
+    def _subspace_in(self) -> Subspace:
+        """
+        Method to for computing :py:func:`subspace_in`.
+        
+        To be implemented in all subclasses of :py:class:`Node`.
+        """
+        raise NotImplementedError
+
+    @cached_property
     def subspace_out(self) -> Subspace:
         """
         The embedding of the output vectorspace.
@@ -78,9 +88,18 @@ class Node(ABC):
 
         In the formalism of block encodings this corresponds to the projection Pi_2.
         """
-        raise NotImplementedError
+        return self._subspace_out()
 
     @abstractmethod
+    def _subspace_out(self) -> Subspace:
+        """
+        Method to for computing :py:func:`subspace_out`.
+        
+        To be implemented in all subclasses of :py:class:`Node`.
+        """
+        raise NotImplementedError
+
+    @cached_property
     def normalization(self) -> float:
         """
         Normalization of the block encoding.
@@ -88,9 +107,18 @@ class Node(ABC):
         Non-negative number, which has to be multiplied with the outputs of the
         circuit to ensure proper scaling of the result.
         """
-        raise NotImplementedError
+        return self._normalization()
 
     @abstractmethod
+    def _normalization(self) -> float:
+        """
+        Method to for computing :py:func:`normalization`.
+        
+        To be implemented in all subclasses of :py:class:`Node`.
+        """
+        raise NotImplementedError
+
+    @cached_property
     def phase(self) -> float:
         """
         The global phase of the block encoding which can't be represented in the Tequila circuit.
@@ -99,13 +127,22 @@ class Node(ABC):
 
         The output of the circuit has to be multiplied with exp(i * phase) to get the correct result.
         """
+        return self._phase()
+
+    @abstractmethod
+    def _phase(self) -> float:
+        """
+        Method to for computing :py:func:`phase`.
+        
+        To be implemented in all subclasses of :py:class:`Node`.
+        """
         raise NotImplementedError
 
     def is_vector(self) -> bool:
         """
         Tests whether this node encodes a vector or a matrix.
         """
-        return self.subspace_in().is_trivial()
+        return self.subspace_in.is_trivial()
 
     @abstractmethod
     def compute(self, input: np.ndarray | None = None) -> np.ndarray:
@@ -134,10 +171,19 @@ class Node(ABC):
         """
         raise NotImplementedError
 
-    @abstractmethod
+    @cached_property
     def circuit(self) -> Circuit:
         """
         The circuit corresponding to the unitary of the block encoding.
+        """
+        return self._circuit()
+
+    @abstractmethod
+    def _circuit(self) -> float:
+        """
+        Method to for computing :py:func:`circuit`.
+        
+        To be implemented in all subclasses of :py:class:`Node`.
         """
         raise NotImplementedError
 
@@ -218,19 +264,17 @@ class Node(ABC):
             If True and an error is found, recursivly test this nodes children
             to find the smallest node which still contains the error.
         """
-        basis_in = self.subspace_in().enumerate_basis()
-        basis_out = self.subspace_out().enumerate_basis()
-        circuit = self.circuit()
+        basis_in = self.subspace_in.enumerate_basis()
+        basis_out = self.subspace_out.enumerate_basis()
+        circuit = self.circuit
         try:
-            if self.subspace_in().total_qubits == 0:
+            if self.subspace_in.total_qubits == 0:
                 # TODO: Tequila does not support circuits without qubits
                 assert circuit.tq_circuit.n_qubits == 1
-                assert self.subspace_out().total_qubits == 0
+                assert self.subspace_out.total_qubits == 0
             else:
-                assert circuit.tq_circuit.n_qubits == self.subspace_in(
-                ).total_qubits
-                assert circuit.tq_circuit.n_qubits == self.subspace_out(
-                ).total_qubits
+                assert circuit.tq_circuit.n_qubits == self.subspace_in.total_qubits
+                assert circuit.tq_circuit.n_qubits == self.subspace_out.total_qubits
 
             if not self.is_vector():
                 computed = np.eye(len(basis_out),
@@ -249,8 +293,8 @@ class Node(ABC):
                     input[i] = 1
                     computed[:, i] = self.compute(input)
                     simulated[:, i] = np.exp(
-                        self.phase() *
-                        1j) * self.normalization() * self.subspace_out().project(
+                        self.phase *
+                        1j) * self.normalization * self.subspace_out.project(
                             circuit.simulate(b, backend="qulacs"))
 
                 for (i, b) in enumerate(basis_out):
@@ -273,8 +317,8 @@ class Node(ABC):
                 if computed is None:
                     computed = np.array([1])
                 simulated = np.exp(
-                    self.phase() *
-                    1j) * self.normalization() * self.subspace_out().project(
+                    self.phase *
+                    1j) * self.normalization * self.subspace_out.project(
                         circuit.simulate(0, backend="qulacs"))
 
                 # verify circuit
@@ -305,4 +349,4 @@ class VerificationError(Exception):
             console.print(
                 Syntax(self.circuit, "text", background_color="default"))
         output = capture.get()
-        return "\n" + output + f"\nnormalization = {self.node.normalization()}, phase = {self.node.phase()}"
+        return "\n" + output + f"\nnormalization = {self.node.normalization}, phase = {self.node.phase}"

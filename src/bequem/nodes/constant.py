@@ -23,8 +23,6 @@ class ConstantVector(Node):
         self.n_qubits = round(np.log2(vec.shape[0]))
         assert 2 ** self.n_qubits == vec.shape[0]
         self.vec = vec
-        self._normalization = np.linalg.norm(vec)
-        self._phase = np.mean(np.angle(vec))
 
     def children(self) -> list[Node]:
         return []
@@ -32,17 +30,17 @@ class ConstantVector(Node):
     def parameters(self) -> dict:
         return {"vec": self.vec}
 
-    def subspace_in(self) -> Subspace:
+    def _subspace_in(self) -> Subspace:
         return Subspace(0, self.n_qubits)
 
-    def subspace_out(self) -> Subspace:
+    def _subspace_out(self) -> Subspace:
         return Subspace(self.n_qubits)
 
-    def normalization(self) -> float:
-        return self._normalization
+    def _normalization(self) -> float:
+        return np.linalg.norm(self.vec)
 
-    def phase(self) -> float:
-        return self._phase
+    def _phase(self) -> float:
+        return np.mean(np.angle(self.vec))
 
     def compute(self, input: np.ndarray | None = None) -> np.ndarray:
         return self.vec
@@ -50,8 +48,8 @@ class ConstantVector(Node):
     def compute_adjoint(self, input: np.ndarray | None = None) -> np.ndarray:
         return self.vec.T @ input
 
-    def circuit(self) -> Circuit:
-        normalized = self.vec / self.normalization()
+    def _circuit(self) -> Circuit:
+        normalized = self.vec / self.normalization
         # reversed because prepare_state expects MSB ordering
         tq_circuit = prepare_state(normalized, list(reversed(range(self.n_qubits))))
         return Circuit(tq_circuit)
@@ -74,16 +72,16 @@ class ConstantUnitary(Node):
     def parameters(self) -> dict:
         return {"unitary": self.unitary}
 
-    def subspace_in(self) -> Subspace:
+    def _subspace_in(self) -> Subspace:
         return Subspace(self.bits)
 
-    def subspace_out(self) -> Subspace:
+    def _subspace_out(self) -> Subspace:
         return Subspace(self.bits)
 
-    def normalization(self) -> Subspace:
+    def _normalization(self) -> Subspace:
         return 1
 
-    def phase(self) -> Subspace:
+    def _phase(self) -> Subspace:
         return 0
 
     def compute(self, input: np.ndarray) -> np.ndarray:
@@ -94,7 +92,7 @@ class ConstantUnitary(Node):
     def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
         return np.conj(self.unitary.T) @ input
 
-    def circuit(self) -> Circuit:
+    def _circuit(self) -> Circuit:
         from qiskit.circuit.library import UnitaryGate
 
         qiskit_circuit = UnitaryGate(self.unitary).definition

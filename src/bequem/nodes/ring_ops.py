@@ -29,10 +29,10 @@ class Add(ProxyNode):
         return [self.A, self.B]
 
     def definition(self) -> Node:
-        permutation_in = Permutation(self.A.subspace_in(),
-                                     self.B.subspace_in())
-        permutation_out = Permutation(self.A.subspace_out(),
-                                      self.B.subspace_out())
+        permutation_in = Permutation(self.A.subspace_in,
+                                     self.B.subspace_in)
+        permutation_out = Permutation(self.A.subspace_out,
+                                      self.B.subspace_out)
 
         A_permuted = Scale(UnsafeMul(
             Adjoint(permutation_in),
@@ -42,22 +42,22 @@ class Add(ProxyNode):
 
         diag = BlockDiagonal(A_permuted, B_permuted)
 
-        sqrt_A = np.sqrt(np.abs(self.A.normalization()))
-        sqrt_B = np.sqrt(np.abs(self.B.normalization()))
-        rotation_in = Tensor(Identity(permutation_in.subspace_out()),
+        sqrt_A = np.sqrt(np.abs(self.A.normalization))
+        sqrt_B = np.sqrt(np.abs(self.B.normalization))
+        rotation_in = Tensor(Identity(permutation_in.subspace_out),
                              ConstantVector(np.array([sqrt_A, sqrt_B])))
         rotation_out = Tensor(
-            Identity(permutation_out.subspace_out()),
+            Identity(permutation_out.subspace_out),
             ConstantVector(
                 np.array([
-                    self.A.normalization() / sqrt_A,
-                    self.B.normalization() / sqrt_B
+                    self.A.normalization / sqrt_A,
+                    self.B.normalization / sqrt_B
                 ])))
 
         return UnsafeMul(UnsafeMul(rotation_in, diag), Adjoint(rotation_out))
 
-    def normalization(self) -> float:
-        return self.A.normalization() + self.B.normalization()
+    def _normalization(self) -> float:
+        return self.A.normalization + self.B.normalization
 
     def compute(self, input: np.ndarray) -> np.ndarray:
         return self.A.compute(input) + self.B.compute(input)
@@ -92,13 +92,13 @@ class Mul(ProxyNode):
         return [self.A, self.B]
 
     def definition(self) -> Node:
-        permutation = Permutation(self.A.subspace_out(), self.B.subspace_in())
+        permutation = Permutation(self.A.subspace_out, self.B.subspace_in)
         A_permuted = Tensor(self.A,
                             Identity(Subspace(0, 1)))
         B_permuted = Tensor(UnsafeMul(permutation, self.B),
                             Identity(Subspace(0, 1)))
         return UnsafeMul(
-            UnsafeMul(A_permuted, ComputeProjection(self.A.subspace_out())),
+            UnsafeMul(A_permuted, ComputeProjection(self.A.subspace_out)),
             B_permuted)
 
     def compute(self, input: np.ndarray | None) -> np.ndarray:
@@ -111,11 +111,11 @@ class Mul(ProxyNode):
         input = self.A.compute_adjoint(input)
         return input
 
-    def normalization(self) -> float:
-        return self.A.normalization() * self.B.normalization()
+    def _normalization(self) -> float:
+        return self.A.normalization * self.B.normalization
 
-    def phase(self) -> float:
-        return self.A.phase() + self.B.phase()
+    def _phase(self) -> float:
+        return self.A.phase + self.B.phase
 
 
 Node.__matmul__ = lambda A, B: Mul(A, B)

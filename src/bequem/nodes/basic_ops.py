@@ -33,23 +33,11 @@ class UnsafeMul(Node):
         :ivar B:
             The second factor
         """
-        if not A.subspace_out().match_nonzero(B.subspace_in()):
+        if not A.subspace_out.match_nonzero(B.subspace_in):
             raise ValueError(
-                f"Non matching qubit maps {A.subspace_out()} and {B.subspace_in()}"
+                f"Non matching qubit maps {A.subspace_out} and {B.subspace_in}"
             )
 
-        max_qubits = max(A.subspace_in().total_qubits,
-                         B.subspace_out().total_qubits)
-        subspace_in_A = A.subspace_in()
-        self._subspace_in = Subspace(
-            subspace_in_A.registers,
-            max_qubits - subspace_in_A.total_qubits,
-        )
-        subspace_out_B = B.subspace_out()
-        self._subspace_out = Subspace(
-            subspace_out_B.registers,
-            max_qubits - subspace_out_B.total_qubits,
-        )
         self.A = A
         self.B = B
 
@@ -66,24 +54,34 @@ class UnsafeMul(Node):
         input = self.A.compute_adjoint(input)
         return input
 
-    def circuit(self) -> Circuit:
+    def _circuit(self) -> Circuit:
         circuit = Circuit()
-        circuit += self.A.circuit()
-        circuit += self.B.circuit()
+        circuit += self.A.circuit
+        circuit += self.B.circuit
 
         return circuit
 
-    def subspace_in(self) -> Subspace:
-        return self._subspace_in
+    def _subspace_in(self) -> Subspace:
+        max_qubits = max(self.A.subspace_in.total_qubits,
+                         self.B.subspace_out.total_qubits)
+        return Subspace(
+            self.A.subspace_in.registers,
+            max_qubits - self.A.subspace_in.total_qubits,
+        )
 
-    def subspace_out(self) -> Subspace:
-        return self._subspace_out
+    def _subspace_out(self) -> Subspace:
+        max_qubits = max(self.A.subspace_in.total_qubits,
+                         self.B.subspace_out.total_qubits)
+        return Subspace(
+            self.B.subspace_out.registers,
+            max_qubits - self.B.subspace_out.total_qubits,
+        )
 
-    def normalization(self) -> float:
-        return self.A.normalization() * self.B.normalization()
+    def _normalization(self) -> float:
+        return self.A.normalization * self.B.normalization
 
-    def phase(self) -> float:
-        return self.A.phase() + self.B.phase()
+    def _phase(self) -> float:
+        return self.A.phase + self.B.phase
 
 
 class Tensor(Node):
@@ -129,8 +127,8 @@ class Tensor(Node):
         batch_shape = list(input.shape[:-1])
         input = input.reshape(
             batch_shape +
-            [self.B.subspace_in().dimension,
-             self.A.subspace_in().dimension])
+            [self.B.subspace_in.dimension,
+             self.A.subspace_in.dimension])
         input = self.A.compute(input)
         input = np.swapaxes(input, -1, -2)
         input = self.B.compute(input)
@@ -141,50 +139,47 @@ class Tensor(Node):
         batch_shape = list(input.shape[:-1])
         input = input.reshape(
             batch_shape +
-            [self.B.subspace_out().dimension,
-             self.A.subspace_out().dimension])
+            [self.B.subspace_out.dimension,
+             self.A.subspace_out.dimension])
         input = self.A.compute_adjoint(input)
         input = np.swapaxes(input, -1, -2)
         input = self.B.compute_adjoint(input)
         input = np.swapaxes(input, -1, -2)
         return np.reshape(input, batch_shape + [-1])
 
-    def circuit(self) -> Circuit:
-        subspace_in_A = self.A.subspace_in()
-        subspace_in_B = self.B.subspace_in()
-
+    def _circuit(self) -> Circuit:
         circuit = Circuit()
 
-        circuit_A = self.A.circuit().tq_circuit
+        circuit_A = self.A.circuit.tq_circuit
         circuit.tq_circuit += circuit_A
-        qubit_map_B = dict([(i, i + subspace_in_A.total_qubits)
-                            for i in range(subspace_in_B.total_qubits)])
-        circuit_B = self.B.circuit().tq_circuit.map_qubits(qubit_map_B)
+        qubit_map_B = dict([(i, i + self.A.subspace_in.total_qubits)
+                            for i in range(self.B.subspace_in.total_qubits)])
+        circuit_B = self.B.circuit.tq_circuit.map_qubits(qubit_map_B)
         circuit.tq_circuit += circuit_B
 
-        circuit.tq_circuit.n_qubits = subspace_in_A.total_qubits + subspace_in_B.total_qubits
+        circuit.tq_circuit.n_qubits = self.A.subspace_in.total_qubits + self.B.subspace_in.total_qubits
 
         return circuit
 
-    def subspace_in(self) -> Subspace:
-        subspace_A = self.A.subspace_in()
-        subspace_B = self.B.subspace_in()
+    def _subspace_in(self) -> Subspace:
+        subspace_A = self.A.subspace_in
+        subspace_B = self.B.subspace_in
         return Subspace(
             subspace_A.registers + subspace_B.registers,
         )
 
-    def subspace_out(self) -> Subspace:
-        subspace_A = self.A.subspace_out()
-        subspace_B = self.B.subspace_out()
+    def _subspace_out(self) -> Subspace:
+        subspace_A = self.A.subspace_out
+        subspace_B = self.B.subspace_out
         return Subspace(
             subspace_A.registers + subspace_B.registers,
         )
 
-    def normalization(self) -> float:
-        return self.A.normalization() * self.B.normalization()
+    def _normalization(self) -> float:
+        return self.A.normalization * self.B.normalization
 
-    def phase(self) -> float:
-        return self.A.phase() + self.B.phase()
+    def _phase(self) -> float:
+        return self.A.phase + self.B.phase
 
 
 Node.__and__ = lambda A, B: Tensor(A, B)
@@ -209,17 +204,17 @@ class Adjoint(Node):
     def children(self) -> list[Node]:
         return [self.A]
 
-    def subspace_in(self) -> Subspace:
-        return self.A.subspace_out()
+    def _subspace_in(self) -> Subspace:
+        return self.A.subspace_out
 
-    def subspace_out(self) -> Subspace:
-        return self.A.subspace_in()
+    def _subspace_out(self) -> Subspace:
+        return self.A.subspace_in
 
-    def normalization(self) -> float:
-        return self.A.normalization()
+    def _normalization(self) -> float:
+        return self.A.normalization
 
-    def phase(self) -> float:
-        return -self.A.phase()
+    def _phase(self) -> float:
+        return -self.A.phase
 
     def compute(self, input: np.ndarray | None) -> np.ndarray:
         return self.A.compute_adjoint(input)
@@ -227,8 +222,8 @@ class Adjoint(Node):
     def compute_adjoint(self, input: np.ndarray | None) -> np.ndarray:
         return self.A.compute(input)
 
-    def circuit(self) -> Circuit:
-        return self.A.circuit().adjoint()
+    def _circuit(self) -> Circuit:
+        return self.A.circuit.adjoint()
 
 
 class Scale(Node):
@@ -276,39 +271,38 @@ class Scale(Node):
     def parameters(self) -> dict:
         return {"scale": self.scale, "absolute": self.absolute}
 
-    def subspace_in(self) -> Subspace:
-        return self.A.subspace_in()
+    def _subspace_in(self) -> Subspace:
+        return self.A.subspace_in
 
-    def subspace_out(self) -> Subspace:
-        return self.A.subspace_out()
+    def _subspace_out(self) -> Subspace:
+        return self.A.subspace_out
 
-    def normalization(self) -> float:
+    def _normalization(self) -> float:
         if self.absolute:
             return self.scale
         else:
-            return self.scale * self.A.normalization()
+            return self.scale * self.A.normalization
 
-    def phase(self) -> float:
+    def _phase(self) -> float:
         if self.absolute:
             return np.angle(self.scale)
         else:
-            return np.angle(self.scale) + self.A.phase()
+            return np.angle(self.scale) + self.A.phase
 
     def compute(self, input: np.ndarray | None = None) -> np.ndarray:
         if self.absolute:
-            return self.scale / self.A.normalization() * self.A.compute(input)
+            return self.scale / self.A.normalization * self.A.compute(input)
         else:
             return self.scale * self.A.compute(input)
 
     def compute_adjoint(self, input: np.ndarray | None = None) -> np.ndarray:
         if self.absolute:
-            return self.scale / self.A.normalization(
-            ) * self.A.compute_adjoint(input)
+            return self.scale / self.A.normalization * self.A.compute_adjoint(input)
         else:
             return self.scale * self.A.compute_adjoint(input)
 
-    def circuit(self) -> Circuit:
-        return self.A.circuit()
+    def _circuit(self) -> Circuit:
+        return self.A.circuit
 
 
 class ComputeProjection(Node):
@@ -318,16 +312,16 @@ class ComputeProjection(Node):
     def children(self) -> list[Node]:
         return []
 
-    def subspace_in(self) -> Subspace:
+    def _subspace_in(self) -> Subspace:
         return self.qubits
 
-    def subspace_out(self) -> Subspace:
+    def _subspace_out(self) -> Subspace:
         return self.qubits
 
-    def normalization(self) -> float:
+    def _normalization(self) -> float:
         return 1
 
-    def phase(self) -> float:
+    def _phase(self) -> float:
         return 0
 
     def compute(self, input: np.ndarray) -> np.ndarray:
@@ -336,6 +330,6 @@ class ComputeProjection(Node):
     def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
         return input
 
-    def circuit(self) -> Circuit:
+    def _circuit(self) -> Circuit:
         # TODO
         return Circuit()

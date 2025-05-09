@@ -15,7 +15,7 @@ class BlockDiagonal(ProxyNode):
     B: Node
 
     def __init__(self, A: Node, B: Node):
-        assert np.isclose(A.normalization(), B.normalization())
+        assert np.isclose(A.normalization, B.normalization)
 
         self.A = A
         self.B = B
@@ -26,45 +26,45 @@ class BlockDiagonal(ProxyNode):
     def definition(self):
         A_controlled = Controlled(self.A)
         B_controlled = Controlled(self.B)
-        subspace_in = _controlled_qubits(A_controlled.subspace_in(), B_controlled.subspace_in())
-        subspace_mid = _controlled_qubits(A_controlled.subspace_out(), B_controlled.subspace_in())
-        subspace_out = _controlled_qubits(A_controlled.subspace_out(), B_controlled.subspace_out())
-        controlled_bits_A = A_controlled.subspace_in().total_qubits - A_controlled.subspace_in().trailing_zeros()
-        controlled_bits_B = B_controlled.subspace_in().total_qubits - B_controlled.subspace_in().trailing_zeros()
+        subspace_in = _controlled_qubits(A_controlled.subspace_in, B_controlled.subspace_in)
+        subspace_mid = _controlled_qubits(A_controlled.subspace_out, B_controlled.subspace_in)
+        subspace_out = _controlled_qubits(A_controlled.subspace_out, B_controlled.subspace_out)
+        controlled_bits_A = A_controlled.subspace_in.total_qubits - A_controlled.subspace_in.trailing_zeros()
+        controlled_bits_B = B_controlled.subspace_in.total_qubits - B_controlled.subspace_in.trailing_zeros()
 
         A_controlled = ModifyControl(
             A_controlled, max(0, controlled_bits_B - controlled_bits_A), True)
         A_controlled = UnsafeMul(
             UnsafeMul(
-                Identity(subspace_in, A_controlled.subspace_in()),
+                Identity(subspace_in, A_controlled.subspace_in),
                 A_controlled,
             ),
-            Identity(A_controlled.subspace_out(), subspace_mid),
+            Identity(A_controlled.subspace_out, subspace_mid),
         )
         B_controlled = ModifyControl(
             B_controlled, max(0, controlled_bits_A - controlled_bits_B), False)
         B_controlled = UnsafeMul(
             UnsafeMul(
-                Identity(subspace_in, B_controlled.subspace_in()),
+                Identity(subspace_in, B_controlled.subspace_in),
                 B_controlled,
             ),
-            Identity(B_controlled.subspace_out(), subspace_out),
+            Identity(B_controlled.subspace_out, subspace_out),
         )
 
         return UnsafeMul(A_controlled, B_controlled)
 
-    def normalization(self) -> float:
-        return self.A.normalization()
+    def _normalization(self) -> float:
+        return self.A.normalization
 
     def compute(self, input: np.ndarray) -> np.ndarray:
-        dim_A = self.A.subspace_in().dimension
+        dim_A = self.A.subspace_in.dimension
         input_A, input_B = np.split(input, [dim_A], axis=-1)
         result_A = self.A.compute(input_A)
         result_B = self.B.compute(input_B)
         return np.concatenate((result_A, result_B), axis=-1)
 
     def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
-        dim_A = self.A.subspace_out().dimension
+        dim_A = self.A.subspace_out.dimension
         input_A, input_B = np.split(input, [dim_A], axis=-1)
         result_A = self.A.compute_adjoint(input_A)
         result_B = self.B.compute_adjoint(input_B)
@@ -95,18 +95,18 @@ class Controlled(Node):
     def children(self) -> list[Node]:
         return [self.A]
 
-    def subspace_in(self) -> Subspace:
-        subspace_in_A = self.A.subspace_in()
+    def _subspace_in(self) -> Subspace:
+        subspace_in_A = self.A.subspace_in
         return Subspace([ControlledSubspace(Subspace(0, subspace_in_A.total_qubits), subspace_in_A)])
 
-    def subspace_out(self) -> Subspace:
-        subspace_out_A = self.A.subspace_out()
+    def _subspace_out(self) -> Subspace:
+        subspace_out_A = self.A.subspace_out
         return Subspace([ControlledSubspace(Subspace(0, subspace_out_A.total_qubits), subspace_out_A)])
 
-    def normalization(self) -> float:
-        return self.A.normalization()
+    def _normalization(self) -> float:
+        return self.A.normalization
 
-    def phase(self) -> float:
+    def _phase(self) -> float:
         return 0
 
     def compute(self, input: np.ndarray) -> np.ndarray:
@@ -115,11 +115,11 @@ class Controlled(Node):
     def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
         return input
 
-    def circuit(self) -> Circuit:
-        control_qubit = self.A.subspace_in().total_qubits
-        circuit = self.A.circuit().tq_circuit
+    def _circuit(self) -> Circuit:
+        control_qubit = self.A.subspace_in.total_qubits
+        circuit = self.A.circuit.tq_circuit
         circuit = circuit.add_controls(control_qubit)
-        circuit += tq.gates.Phase(target=control_qubit, angle=self.A.phase())
+        circuit += tq.gates.Phase(target=control_qubit, angle=self.A.phase)
         circuit.n_qubits = control_qubit + 1
         return Circuit(circuit)
 
@@ -142,29 +142,29 @@ class ModifyControl(Node):
     def parameters(self) -> dict:
         return {"expand_control": self.expand_control, "swap_control_state": self.swap_control_state}
 
-    def subspace_in(self) -> Subspace:
-        subspace_one = Subspace(self.A.subspace_in().case_one().registers + self.expand_control.registers)
+    def _subspace_in(self) -> Subspace:
+        subspace_one = Subspace(self.A.subspace_in.case_one().registers + self.expand_control.registers)
         subspace_zero = Subspace(0, subspace_one.total_qubits)
 
         if self.swap_control_state:
-            return Subspace([ControlledSubspace(subspace_one, subspace_zero)], self.A.subspace_in().trailing_zeros())
+            return Subspace([ControlledSubspace(subspace_one, subspace_zero)], self.A.subspace_in.trailing_zeros())
         else:
-            return Subspace([ControlledSubspace(subspace_zero, subspace_one)], self.A.subspace_in().trailing_zeros())
+            return Subspace([ControlledSubspace(subspace_zero, subspace_one)], self.A.subspace_in.trailing_zeros())
 
-    def subspace_out(self) -> Subspace:
-        subspace_one = Subspace(self.A.subspace_out().case_one().registers + self.expand_control.registers)
+    def _subspace_out(self) -> Subspace:
+        subspace_one = Subspace(self.A.subspace_out.case_one().registers + self.expand_control.registers)
         subspace_zero = Subspace(0, subspace_one.total_qubits)
 
         if self.swap_control_state:
-            return Subspace([ControlledSubspace(subspace_one, subspace_zero)], self.A.subspace_out().trailing_zeros())
+            return Subspace([ControlledSubspace(subspace_one, subspace_zero)], self.A.subspace_out.trailing_zeros())
         else:
-            return Subspace([ControlledSubspace(subspace_zero, subspace_one)], self.A.subspace_out().trailing_zeros())
+            return Subspace([ControlledSubspace(subspace_zero, subspace_one)], self.A.subspace_out.trailing_zeros())
 
-    def normalization(self) -> float:
-        return self.A.normalization()
+    def _normalization(self) -> float:
+        return self.A.normalization
 
-    def phase(self) -> float:
-        return self.A.phase()
+    def _phase(self) -> float:
+        return self.A.phase
 
     def compute(self, input: np.ndarray) -> np.ndarray:
         raise NotImplementedError
@@ -172,8 +172,8 @@ class ModifyControl(Node):
     def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
         raise NotImplementedError
 
-    def circuit(self) -> Circuit:
-        subspace = self.A.subspace_in()
+    def _circuit(self) -> Circuit:
+        subspace = self.A.subspace_in
         control_qubit_pre = subspace.total_qubits - 1
         control_qubit_post = control_qubit_pre + self.expand_control.total_qubits
 
@@ -183,8 +183,8 @@ class ModifyControl(Node):
 
         qubit_map = dict([(i, i) for i in range(subspace.total_qubits)])
         qubit_map[control_qubit_pre] = control_qubit_post
-        circuit.tq_circuit += self.A.circuit().tq_circuit.map_qubits(qubit_map)
+        circuit.tq_circuit += self.A.circuit.tq_circuit.map_qubits(qubit_map)
         if self.swap_control_state:
             circuit.tq_circuit += tq.gates.X(control_qubit_post)
-        circuit.n_qubits = self.subspace_in().total_qubits
+        circuit.n_qubits = self.subspace_in.total_qubits
         return circuit

@@ -24,18 +24,18 @@ class ComponentwiseMul(Node):
     def __init__(self, subspace: Subspace):
         self.subspace = subspace
 
-    def subspace_in(self) -> Subspace:
+    def _subspace_in(self) -> Subspace:
         return Subspace(self.subspace.registers * 2)
 
-    def subspace_out(self) -> Subspace:
+    def _subspace_out(self) -> Subspace:
         return Subspace(
             self.subspace.registers, self.subspace.total_qubits
         )
 
-    def normalization(self) -> float:
+    def _normalization(self) -> float:
         return 1
 
-    def phase(self) -> float:
+    def _phase(self) -> float:
         return 0
 
     def compute(self, input: np.ndarray) -> np.ndarray:
@@ -53,7 +53,7 @@ class ComponentwiseMul(Node):
             result[:, indices, indices] = input[:, indices]
         return result.reshape(list(input.shape[:-1]) + [input.shape[-1] ** 2])
 
-    def circuit(self) -> Circuit:
+    def _circuit(self) -> Circuit:
         circuit = Circuit()
 
         for i in range(self.subspace.total_qubits):

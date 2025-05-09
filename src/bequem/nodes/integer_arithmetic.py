@@ -19,22 +19,22 @@ class Increment(Node):
     def parameters(self) -> dict:
         return { "bits": self.bits }
 
-    def subspace_in(self) -> Subspace:
+    def _subspace_in(self) -> Subspace:
         if self.bits <= 3:
             return Subspace(self.bits)
         else:
             return Subspace(self.bits, 1)
 
-    def subspace_out(self) -> Subspace:
+    def _subspace_out(self) -> Subspace:
         if self.bits <= 3:
             return Subspace(self.bits)
         else:
             return Subspace(self.bits, 1)
 
-    def normalization(self) -> float:
+    def _normalization(self) -> float:
         return 1
 
-    def phase(self) -> float:
+    def _phase(self) -> float:
         return 0
 
     def compute(self, input: np.ndarray) -> np.ndarray:
@@ -43,7 +43,7 @@ class Increment(Node):
     def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
         return np.roll(input, -1, axis=-1)
 
-    def circuit(self) -> Circuit:
+    def _circuit(self) -> Circuit:
         if self.bits <= 3:
             circuit = Circuit()
             for i in reversed(range(self.bits)):
@@ -69,16 +69,16 @@ class IntegerAddition(Node):
     def parameters(self) -> dict:
         return { "source_bits": self.source_bits, "target_bits": self.target_bits }
 
-    def subspace_in(self) -> Subspace:
+    def _subspace_in(self) -> Subspace:
         return Subspace(self.source_bits + self.target_bits)
 
-    def subspace_out(self) -> Subspace:
+    def _subspace_out(self) -> Subspace:
         return Subspace(self.source_bits + self.target_bits)
 
-    def normalization(self) -> float:
+    def _normalization(self) -> float:
         return 1
 
-    def phase(self) -> float:
+    def _phase(self) -> float:
         return 0
 
     def compute(self, input: np.ndarray) -> np.ndarray:
@@ -101,7 +101,7 @@ class IntegerAddition(Node):
             result[:, :, val] += np.roll(input[:, :, val], -val, axis=-1)
         return result.reshape(old_shape)
 
-    def circuit(self) -> Circuit:
+    def _circuit(self) -> Circuit:
         source = list(reversed(range(self.source_bits)))
         target = list(reversed(range(self.source_bits, self.source_bits + self.target_bits)))
         circuit = addition_circuit(source, target)

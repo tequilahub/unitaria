@@ -23,22 +23,22 @@ class Permutation(ProxyNode):
     def definition(self):
         perm_in = move_zeros_to_end(self.subspace_from)
         perm_out = move_zeros_to_end(self.subspace_to)
-        if perm_in.subspace_out().match_nonzero(perm_out.subspace_out()):
+        if perm_in.subspace_out.match_nonzero(perm_out.subspace_out):
             return UnsafeMul(perm_in, Adjoint(perm_out))
         raise NotImplementedError
 
     def parameters(self) -> dict:
         return { "subspace_from": self.subspace_from, "subspace_to": self.subspace_to }
 
-    def subspace_in(self) -> Subspace:
+    def _subspace_in(self) -> Subspace:
         max_qubits = max(self.subspace_from.total_qubits, self.subspace_to.total_qubits)
         return Subspace(self.subspace_from.registers, max_qubits - self.subspace_from.total_qubits)
 
-    def subspace_out(self) -> Subspace:
+    def _subspace_out(self) -> Subspace:
         max_qubits = max(self.subspace_from.total_qubits, self.subspace_to.total_qubits)
         return Subspace(self.subspace_to.registers, max_qubits - self.subspace_to.total_qubits)
 
-    def normalization(self) -> float:
+    def _normalization(self) -> float:
         return 1
 
     def compute(self, input: np.ndarray) -> np.ndarray:
@@ -79,16 +79,16 @@ class PermuteRegisters(Node):
     def parameters(self) -> dict:
         return { "qubits": self.qubits, "permutation_map": self.permutation_map }
 
-    def subspace_in(self) -> Subspace:
+    def _subspace_in(self) -> Subspace:
         return self.qubits
 
-    def subspace_out(self) -> Subspace:
+    def _subspace_out(self) -> Subspace:
         return Subspace([self.qubits.registers[i] for i in self.permutation_map])
 
-    def normalization(self) -> float:
+    def _normalization(self) -> float:
         return 1
 
-    def phase(self) -> float:
+    def _phase(self) -> float:
         return 0
 
     def compute(self, input: np.ndarray) -> np.ndarray:
@@ -102,14 +102,14 @@ class PermuteRegisters(Node):
 
     def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
         outer_shape = list(input.shape[:-1])
-        register_shape = [r.dimension() for r in self.subspace_out().registers]
+        register_shape = [r.dimension() for r in self.subspace_out.registers]
         total_shape = outer_shape + register_shape
         input = input.reshape(outer_shape + register_shape)
         perm = list(range(len(outer_shape))) + [len(total_shape) - i - 1 for i in reversed(self.permutation_map)]
         input = np.transpose(input, np.argsort(perm))
         return input.reshape(outer_shape + [-1])
 
-    def circuit(self) -> Circuit:
+    def _circuit(self) -> Circuit:
 
         if self.qubits.total_qubits == 0:
             circuit = Circuit()
