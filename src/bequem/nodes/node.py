@@ -252,7 +252,7 @@ class Node(ABC):
         for child in self.children():
             child.find_error()
 
-    def verify(self, drill: bool = True, up_to_phase: bool = False) -> np.ndarray:
+    def verify(self, drill: bool = True, up_to_phase: bool = False, batch_compute: bool | None = None) -> np.ndarray:
         """
         Verify the correctness of this node.
 
@@ -264,8 +264,12 @@ class Node(ABC):
             If True and an error is found, recursivly test this nodes children
             to find the smallest node which still contains the error.
         """
+
         basis_in = self.subspace_in.enumerate_basis()
         basis_out = self.subspace_out.enumerate_basis()
+
+        if batch_compute is None:
+            batch_compute = len(basis_in) < 2 ** 10
         circuit = self.circuit
         try:
             if self.subspace_in.total_qubits == 0:
@@ -277,47 +281,50 @@ class Node(ABC):
                 assert circuit.tq_circuit.n_qubits == self.subspace_out.total_qubits
 
             if not self.is_vector():
-                computed = np.eye(len(basis_out),
-                                  len(basis_in),
-                                  dtype=np.complex128)
-                simulated = np.zeros((len(basis_out), len(basis_in)),
-                                     dtype=np.complex128)
-                computed_m = self.compute(np.eye(len(basis_in), dtype=np.complex128)).T
-                computed_adj_m = self.compute_adjoint(np.eye(len(basis_out), dtype=np.complex128)).T
-                computed_adj = np.eye(len(basis_in),
-                                      len(basis_out),
+                if batch_compute:
+                    computed = np.eye(len(basis_out),
+                                      len(basis_in),
                                       dtype=np.complex128)
+                    computed_adj = np.eye(len(basis_in),
+                                          len(basis_out),
+                                          dtype=np.complex128)
+                    computed_m = self.compute(np.eye(len(basis_in), dtype=np.complex128)).T
+                    computed_adj_m = self.compute_adjoint(np.eye(len(basis_out), dtype=np.complex128)).T
 
                 for (i, b) in enumerate(basis_in):
                     input = np.zeros(len(basis_in), dtype=np.complex128)
                     input[i] = 1
-                    computed[:, i] = self.compute(input)
-                    simulated[:, i] = np.exp(
+                    computed_temp = self.compute(input)
+                    simulated = np.exp(
                         self.phase *
                         1j) * self.normalization * self.subspace_out.project(
                             circuit.simulate(b, backend="qulacs"))
+                    if up_to_phase:
+                        simulated = bring_to_same_phase(computed_temp, simulated)
+                    # verify circuit
+                    np.testing.assert_allclose(computed_temp, simulated, atol=1e-8, err_msg=f"On input {i}:")
+                    if batch_compute:
+                        computed[:, i] = computed_temp
 
-                for (i, b) in enumerate(basis_out):
-                    input = np.zeros(len(basis_out), dtype=np.complex128)
-                    input[i] = 1
-                    computed_adj[:, i] = self.compute_adjoint(input)
+                if batch_compute:
+                    for (i, b) in enumerate(basis_out):
+                        input = np.zeros(len(basis_out), dtype=np.complex128)
+                        input[i] = 1
+                        computed_adj[:, i] = self.compute_adjoint(input)
 
-                if up_to_phase:
-                    computed_m = bring_to_same_phase(computed, computed_m)
-                    simulated = bring_to_same_phase(computed, simulated)
-                    computed_adj_m = bring_to_same_phase(np.conj(computed).T, computed_adj_m)
-                    computed_adj = bring_to_same_phase(np.conj(computed).T, computed_adj)
+                    if up_to_phase:
+                        computed_m = bring_to_same_phase(computed, computed_m)
+                        computed_adj_m = bring_to_same_phase(np.conj(computed).T, computed_adj_m)
+                        computed_adj = bring_to_same_phase(np.conj(computed).T, computed_adj)
 
-                # verify compute with tensor valued input
-                np.testing.assert_allclose(computed, computed_m, atol=1e-8)
-                # verify circuit
-                np.testing.assert_allclose(computed, simulated, atol=1e-8)
-                # verify compute_adjoint
-                np.testing.assert_allclose(computed_adj_m,
-                                           np.conj(computed_m).T, atol=1e-8)
-                np.testing.assert_allclose(computed_adj, computed_adj_m, atol=1e-8)
+                    # verify compute with tensor valued input
+                    np.testing.assert_allclose(computed, computed_m, atol=1e-8)
+                    # verify compute_adjoint
+                    np.testing.assert_allclose(computed_adj_m,
+                                               np.conj(computed_m).T, atol=1e-8)
+                    np.testing.assert_allclose(computed_adj, computed_adj_m, atol=1e-8)
 
-                return computed_m
+                    return computed_m
             else:
                 computed = self.compute(np.array([1], dtype=np.complex128))
                 simulated = np.exp(

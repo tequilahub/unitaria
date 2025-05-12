@@ -14,11 +14,13 @@ class Identity(Node):
     """
     subspace: Subspace
 
-    def __init__(self, subspace: Subspace, project_to: Subspace | None = None):
+    def __init__(self, subspace: Subspace | int, project_to: Subspace | None = None):
         """
         :param qubits:
             The domain of the identity matrix
         """
+        if not isinstance(subspace, Subspace):
+            subspace = Subspace(subspace)
         self.subspace = subspace
         self.project_to = project_to
         if project_to is not None and subspace.total_qubits != project_to.total_qubits:

@@ -59,6 +59,7 @@ Vielleicht von Numpy inspirieren lassen
 12. [ ] Documentation
 13. [ ] plan.md nicht auf PyPi hochladen
 14. [ ] Verify mit zufälliger Basis
+15. [ ] Better custom verificaitions
 
 ## Offene Fragen
 

@@ -34,7 +34,7 @@ def test_constant_integer_addition(bits, constant):
 
 @pytest.mark.parametrize(
     "bits, constant",
-    [(1, 1), (2, 1), (2, 3), (4, 7)]
+    [(1, 1), (2, 1), (2, 3), (4, 5)]
 )
 def test_constant_integer_multiplication(bits, constant):
     A = ConstantIntegerMultiplication(bits, constant)

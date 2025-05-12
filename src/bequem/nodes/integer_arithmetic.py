@@ -195,17 +195,17 @@ class ConstantIntegerMultiplication(ProxyNode):
         return result
 
     def compute(self, input: np.ndarray) -> np.ndarray:
-        outer_shape = list(input.shape[:-1])
-        input = input.reshape([-1, 2 ** self.bits])
-        indices = np.array([(i * self.constant) % 2 ** self.bits for i in range(2 ** self.bits)], dtype=np.uint32)
-        output = input[:, indices]
-        return output.reshape(outer_shape + [-1])
-
-    def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
         inv = self._mod_inv()
         outer_shape = list(input.shape[:-1])
         input = input.reshape([-1, 2 ** self.bits])
         indices = np.array([(i * inv) % 2 ** self.bits for i in range(2 ** self.bits)], dtype=np.uint32)
+        output = input[:, indices]
+        return output.reshape(outer_shape + [-1])
+
+    def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
+        outer_shape = list(input.shape[:-1])
+        input = input.reshape([-1, 2 ** self.bits])
+        indices = np.array([(i * self.constant) % 2 ** self.bits for i in range(2 ** self.bits)], dtype=np.uint32)
         output = input[:, indices]
         return output.reshape(outer_shape + [-1])
 
