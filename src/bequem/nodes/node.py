@@ -349,9 +349,7 @@ class VerificationError(Exception):
     def __init__(self, node: Node, circuit: Circuit):
         super().__init__()
         self.node = node
-        compiled = tq.simulators.simulator_api.compile_circuit(
-            abstract_circuit=circuit.padded(), backend="cirq")
-        self.circuit = compiled.circuit.to_text_diagram()
+        self.circuit = circuit.draw()
 
     def __str__(self):
         console = Console(width=60)

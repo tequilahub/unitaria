@@ -56,6 +56,11 @@ class Circuit:
         adj.n_qubits = self.tq_circuit.n_qubits
         return Circuit(adj)
 
+    def draw(self):
+        compiled = tq.simulators.simulator_api.compile_circuit(
+            abstract_circuit=self.padded(), backend="cirq")
+        return compiled.circuit.to_text_diagram()
+
     @staticmethod
     def from_qiskit(circuit):
         from qiskit.qasm2 import dumps
