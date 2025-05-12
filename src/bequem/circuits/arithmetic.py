@@ -223,3 +223,98 @@ def multi_controlled_not(target: int, controls: Sequence[int], ancillae: Sequenc
         U += staircase
 
     return U
+
+
+def _carry_circuit(target: Sequence[int], const: int, carry: int, ancillae: Sequence[int]) -> tq.QCircuit:
+    """
+    Implements the carry circuit from https://arxiv.org/abs/1611.07995, Fig. 3. Used for const_addition_circuit.
+    Expects LSB ordering.
+    """
+    assert len(ancillae) >= len(target) - 1
+    assert len(set(target) & set(ancillae)) == 0
+    assert carry not in set(target) | set(ancillae)
+    n = len(target)
+
+    U = tq.QCircuit()
+
+    if n == 1:
+        if const & 1:
+            U += tq.gates.CNOT(control=target[0], target=carry)
+        return U
+
+    U += tq.gates.CNOT(control=ancillae[n - 2], target=carry)
+
+    half = tq.QCircuit()
+
+    for i in reversed(range(1, n)):
+        if const & (1 << i):
+            half += tq.gates.CNOT(control=target[i], target=ancillae[i - 1])
+            half += tq.gates.X(target=target[i])
+        if i > 1:
+            half += tq.gates.Toffoli(first=ancillae[i - 2], second=target[i], target=ancillae[i - 1])
+
+    if const & 1:
+        half += tq.gates.Toffoli(first=target[0], second=target[1], target=ancillae[0])
+
+    for i in range(2, n):
+        half += tq.gates.Toffoli(first=ancillae[i - 2], second=target[i], target=ancillae[i - 1])
+
+    U += half
+
+    U += tq.gates.CNOT(control=ancillae[n - 2], target=carry)
+
+    U += half.dagger()
+
+    return U
+
+
+def const_addition_circuit(target: Sequence[int], const: int, ancillae: Sequence[int]) -> tq.QCircuit:
+    """
+    Adds a constant to the target register.
+    Reference: https://arxiv.org/abs/1611.07995, chapter 2
+
+    :param target: Indices of the target qubits in MSB ordering.
+    :param const: The constant to be added.
+    :param ancillae: Indices of the ancilla qubits. Must contain at least 2 qubits.
+    Ancillae can be in any state, and will be returned to that state by the end of the circuit.
+    :return: A circuit implementing the addition.
+    """
+    n = len(target)
+    if n == 1:
+        U = tq.QCircuit()
+        if const & 1:
+            U += tq.gates.X(target=target[0])
+        return U
+
+    assert abs(const) < 2 ** n
+    assert len(ancillae) >= 2
+
+    split = n // 2
+
+    U = tq.QCircuit()
+
+    U += increment_circuit_n_ancillae(target=list(target[:split]) + [ancillae[0]],
+                                      ancillae=list(target[split:]) + [ancillae[1]])
+    U += tq.gates.X(target=ancillae[0])
+
+    for i in range(split):
+        U += tq.gates.CNOT(control=ancillae[0], target=target[i])
+
+    U += _carry_circuit(target=target[split:][::-1], const=const % (2 ** (n - split)), carry=ancillae[0],
+                        ancillae=list(target[:split]))
+
+    U += increment_circuit_n_ancillae(target=list(target[:split]) + [ancillae[0]],
+                                      ancillae=list(target[split:]) + [ancillae[1]])
+    U += tq.gates.X(target=ancillae[0])
+
+    U += _carry_circuit(target=target[split:][::-1], const=const % (2 ** (n - split)), carry=ancillae[0],
+                        ancillae=list(target[:split]))
+
+    for i in range(split):
+        U += tq.gates.CNOT(control=ancillae[0], target=target[i])
+
+    U += const_addition_circuit(target=target[:split], const=const >> (n - split), ancillae=ancillae)
+    U += const_addition_circuit(target=target[split:], const=const % (2 ** (n - split)), ancillae=ancillae)
+
+    return U
+

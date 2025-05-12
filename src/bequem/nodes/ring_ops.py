@@ -89,25 +89,38 @@ class Mul(ProxyNode):
     """
     A: Node
     B: Node
+    skip_projection: bool
 
-    def __init__(self, A: Node, B: Node):
+    def __init__(self, A: Node, B: Node, skip_projection: bool = False):
         if A.subspace_out.dimension != B.subspace_in.dimension:
             raise ValueError(f"dimensions {A.subspace_out.dimension} and {B.subspace_in.dimension} do not match")
         self.A = A
         self.B = B
+        self.skip_projection = skip_projection
 
     def children(self) -> list[Node]:
         return [self.A, self.B]
 
+    def parameters(self):
+        params = {}
+        if self.skip_projection:
+            params["skip_projection"] = True
+        return params
+
     def definition(self) -> Node:
         permutation = Permutation(self.A.subspace_out, self.B.subspace_in)
-        A_permuted = Tensor(self.A,
-                            Identity(Subspace(0, 1)))
-        B_permuted = Tensor(UnsafeMul(permutation, self.B),
-                            Identity(Subspace(0, 1)))
-        return UnsafeMul(
-            UnsafeMul(A_permuted, ComputeProjection(self.A.subspace_out)),
-            B_permuted)
+        if self.skip_projection:
+            A_permuted = self.A
+            B_permuted = UnsafeMul(permutation, self.B)
+            return UnsafeMul(A_permuted, B_permuted)
+        else:
+            A_permuted = Tensor(self.A,
+                                Identity(Subspace(0, 1)))
+            B_permuted = Tensor(UnsafeMul(permutation, self.B),
+                                Identity(Subspace(0, 1)))
+            return UnsafeMul(
+                UnsafeMul(A_permuted, ComputeProjection(self.A.subspace_out)),
+                B_permuted)
 
     def compute(self, input: np.ndarray | None) -> np.ndarray:
         input = self.A.compute(input)
