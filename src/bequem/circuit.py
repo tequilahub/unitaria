@@ -1,4 +1,7 @@
 from __future__ import annotations
+
+import copy
+
 import tequila as tq
 import numpy as np
 from dataclasses import dataclass
@@ -44,10 +47,17 @@ class Circuit:
         return copy
 
     def __add__(self, other):
-        return self.tq_circuit + other.tq_circuit
+        result = copy.deepcopy(self)
+        result += other
+        return result
 
     def __iadd__(self, other):
-        self.tq_circuit += other.tq_circuit
+        if isinstance(other, Circuit):
+            self.tq_circuit += other.tq_circuit
+        elif isinstance(other, tq.QCircuit):
+            self.tq_circuit += other
+        else:
+            raise TypeError(f"Cannot add {type(other)} to Circuit")
         return self
 
     def adjoint(self):
@@ -55,6 +65,12 @@ class Circuit:
         adj = self.tq_circuit.dagger()
         adj.n_qubits = self.tq_circuit.n_qubits
         return Circuit(adj)
+
+    def add_controls(self, controls):
+        return Circuit(self.tq_circuit.add_controls(control=controls))
+
+    def map_qubits(self, map):
+        return Circuit(self.tq_circuit.map_qubits(map))
 
     @staticmethod
     def from_qiskit(circuit):
