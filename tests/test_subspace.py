@@ -1,8 +1,7 @@
 import numpy as np
-import tequila as tq
+import pytest
 
 from bequem.subspace import Subspace, ControlledSubspace, ID
-from bequem.circuit import Circuit
 
 
 def test_eq():
@@ -67,3 +66,12 @@ def test_total_qubits():
         == 5
     )
 
+
+@pytest.mark.parametrize("subspace", [
+    Subspace(0),
+    Subspace(1, 1),
+    Subspace([ID, ControlledSubspace(Subspace(1), Subspace(0, 1))]),
+    Subspace([ID, ControlledSubspace(Subspace([ControlledSubspace(Subspace(0, 1), Subspace(1)), ID]), Subspace(1, 2))]),
+])
+def test_circuit(subspace: Subspace):
+    subspace.verify_circuit()
