@@ -20,7 +20,7 @@ class Subspace:
 
     registers: list[Register]
 
-    def __init__(self, registers: list[Register] | int, zero_qubits: int = 0):
+    def __init__(self, registers: list[Register] | int, zero_qubits: int = 0, ancillae: int = 0):
         if isinstance(registers, (int, np.integer)):
             registers = [ID] * registers
         for register in registers:
@@ -32,7 +32,7 @@ class Subspace:
                 simplified_registers += register.simplify()
             else:
                 simplified_registers.append(register)
-        self.registers = simplified_registers + [ZeroQubit()] * zero_qubits
+        self.registers = simplified_registers + [ZeroQubit()] * zero_qubits + [CleanAncilla()] * ancillae
         self._dimension = None
         self._total_qubits = None
 
@@ -87,7 +87,7 @@ class Subspace:
 
     def trailing_zeros(self) -> int:
         for i in reversed(range(len(self.registers))):
-            if not isinstance(self.registers[i], ZeroQubit):
+            if not isinstance(self.registers[i], ZeroQubit) and not isinstance(self.registers[i], CleanAncilla):
                 return len(self.registers) - i - 1
         return len(self.registers)
 
@@ -118,7 +118,7 @@ class Subspace:
                     if not result:
                         return False
                     bits = bits >> (num_qubits + 1)
-                case ZeroQubit():
+                case ZeroQubit() | CleanAncilla():
                     if bits & 1 != 0:
                         return False
                     bits = bits >> 1
@@ -167,7 +167,7 @@ class Subspace:
                 offset += 1
                 continue
 
-            if register == ID:
+            if register == ID or isinstance(register, CleanAncilla):
                 # No need to do anything here
                 offset += 1
                 continue
@@ -252,6 +252,16 @@ class Register(ABC):
 
 @dataclass(frozen=True)
 class ZeroQubit(Register):
+    def total_qubits(self) -> int:
+        return 1
+
+    def dimension(self) -> int:
+        return 1
+
+
+@dataclass(frozen=True)
+class CleanAncilla(Register):
+
     def total_qubits(self) -> int:
         return 1
 

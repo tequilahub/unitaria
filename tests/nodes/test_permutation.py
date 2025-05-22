@@ -18,6 +18,9 @@ def test_find_permutation_trivial():
     verify(Permutation(Subspace(1), Subspace(1, 1)))
     verify(Permutation(Subspace([c]), Subspace([c], 1)))
 
+    Permutation(Subspace(1, 0, 1), Subspace(1, 0, 1)).verify()
+    Permutation(Subspace(1, 1, 0), Subspace(1, 0, 1)).verify()
+
 
 def test_find_permutation_matching_partitioning():
     verify(Permutation(Subspace([ZeroQubit(), ID]), Subspace(1)))

@@ -29,13 +29,13 @@ class Increment(Node):
         if self.bits <= 3:
             return Subspace(self.bits)
         else:
-            return Subspace(self.bits, 1)
+            return Subspace(self.bits, 0, 1)
 
     def _subspace_out(self) -> Subspace:
         if self.bits <= 3:
             return Subspace(self.bits)
         else:
-            return Subspace(self.bits, 1)
+            return Subspace(self.bits, 0, 1)
 
     def _normalization(self) -> float:
         return 1
