@@ -39,27 +39,22 @@ Vielleicht von Numpy inspirieren lassen
 
 ## TODOS
 
-1. [x] Caching
-1. [ ] Check dass case_one.total_qubits = case_zero.total_qubits
-1. [ ] Alles in Datein aufspalten
-1. [ ] Dependencies qulacs, cirq, qiskit
-1. [ ] Global phase in tequila implementieren (Ram)
-2. [ ] Identity Gate (Ram)
-3. [ ] Circuit für QubitMap (Oliver)
-3. [x] phase (Oliver)
-4. [x] Componentwise Multiplication (Matthias)
-5. [x] Circuit Synthesis (Matthias)
-6. [ ] Nonlinear Beispiel (Jessica)
-7. [ ] FEM Beispiel (Matthias)
-8. [ ] QSVT (Matthias)
-9. [ ] Laplace / Konvolution testen <-- für nächstes Treffen
-10. [ ] Ancillas (Oliver)
-10. [ ] Measurements
-11. [ ] CI
-12. [ ] Documentation
-13. [ ] plan.md nicht auf PyPi hochladen
-14. [ ] Verify mit zufälliger Basis
-15. [ ] Better custom verificaitions
+* Bilineare Operationen besseres interface, z.B. ComponentwiseMul (Matthias)
+* Qulacs global phase (Oliver)
+* Dependencies qulacs, cirq, qiskit (Matthias)
+* Alles in Datein aufspalten
+* Global phase in tequila implementieren (Ram)
+* Nonlinear Beispiel (Jessica)
+* FEM Beispiel (Matthias)
+* QSVT (Matthias)
+* Clean Ancillas (Oliver) (Pull request)
+* Dirty Ancillas (Oliver)
+* Measurements: norm() -> float (Ram)
+* CI
+* Documentation
+* plan.md nicht auf PyPi hochladen
+* Verify mit zufälliger Basis
+* Better custom verificaitions
 
 ## Offene Fragen
 
