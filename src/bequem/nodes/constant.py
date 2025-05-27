@@ -43,10 +43,15 @@ class ConstantVector(Node):
         return np.mean(np.angle(self.vec))
 
     def compute(self, input: np.ndarray | None = None) -> np.ndarray:
-        return self.vec
+        if input is None:
+            return self.vec
+        elif input.ndim == 1:
+            return self.vec * input[0]
+        else:
+            return (np.array([self.vec]).T @ input.T).T
 
     def compute_adjoint(self, input: np.ndarray | None = None) -> np.ndarray:
-        return self.vec.T @ input
+        return np.array([self.vec]) @ input
 
     def _circuit(self) -> Circuit:
         normalized = self.vec / self.normalization
