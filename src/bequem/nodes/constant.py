@@ -40,7 +40,7 @@ class ConstantVector(Node):
         return np.linalg.norm(self.vec)
 
     def _phase(self) -> float:
-        return np.mean(np.angle(self.vec))
+        return 0
 
     def compute(self, input: np.ndarray | None = None) -> np.ndarray:
         if input is None:
