@@ -29,13 +29,13 @@ class Increment(Node):
         if self.bits <= 3:
             return Subspace(self.bits)
         else:
-            return Subspace(self.bits, 0, 1)
+            return Subspace(self.bits, 0, 0, 1)
 
     def _subspace_out(self) -> Subspace:
         if self.bits <= 3:
             return Subspace(self.bits)
         else:
-            return Subspace(self.bits, 0, 1)
+            return Subspace(self.bits, 0, 0, 1)
 
     def _normalization(self) -> float:
         return 1
@@ -125,10 +125,10 @@ class ConstantIntegerAddition(Node):
         return {"bits": self.bits, "constant": self.constant}
 
     def _subspace_in(self) -> Subspace:
-        return Subspace(self.bits, 2)
+        return Subspace(self.bits, 0, 0, 2)
 
     def _subspace_out(self) -> Subspace:
-        return Subspace(self.bits, 2)
+        return Subspace(self.bits, 0, 0, 2)
 
     def _normalization(self) -> float:
         return 1
