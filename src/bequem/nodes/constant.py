@@ -39,9 +39,6 @@ class ConstantVector(Node):
     def _normalization(self) -> float:
         return np.linalg.norm(self.vec)
 
-    def _phase(self) -> float:
-        return 0
-
     def compute(self, input: np.ndarray | None = None) -> np.ndarray:
         if input is None:
             return self.vec
@@ -99,9 +96,6 @@ class ConstantUnitary(Node):
 
     def _normalization(self) -> Subspace:
         return 1
-
-    def _phase(self) -> Subspace:
-        return 0
 
     def compute(self, input: np.ndarray) -> np.ndarray:
         return (self.unitary @ input.T).T

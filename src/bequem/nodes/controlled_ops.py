@@ -106,9 +106,6 @@ class Controlled(Node):
     def _normalization(self) -> float:
         return self.A.normalization
 
-    def _phase(self) -> float:
-        return 0
-
     def compute(self, input: np.ndarray) -> np.ndarray:
         return input
 
@@ -119,7 +116,6 @@ class Controlled(Node):
         control_qubit = self.A.subspace_in.total_qubits
         circuit = self.A.circuit.tq_circuit
         circuit = circuit.add_controls(control_qubit)
-        circuit += tq.gates.Phase(target=control_qubit, angle=self.A.phase)
         circuit.n_qubits = control_qubit + 1
         return Circuit(circuit)
 
@@ -162,9 +158,6 @@ class ModifyControl(Node):
 
     def _normalization(self) -> float:
         return self.A.normalization
-
-    def _phase(self) -> float:
-        return self.A.phase
 
     def compute(self, input: np.ndarray) -> np.ndarray:
         raise NotImplementedError

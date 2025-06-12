@@ -135,8 +135,5 @@ class Mul(ProxyNode):
     def _normalization(self) -> float:
         return self.A.normalization * self.B.normalization
 
-    def _phase(self) -> float:
-        return self.A.phase + self.B.phase
-
 
 Node.__matmul__ = lambda A, B: Mul(B, A)

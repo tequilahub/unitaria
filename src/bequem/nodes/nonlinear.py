@@ -35,9 +35,6 @@ class ComponentwiseMul(Node):
     def _normalization(self) -> float:
         return 1
 
-    def _phase(self) -> float:
-        return 0
-
     def compute(self, input: np.ndarray) -> np.ndarray:
         shape = list(input.shape[:-1])
         dim = self.subspace.dimension

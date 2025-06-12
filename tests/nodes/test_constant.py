@@ -18,6 +18,8 @@ def test_constant_unitary():
 def test_constant_unitary_rectangular():
     ConstantUnitary(np.array([[1, 0]])).verify()
     ConstantUnitary(np.array([[1], [0]])).verify()
+
+
 def test_constant_unitary_failing():
     # Global phase is not correct
     ConstantUnitary(np.array([[0, 1], [1, 0]])).verify(up_to_phase=True)

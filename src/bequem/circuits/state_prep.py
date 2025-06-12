@@ -43,6 +43,6 @@ def prepare_state(
         if not np.allclose(np.array([phi[bit, i] for i in range(2 ** bit)]), 0.0):
             U += multiplexed_Rz(np.array([phi[bit, i] for i in range(2 ** bit)]), target=target[bit], controls=target[:bit])
 
-    U += tq.gates.GlobalPhase(angle=np.mean(np.angle(state)))
+    U += tq.gates.GlobalPhase(angle=np.angle(combined[0, 0]))
 
     return U
