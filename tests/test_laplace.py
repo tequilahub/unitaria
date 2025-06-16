@@ -29,4 +29,4 @@ def test_preconditioned_laplace_1d():
                 [1, np.sqrt(3) / 2],
                 [0, 1 / 2],
             ])) & Identity(Subspace(l))
-        T_l.verify(up_to_phase=True)
+        T_l.verify()
