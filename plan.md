@@ -43,21 +43,15 @@ Vielleicht von Numpy inspirieren lassen
 * Qulacs global phase (Oliver)
 * Dependencies qulacs, cirq, qiskit (Matthias)
 * Alles in Datein aufspalten
-* Global phase in tequila implementieren (Ram)
+* Global phase in tequila implementieren (Ram) -> mergen
 * Nonlinear Beispiel (Jessica)
 * FEM Beispiel (Matthias)
 * QSVT (Matthias)
 * Clean Ancillas (Oliver) (Pull request)
-* Dirty Ancillas (Oliver)
+* Dirty Ancillas (Oliver) (Pull request)
 * Measurements: norm() -> float (Ram)
 * CI
 * Documentation
 * plan.md nicht auf PyPi hochladen
 * Verify mit zufälliger Basis
-* Better custom verificaitions
-
-## Offene Fragen
-
-* Wie können wir mit Global Phase umgehen? Tequila kann das im Prinzip nicht
-  (Benötigt für `Add`, `ConstantVector`)
-* Soll normalization ein float oder complex sein?
+* Better custom verifications
