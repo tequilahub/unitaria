@@ -1,6 +1,7 @@
 import numpy as np
 
 from bequem.circuit import Circuit
+from bequem.circuits.generic_unitary import generic_unitary
 from bequem.circuits.state_prep import prepare_state
 from bequem.nodes.node import Node
 from bequem.subspace import Subspace
@@ -104,11 +105,9 @@ class ConstantUnitary(Node):
         return (np.conj(self.unitary.T) @ input.T).T
 
     def _circuit(self) -> Circuit:
-        from qiskit.circuit.library import UnitaryGate
-
-        qiskit_circuit = UnitaryGate(self.extended_unitary).definition
-
-        return Circuit.from_qiskit(qiskit_circuit)
+        # Reversed because circuit function expects MSB ordering
+        target = list(reversed(range(self.bits)))
+        return Circuit(generic_unitary(U=self.extended_unitary, target=target))
 
 def _extend_basis_by_one(U: np.array, n: int):
     candidates = np.eye(U.shape[0]) - U[:, :n] @ np.conj(U.T)[:n, :]
