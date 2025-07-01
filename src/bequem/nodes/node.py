@@ -118,26 +118,6 @@ class Node(ABC):
         """
         raise NotImplementedError
 
-    @cached_property
-    def phase(self) -> float:
-        """
-        The global phase of the block encoding which can't be represented in the Tequila circuit.
-
-        If a global phase gate is added to Tequila in the future, that should be used instead.
-
-        The output of the circuit has to be multiplied with exp(i * phase) to get the correct result.
-        """
-        return self._phase()
-
-    @abstractmethod
-    def _phase(self) -> float:
-        """
-        Method to for computing :py:func:`phase`.
-        
-        To be implemented in all subclasses of :py:class:`Node`.
-        """
-        raise NotImplementedError
-
     def is_vector(self) -> bool:
         """
         Tests whether this node encodes a vector or a matrix.
@@ -295,9 +275,7 @@ class Node(ABC):
                     input = np.zeros(len(basis_in), dtype=np.complex128)
                     input[i] = 1
                     computed_temp = self.compute(input)
-                    simulated = np.exp(
-                        self.phase *
-                        1j) * self.normalization * self.subspace_out.project(
+                    simulated = self.normalization * self.subspace_out.project(
                             circuit.simulate(b, backend="qulacs"))
                     if up_to_phase:
                         simulated = bring_to_same_phase(computed_temp, simulated)
@@ -327,9 +305,7 @@ class Node(ABC):
                     return computed_m
             else:
                 computed = self.compute(np.array([1], dtype=np.complex128))
-                simulated = np.exp(
-                    self.phase *
-                    1j) * self.normalization * self.subspace_out.project(
+                simulated = self.normalization * self.subspace_out.project(
                         circuit.simulate(0, backend="qulacs"))
                 if up_to_phase:
                     simulated = bring_to_same_phase(computed, simulated)
@@ -367,4 +343,4 @@ class VerificationError(Exception):
             console.print(
                 Syntax(self.circuit, "text", background_color="default"))
         output = capture.get()
-        return "\n" + output + f"\nnormalization = {self.node.normalization}, phase = {self.node.phase}"
+        return "\n" + output + f"\nnormalization = {self.node.normalization}"

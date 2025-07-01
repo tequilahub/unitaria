@@ -49,7 +49,7 @@ class Subspace:
         return self._dimension
 
     @property
-    def total_qubits(self) -> int:
+    def  total_qubits(self) -> int:
         """
         The number of qubits of the state space in which the subspace lives
 

@@ -88,9 +88,6 @@ class PermuteRegisters(Node):
     def _normalization(self) -> float:
         return 1
 
-    def _phase(self) -> float:
-        return 0
-
     def compute(self, input: np.ndarray) -> np.ndarray:
         outer_shape = list(input.shape[:-1])
         register_shape = [r.dimension() for r in self.qubits.registers]

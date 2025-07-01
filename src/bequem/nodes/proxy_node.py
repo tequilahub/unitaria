@@ -63,11 +63,6 @@ class ProxyNode(Node):
             self._definition = self.definition()
         return self._definition.normalization
 
-    def _phase(self) -> float:
-        if self._definition is None:
-            self._definition = self.definition()
-        return self._definition.phase
-
     def tree_label(self, verbose: bool = False):
         label = super().tree_label()
         if not verbose:
