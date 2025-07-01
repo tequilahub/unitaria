@@ -13,7 +13,6 @@ keywords = ["quantum computing"]
 dependencies = [
   "tequila-basic@git+ssh://git@github.com/Ram4Dev/tequila@f46eae9e415efe643ab62fcec70743d6f2d5ced5",
   "rich==14.0.*",
-  "qiskit==2.0.2",
   "cirq==1.5.0"
 ]
 
