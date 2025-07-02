@@ -40,16 +40,14 @@ class ConstantVector(Node):
     def _normalization(self) -> float:
         return np.linalg.norm(self.vec)
 
-    def compute(self, input: np.ndarray | None = None) -> np.ndarray:
-        if input is None:
-            return self.vec
-        elif input.ndim == 1:
+    def compute(self, input: np.ndarray) -> np.ndarray:
+        if input.ndim == 1:
             return self.vec * input[0]
         else:
             return (np.array([self.vec]).T @ input.T).T
 
-    def compute_adjoint(self, input: np.ndarray | None = None) -> np.ndarray:
-        return np.array([self.vec]) @ input
+    def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
+        return (np.array([np.conj(self.vec)]) @ input.T).T
 
     def _circuit(self) -> Circuit:
         normalized = self.vec / self.normalization

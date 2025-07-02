@@ -1,7 +1,7 @@
-import tequila as tq
 import numpy as np
 from bequem.nodes import ProxyNode, Node, ConstantIntegerAddition, ConstantIntegerMultiplication, Identity, Mul
 from bequem.subspace import Subspace, ID, ZeroQubit
+from bequem.verifier import verify
 
 
 class LCG(ProxyNode):
@@ -66,6 +66,5 @@ class LCG(ProxyNode):
 
 
 def test_lcg():
-    LCG(2, 1, 1).verify()
-    LCG(2, 1, 3).verify()
-    # LCG(3, 3, 5).verify()
+    verify(LCG(2, 1, 1))
+    verify(LCG(2, 1, 3))

@@ -1,6 +1,7 @@
 from bequem.nodes.identity import Identity
 from bequem.nodes.integer_arithmetic import Increment
 from bequem.subspace import Subspace
+from bequem.verifier import verify
 
 
 def test_block_diagonal():
@@ -8,9 +9,9 @@ def test_block_diagonal():
     B = Increment(2)
 
     D = A | B
-    D.verify()
+    verify(D)
     D = B | A
-    D.verify()
+    verify(D)
 
 
 def test_block_diagonal_with_permutation():
@@ -18,6 +19,6 @@ def test_block_diagonal_with_permutation():
     B = Increment(2)
 
     D = A | B
-    D.verify()
+    verify(D)
     D = B | A
-    D.verify()
+    verify(D)

@@ -2,25 +2,26 @@ import pytest
 
 from bequem.subspace import Subspace, ControlledSubspace, ID, ZeroQubit
 from bequem.nodes.permutation import _find_matching_partitioning, Permutation, PermuteRegisters
+from bequem.verifier import verify
 
 
 def test_find_permutation_trivial():
-    Permutation(Subspace(0), Subspace(0)).verify()
-    Permutation(Subspace(0, 1), Subspace(0, 1)).verify()
-    Permutation(Subspace(1), Subspace(1)).verify()
-    Permutation(Subspace(1, 1), Subspace(1, 1)).verify()
-    Permutation(Subspace(1, 2), Subspace(1, 2)).verify()
+    verify(Permutation(Subspace(0), Subspace(0)))
+    verify(Permutation(Subspace(0, 1), Subspace(0, 1)))
+    verify(Permutation(Subspace(1), Subspace(1)))
+    verify(Permutation(Subspace(1, 1), Subspace(1, 1)))
+    verify(Permutation(Subspace(1, 2), Subspace(1, 2)))
     c = ControlledSubspace(Subspace(1), Subspace(0, 1))
-    Permutation(Subspace([c]), Subspace([c])).verify()
+    verify(Permutation(Subspace([c]), Subspace([c])))
 
-    Permutation(Subspace(0), Subspace(0, 1)).verify()
-    Permutation(Subspace(1), Subspace(1, 1)).verify()
-    Permutation(Subspace([c]), Subspace([c], 1)).verify()
+    verify(Permutation(Subspace(0), Subspace(0, 1)))
+    verify(Permutation(Subspace(1), Subspace(1, 1)))
+    verify(Permutation(Subspace([c]), Subspace([c], 1)))
 
 
 def test_find_permutation_matching_partitioning():
-    Permutation(Subspace([ZeroQubit(), ID]), Subspace(1)).verify()
-    Permutation(Subspace(1), Subspace([ZeroQubit(), ID])).verify()
+    verify(Permutation(Subspace([ZeroQubit(), ID]), Subspace(1)))
+    verify(Permutation(Subspace(1), Subspace([ZeroQubit(), ID])))
 
 
 @pytest.mark.xfail
@@ -30,8 +31,8 @@ def test_brute_force_1_simple_rotation():
     b = Subspace([ControlledSubspace(a, a)])
     c = Subspace([ControlledSubspace(b, a1)])
     d = Subspace([ControlledSubspace(a1, b)])
-    Permutation(d, c).verify()
-    Permutation(c, d).verify()
+    verify(Permutation(d, c))
+    verify(Permutation(c, d))
 
 @pytest.mark.xfail
 def test_brute_force_2_simple_rotations():
@@ -41,15 +42,15 @@ def test_brute_force_2_simple_rotations():
     b1 = Subspace(1)
     b2 = Subspace([ControlledSubspace(b1, Subspace(0, 1))])
     b3 = Subspace([ControlledSubspace(b2, Subspace(0, 2))])
-    Permutation(a, b3).verify()
-    Permutation(b3, a).verify()
+    verify(Permutation(a, b3))
+    verify(Permutation(b3, a))
 
     # Right
     b1 = Subspace(1)
     b2 = Subspace([ControlledSubspace(Subspace(0, 1), b1)])
     b3 = Subspace([ControlledSubspace(Subspace(0, 2), b2)])
-    Permutation(a, b3).verify()
-    Permutation(b3, a).verify()
+    verify(Permutation(a, b3))
+    verify(Permutation(b3, a))
 
 @pytest.mark.xfail
 def test_brute_force_double_rotation_left_right():
@@ -58,7 +59,7 @@ def test_brute_force_double_rotation_left_right():
     b1 = Subspace(1)
     b2 = Subspace([ControlledSubspace(Subspace(0, 1), b1)])
     b3 = Subspace([ControlledSubspace(b2, Subspace(0, 2))])
-    Permutation(a, b3).verify()
+    verify(Permutation(a, b3))
 
 @pytest.mark.xfail
 def test_brute_force_double_rotation_right_left():
@@ -67,19 +68,19 @@ def test_brute_force_double_rotation_right_left():
     b1 = Subspace(1)
     b2 = Subspace([ControlledSubspace(b1, Subspace(0, 1))])
     b3 = Subspace([ControlledSubspace(Subspace(0, 2), b2)])
-    Permutation(a, b3).verify()
+    verify(Permutation(a, b3))
 
 
 def test_permute_registers():
-    PermuteRegisters(Subspace(1), [0]).verify()
-    PermuteRegisters(Subspace(2), [0, 1]).verify()
-    PermuteRegisters(Subspace(2), [1, 0]).verify()
-    PermuteRegisters(Subspace(3), [0, 1, 2]).verify()
-    PermuteRegisters(Subspace(3), [0, 2, 1]).verify()
-    PermuteRegisters(Subspace(3), [1, 0, 2]).verify()
-    PermuteRegisters(Subspace(3), [1, 2, 0]).verify()
-    PermuteRegisters(Subspace(3), [2, 0, 1]).verify()
-    PermuteRegisters(Subspace(3), [2, 1, 0]).verify()
+    verify(PermuteRegisters(Subspace(1), [0]))
+    verify(PermuteRegisters(Subspace(2), [0, 1]))
+    verify(PermuteRegisters(Subspace(2), [1, 0]))
+    verify(PermuteRegisters(Subspace(3), [0, 1, 2]))
+    verify(PermuteRegisters(Subspace(3), [0, 2, 1]))
+    verify(PermuteRegisters(Subspace(3), [1, 0, 2]))
+    verify(PermuteRegisters(Subspace(3), [1, 2, 0]))
+    verify(PermuteRegisters(Subspace(3), [2, 0, 1]))
+    verify(PermuteRegisters(Subspace(3), [2, 1, 0]))
 
 
 def test_find_matching_partitioning():

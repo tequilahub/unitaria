@@ -2,17 +2,18 @@ from bequem.nodes.block_concatenation import BlockHorizontal, BlockVertical
 from bequem.nodes.integer_arithmetic import Increment
 from bequem.nodes.identity import Identity
 from bequem.subspace import Subspace
+from bequem.verifier import verify
 
 
 def test_block_horizontal():
     A = Identity(Subspace(1))
     B = Increment(1)
-    BlockHorizontal(A, B).verify()
-    BlockHorizontal(B, A).verify()
+    verify(BlockHorizontal(A, B))
+    verify(BlockHorizontal(B, A))
 
 def test_block_vertical():
     A = Identity(Subspace(1))
     B = Increment(1)
-    BlockVertical(A, B).verify()
-    BlockVertical(B, A).verify()
+    verify(BlockVertical(A, B))
+    verify(BlockVertical(B, A))
 

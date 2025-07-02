@@ -3,10 +3,8 @@ from abc import ABC, abstractmethod
 from functools import cached_property
 
 import numpy as np
-import tequila as tq
 from rich.tree import Tree
 from rich.console import Console
-from rich.syntax import Syntax
 
 from bequem.subspace import Subspace
 from bequem.circuit import Circuit
@@ -222,125 +220,14 @@ class Node(ABC):
     def __str__(self):
         return self.draw()
 
-    def find_error(self) -> np.ndarray:
-        """
-        Convenience function to recursively call :py:func:`verify` on the
-        children of this node.
-
-        You should typically use :py:func:`verify` instead.
-        """
-        for child in self.children():
-            child.find_error()
-
-    def verify(self, drill: bool = True, up_to_phase: bool = False, batch_compute: bool | None = None) -> np.ndarray:
-        """
-        Verify the correctness of this node.
-
-        Checks that the outputs of :py:func:`qubits_in`, :py:func:`qubits_out`,
-        :py:func:`normalization`, and :py:func:`circuit` are sensible and encode
-        the same matrix.
-
-        :param drill:
-            If True and an error is found, recursivly test this nodes children
-            to find the smallest node which still contains the error.
-        """
-
-        basis_in = self.subspace_in.enumerate_basis()
-        basis_out = self.subspace_out.enumerate_basis()
-
-        if batch_compute is None:
-            batch_compute = len(basis_in) < 2 ** 10
-        circuit = self.circuit
-        try:
-            if self.subspace_in.total_qubits == 0:
-                # TODO: Tequila does not support circuits without qubits
-                assert circuit.tq_circuit.n_qubits == 1
-                assert self.subspace_out.total_qubits == 0
-            else:
-                assert circuit.tq_circuit.n_qubits == self.subspace_in.total_qubits
-                assert circuit.tq_circuit.n_qubits == self.subspace_out.total_qubits
-
-            if not self.is_vector():
-                if batch_compute:
-                    computed = np.eye(len(basis_out),
-                                      len(basis_in),
-                                      dtype=np.complex128)
-                    computed_adj = np.eye(len(basis_in),
-                                          len(basis_out),
-                                          dtype=np.complex128)
-                    computed_m = self.compute(np.eye(len(basis_in), dtype=np.complex128)).T
-                    computed_adj_m = self.compute_adjoint(np.eye(len(basis_out), dtype=np.complex128)).T
-
-                for (i, b) in enumerate(basis_in):
-                    input = np.zeros(len(basis_in), dtype=np.complex128)
-                    input[i] = 1
-                    computed_temp = self.compute(input)
-                    simulated = self.normalization * self.subspace_out.project(
-                            circuit.simulate(b, backend="qulacs"))
-                    if up_to_phase:
-                        simulated = bring_to_same_phase(computed_temp, simulated)
-                    # verify circuit
-                    np.testing.assert_allclose(computed_temp, simulated, atol=1e-8, err_msg=f"On input {i}:")
-                    if batch_compute:
-                        computed[:, i] = computed_temp
-
-                if batch_compute:
-                    for (i, b) in enumerate(basis_out):
-                        input = np.zeros(len(basis_out), dtype=np.complex128)
-                        input[i] = 1
-                        computed_adj[:, i] = self.compute_adjoint(input)
-
-                    if up_to_phase:
-                        computed_m = bring_to_same_phase(computed, computed_m)
-                        computed_adj_m = bring_to_same_phase(np.conj(computed).T, computed_adj_m)
-                        computed_adj = bring_to_same_phase(np.conj(computed).T, computed_adj)
-
-                    # verify compute with tensor valued input
-                    np.testing.assert_allclose(computed, computed_m, atol=1e-8)
-                    # verify compute_adjoint
-                    np.testing.assert_allclose(computed_adj_m,
-                                               np.conj(computed_m).T, atol=1e-8)
-                    np.testing.assert_allclose(computed_adj, computed_adj_m, atol=1e-8)
-
-                    return computed_m
-            else:
-                computed = self.compute(np.array([1], dtype=np.complex128))
-                simulated = self.normalization * self.subspace_out.project(
-                        circuit.simulate(0, backend="qulacs"))
-                if up_to_phase:
-                    simulated = bring_to_same_phase(computed, simulated)
-
-                # verify circuit
-                np.testing.assert_allclose(computed, simulated, atol=1e-8)
-                return computed
-        except AssertionError as err:
-            if drill:
-                try:
-                    self.find_error()
-                except VerificationError as child_err:
-                    raise VerificationError(self, circuit) from child_err
-            raise VerificationError(self, circuit) from err
-
-def bring_to_same_phase(a: np.ndarray, b: np.ndarray):
-    b_f = b.flatten()
-    i = np.argmax(np.abs(b_f))
-    return a.flatten()[i] / b_f[i] * b
-
-
-class VerificationError(Exception):
-
-    def __init__(self, node: Node, circuit: Circuit):
-        super().__init__()
-        self.node = node
-        compiled = tq.simulators.simulator_api.compile_circuit(
-            abstract_circuit=circuit.padded(), backend="cirq")
-        self.circuit = compiled.circuit.to_text_diagram()
-
-    def __str__(self):
-        console = Console(width=60)
-        with console.capture() as capture:
-            console.print(self.node.tree())
-            console.print(
-                Syntax(self.circuit, "text", background_color="default"))
-        output = capture.get()
-        return "\n" + output + f"\nnormalization = {self.node.normalization}"
+    def __repr__(self):
+        out = self.__class__.__name__ + "("
+        parameters = self.parameters()
+        if len(parameters) != 0:
+            out += str(parameters)[1:-1]
+            if len(self.children()) > 0:
+                out += ", "
+        if len(self.children()) > 0:
+            out += self.children().__repr__()
+        out += ")"
+        return out
