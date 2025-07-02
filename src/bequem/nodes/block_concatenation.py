@@ -58,7 +58,7 @@ class BlockHorizontal(ProxyNode):
 
     def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
         return np.concatenate(
-            (self.A.compute_adjoint(input), self.B.compute(input)), axis=-1)
+            (self.A.compute_adjoint(input), self.B.compute_adjoint(input)), axis=-1)
 
 
 class BlockVertical(ProxyNode):
