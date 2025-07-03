@@ -10,12 +10,12 @@ from rich.syntax import Syntax
 default_verifier = None
 
 
-def verify(node: Node):
+def verify(node: Node, reference: np.ndarray | None = None):
     global default_verifier
     if default_verifier is None:
         default_verifier = Verifier()
 
-    default_verifier.verify(node)
+    default_verifier.verify(node, reference)
 
 class Verifier:
 
@@ -36,7 +36,7 @@ class Verifier:
             assert node.circuit.tq_circuit.n_qubits == node.subspace_in.total_qubits
             assert node.circuit.tq_circuit.n_qubits == node.subspace_out.total_qubits
 
-    def _compare_batch_compute(self, node: Node):
+    def _compare_batch_compute(self, node: Node, reference: np.ndarray | None = None):
         batch_computed = node.compute(np.eye(node.subspace_in.dimension, dtype=np.complex128))
         computed = np.zeros_like(batch_computed)
         for i in range(node.subspace_in.dimension):
@@ -44,6 +44,8 @@ class Verifier:
             input[i] = 1
             computed[i, :] = node.compute(input)
         np.testing.assert_allclose(batch_computed, computed, atol=1e-8)
+        if reference is not None:
+            np.testing.assert_allclose(batch_computed, reference)
 
     def _compare_compute_simulate(self, node: Node):
         basis_in = node.subspace_in.enumerate_basis()
@@ -56,9 +58,20 @@ class Verifier:
                     node.circuit.simulate(b, backend="qulacs"))
             if self.up_to_phase:
                 simulated = bring_to_same_phase(computed, simulated)
-            np.testing.assert_allclose(computed, simulated, atol=1e-8, err_msg=f"On input {i}:")
+            np.testing.assert_allclose(simulated, computed, atol=1e-8, err_msg=f"On input {i}:")
 
-    def verify(self, node: Node):
+    def _verify(self, node: Node, reference: np.ndarray | None = None):
+
+        try:
+            self._verify_circuit_qubits(node)
+            self._compare_compute_simulate(node)
+            self._compare_compute_simulate(Adjoint(node))
+            self._compare_batch_compute(node, reference)
+            self._compare_batch_compute(Adjoint(node))
+        except AssertionError as err:
+            raise VerificationError(node, node.circuit) from err
+
+    def verify(self, node: Node, reference: np.ndarray | None = None):
         """
         Verify the correctness of this node.
 
@@ -72,18 +85,11 @@ class Verifier:
         """
 
         try:
-            self._verify_circuit_qubits(node)
-            self._compare_compute_simulate(node)
-            self._compare_compute_simulate(Adjoint(node))
-            self._compare_batch_compute(node)
-            self._compare_batch_compute(Adjoint(node))
-        except AssertionError as err:
+            self._verify(node, reference)
+        except VerificationError as err:
             if self.drill:
-                try:
-                    self.find_error()
-                except VerificationError as child_err:
-                    raise VerificationError(self, node.circuit) from child_err
-            raise VerificationError(self, node.circuit) from err
+                self.find_error(node)
+            raise err
 
     def find_error(self, node: Node):
         """
@@ -92,8 +98,9 @@ class Verifier:
 
         You should typically use :py:func:`verify` instead.
         """
-        for child in self.children():
-            child.find_error()
+        for child in node.children():
+            self.find_error(child)
+            self._verify(child)
 
 def bring_to_same_phase(a: np.ndarray, b: np.ndarray):
     b_f = b.flatten()
@@ -106,7 +113,7 @@ class VerificationError(Exception):
     def __init__(self, node: Node, circuit: Circuit):
         super().__init__()
         self.node = node
-        self.circuit = tq.draw(circuit)
+        self.circuit = tq.draw(circuit.tq_circuit)
 
     def __str__(self):
         console = Console(width=60)
