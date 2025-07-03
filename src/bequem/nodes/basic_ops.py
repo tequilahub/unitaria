@@ -310,17 +310,22 @@ Node.__rmul__ = lambda A, s: Scale(A, s)
 
 
 class ComputeProjection(Node):
-    def __init__(self, qubits: Subspace):
-        self.qubits = Subspace(qubits.registers, 1)
+    def __init__(self, subspace: Subspace):
+        self.subspace = subspace
 
     def children(self) -> list[Node]:
         return []
 
     def _subspace_in(self) -> Subspace:
-        return self.qubits
+        # TODO: most of the extra zeros are actually ancillas
+        return Subspace(
+            self.subspace.registers,
+            self.circuit.tq_circuit.n_qubits - self.subspace.total_qubits)
 
     def _subspace_out(self) -> Subspace:
-        return self.qubits
+        return Subspace(
+            self.subspace.registers,
+            self.circuit.tq_circuit.n_qubits - self.subspace.total_qubits)
 
     def _normalization(self) -> float:
         return 1
@@ -332,5 +337,4 @@ class ComputeProjection(Node):
         return input
 
     def _circuit(self) -> Circuit:
-        # TODO
-        return Circuit()
+        return self.subspace.circuit()
