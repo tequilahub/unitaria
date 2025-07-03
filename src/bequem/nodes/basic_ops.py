@@ -290,18 +290,21 @@ class Scale(Node):
 
     def compute(self, input: np.ndarray | None = None) -> np.ndarray:
         if self.absolute:
-            return self.scale / self.A.normalization * self.A.compute(input)
+            return np.exp(1j * self.global_phase) * self.scale / self.A.normalization * self.A.compute(input)
         else:
-            return self.scale * self.A.compute(input)
+            return np.exp(1j * self.global_phase) * self.scale * self.A.compute(input)
 
     def compute_adjoint(self, input: np.ndarray | None = None) -> np.ndarray:
         if self.absolute:
-            return self.scale / self.A.normalization * self.A.compute_adjoint(input)
+            return np.exp(-1j * self.global_phase) * self.scale / self.A.normalization * self.A.compute_adjoint(input)
         else:
-            return self.scale * self.A.compute_adjoint(input)
+            return np.exp(-1j * self.global_phase) * self.scale * self.A.compute_adjoint(input)
 
     def _circuit(self) -> Circuit:
-        return self.A.circuit
+        circuit = Circuit()
+        circuit += self.A.circuit
+        circuit.tq_circuit += tq.circuit.gates.GlobalPhase(self.global_phase)
+        return circuit
 
 Node.__rmul__ = lambda A, s: Scale(A, s)
 

@@ -2,6 +2,7 @@ from bequem.nodes.identity import Identity
 from bequem.nodes.integer_arithmetic import Increment
 from bequem.subspace import Subspace
 from bequem.verifier import verify
+from bequem.nodes.basic_ops import Scale
 
 
 def test_tensor():
@@ -14,3 +15,11 @@ def test_tensor():
     verify((B & A))
     verify((B & (A & B)))
     verify(((B & A) & B))
+
+
+def test_scale():
+    A = Increment(1)
+
+    verify(1 * A)
+    verify((-1) * A)
+    verify(Scale(A, 0.5, absolute=True))
