@@ -33,6 +33,7 @@
 * [x] (Convolution) (bilinear), (Increment)
 * [ ] ElementwiseMultiplication (bilinear)
 * [ ] (AmplitudeEstimation, PhaseEstimation)
+* [ ] QFT
 
 Vielleicht von Numpy inspirieren lassen
 
@@ -43,10 +44,10 @@ Vielleicht von Numpy inspirieren lassen
 * Qulacs global phase (Oliver)
 * Dependencies qulacs, cirq, qiskit (Matthias)
 * Alles in Datein aufspalten
-* Global phase in tequila implementieren (Ram) -> mergen
 * Nonlinear Beispiel (Jessica)
 * FEM Beispiel (Matthias)
 * QSVT (Matthias)
+* QFT (Matthias)
 * Clean Ancillas (Oliver) (Pull request)
 * Dirty Ancillas (Oliver) (Pull request)
 * Measurements: norm() -> float (Ram)
@@ -55,3 +56,11 @@ Vielleicht von Numpy inspirieren lassen
 * plan.md nicht auf PyPi hochladen
 * Verify mit zufälliger Basis
 * Better custom verifications
+
+
+## Example projects
+
+* FEM 1d toeplitz + Inverse?
+* Gauss convolution
+* Haar transformation
+* Faber matrix
