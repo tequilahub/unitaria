@@ -18,9 +18,9 @@
 
 ## Nodes
 
-* [y] Multiply
+* [x] Multiply
 * [x] Add
-* [x] ~ConstantVector~ = ConstantMatrix
+* [x] ConstantVector
 * [ ] ConstantUnitary
 * [ ] ConstantMatrix
 * [x] TensorProduct
@@ -40,12 +40,11 @@ Vielleicht von Numpy inspirieren lassen
 
 ## TODOS
 
+* Move dimension from subspace to node (discuss next meeting)
 * Bilineare Operationen besseres interface, z.B. ComponentwiseMul (Matthias)
-* Qulacs global phase (Oliver)
-* Dependencies qulacs, cirq, qiskit (Matthias)
+* Dependencies qulacs, ~cirq~, ~qiskit~ (Matthias)
 * Alles in Datein aufspalten
 * Nonlinear Beispiel (Jessica)
-* FEM Beispiel (Matthias)
 * QSVT (Matthias)
 * QFT (Matthias)
 * Clean Ancillas (Oliver) (Pull request)
@@ -56,6 +55,8 @@ Vielleicht von Numpy inspirieren lassen
 * plan.md nicht auf PyPi hochladen
 * Verify mit zufälliger Basis
 * Better custom verifications
+* Better circuit output
+* Permutations
 
 
 ## Example projects

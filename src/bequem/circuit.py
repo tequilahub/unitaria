@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import tempfile
 
 import tequila as tq
 import numpy as np
@@ -71,3 +72,12 @@ class Circuit:
 
     def map_qubits(self, map):
         return Circuit(self.tq_circuit.map_qubits(map))
+
+    def draw(self) -> str:
+        if tq.circuit.qpic.system_has_qpic:
+            # TODO: Use IPython if available
+            _handle, file = tempfile.mkstemp(suffix=".pdf")
+            tq.circuit.qpic.export_to(self.tq_circuit, file, always_use_generators=True)
+            return f"Circuit stored at file://{file}"
+        else:
+            return tq.draw(self.tq_circuit)

@@ -173,7 +173,6 @@ def test_preconditioned_laplace_1d():
     C_F = None
 
     for l in range(L, 0, -1):
-        print(l)
         I_l = Identity(Subspace.from_dim(2**l - 1, bits=l), Subspace(l))
         N_l = Increment(l) @ I_l
         C_l = 2**(l / 2) * (I_l - N_l)
