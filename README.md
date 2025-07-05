@@ -3,5 +3,5 @@
 *Block Encoding QUantum Execution Module*
 
 ```
-pip3 install . --editable
+pip3 install --editable .
 ```
