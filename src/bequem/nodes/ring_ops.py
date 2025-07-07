@@ -123,9 +123,15 @@ class Mul(ProxyNode):
             projection_subspace = A_permuted.subspace_out
             if A_permuted.subspace_out.total_qubits < B_permuted.subspace_in.total_qubits:
                 projection_subspace = B_permuted.subspace_in
-            return UnsafeMul(
-                UnsafeMul(A_permuted, ComputeProjection(projection_subspace)),
-                B_permuted)
+            projection_required = True
+            if projection_subspace == Subspace(projection_subspace.total_qubits):
+                projection_required = False
+            if projection_required:
+                return UnsafeMul(
+                    UnsafeMul(A_permuted, ComputeProjection(projection_subspace)),
+                    B_permuted)
+            else:
+                return UnsafeMul(A_permuted, B_permuted)
 
     def compute(self, input: np.ndarray | None) -> np.ndarray:
         input = self.A.compute(input)
