@@ -110,7 +110,7 @@ def bring_to_same_phase(a: np.ndarray, b: np.ndarray):
 
 class VerificationError(Exception):
 
-    def __init__(self, node: Node, circuit: Circuit):
+    def __init__(self, node: Node):
         super().__init__()
         self.node = node
 
