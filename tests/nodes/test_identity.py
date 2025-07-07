@@ -4,7 +4,7 @@ from bequem.verifier import verify
 
 
 def test_identity():
-    I = Identity(Subspace(1))
-    verify(I)
-    I = Identity(Subspace(0))
-    verify(I)
+    Id = Identity(Subspace(1))
+    verify(Id)
+    Id = Identity(Subspace(0))
+    verify(Id)
