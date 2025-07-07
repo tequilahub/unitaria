@@ -173,7 +173,7 @@ class Subspace:
                 continue
 
             if not isinstance(register, ControlledSubspace):
-                raise ValueError(f"Registers that aren't of type Qubit are unsupported")
+                raise ValueError("Registers that aren't of type Qubit are unsupported")
 
             register_circuit = register.circuit()
             register_ancillae = register_circuit.tq_circuit.n_qubits - register.total_qubits()

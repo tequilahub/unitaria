@@ -1,9 +1,7 @@
 import numpy as np
-import tequila as tq
 
 from bequem.nodes.node import Node
 from bequem.nodes.basic_ops import Adjoint
-from bequem.circuit import Circuit
 from rich.console import Console
 from rich.syntax import Syntax
 
