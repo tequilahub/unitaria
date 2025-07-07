@@ -49,7 +49,7 @@ class Subspace:
         return self._dimension
 
     @property
-    def  total_qubits(self) -> int:
+    def total_qubits(self) -> int:
         """
         The number of qubits of the state space in which the subspace lives
 
@@ -102,7 +102,7 @@ class Subspace:
         """
         Tests whether the given basis state is inside the subspace
         """
-        if bits >= 2 ** self.total_qubits:
+        if bits >= 2**self.total_qubits:
             raise ValueError
         for register in self.registers:
             match register:
@@ -130,13 +130,11 @@ class Subspace:
         """
         Enumerates the basis states inside the subspace
         """
-        return np.fromiter(
-            filter(self.test_basis, range(2 ** self.total_qubits)), dtype=np.int32
-        )
+        return np.fromiter(filter(self.test_basis, range(2**self.total_qubits)), dtype=np.int32)
 
     def project(self, vector: np.ndarray) -> np.ndarray:
         """
-        Projects a state vector the embedding 
+        Projects a state vector the embedding
         """
         return vector[self.enumerate_basis()]
 
@@ -182,8 +180,10 @@ class Subspace:
             # Main qubits get shifted by the offset
             register_map = {i: i + offset for i in range(register.total_qubits())}
             # Ancilla qubits get shifted to the flag qubit and following qubits
-            register_map |= {j: j - register.total_qubits() + next_flag
-                             for j in range(register.total_qubits(), register.total_qubits() + register_ancillae)}
+            register_map |= {
+                j: j - register.total_qubits() + next_flag
+                for j in range(register.total_qubits(), register.total_qubits() + register_ancillae)
+            }
             circuit += register_circuit.map_qubits(register_map)
             circuit += tq.gates.X(target=next_flag)
             flags.append(next_flag)
@@ -193,28 +193,25 @@ class Subspace:
 
         # Apply the constructed circuit, add a multi-controlled NOT to determine
         # if the result flag is set, then uncompute the rest of the circuit
-        circuit = (circuit
-                   + tq.gates.X(target=result, control=flags)
-                   + tq.gates.X(target=result)
-                   + circuit.adjoint())
+        circuit = circuit + tq.gates.X(target=result, control=flags) + tq.gates.X(target=result) + circuit.adjoint()
 
         return circuit
 
     def verify_circuit(self):
         circuit = self.circuit()
-        for i in range(2 ** self.total_qubits):
+        for i in range(2**self.total_qubits):
             result = circuit.simulate(i)
             if self.test_basis(i):
                 assert result[i] == 1
             else:
-                assert result[i + 2 ** self.total_qubits] == 1
+                assert result[i + 2**self.total_qubits] == 1
 
     def case_zero(self) -> Subspace:
         trailing_zeros = self.trailing_zeros()
         assert isinstance(self.registers[-(trailing_zeros + 1)], ControlledSubspace)
 
         return Subspace(
-            self.registers[:-(trailing_zeros + 1)] + self.registers[-(trailing_zeros + 1)].case_zero.registers,
+            self.registers[: -(trailing_zeros + 1)] + self.registers[-(trailing_zeros + 1)].case_zero.registers,
         )
 
     def case_one(self) -> Subspace:
@@ -222,7 +219,7 @@ class Subspace:
         assert isinstance(self.registers[-(trailing_zeros + 1)], ControlledSubspace)
 
         return Subspace(
-            self.registers[:-(trailing_zeros + 1)] + self.registers[-(trailing_zeros + 1)].case_one.registers,
+            self.registers[: -(trailing_zeros + 1)] + self.registers[-(trailing_zeros + 1)].case_one.registers,
         )
 
     @staticmethod
@@ -236,7 +233,6 @@ class Subspace:
 
 
 class Register(ABC):
-
     @abstractmethod
     def total_qubits(self) -> int:
         """
@@ -256,7 +252,6 @@ class Register(ABC):
 
 @dataclass(frozen=True)
 class ZeroQubit(Register):
-
     def total_qubits(self) -> int:
         return 1
 

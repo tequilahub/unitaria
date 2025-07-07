@@ -20,6 +20,7 @@ class UnsafeMul(Node):
     :ivar B:
         The second factor
     """
+
     A: Node
     B: Node
 
@@ -34,9 +35,7 @@ class UnsafeMul(Node):
             The second factor
         """
         if not A.subspace_out.match_nonzero(B.subspace_in):
-            raise ValueError(
-                f"Non matching qubit maps {A.subspace_out} and {B.subspace_in}"
-            )
+            raise ValueError(f"Non matching qubit maps {A.subspace_out} and {B.subspace_in}")
 
         self.A = A
         self.B = B
@@ -62,16 +61,14 @@ class UnsafeMul(Node):
         return circuit
 
     def _subspace_in(self) -> Subspace:
-        max_qubits = max(self.A.subspace_in.total_qubits,
-                         self.B.subspace_out.total_qubits)
+        max_qubits = max(self.A.subspace_in.total_qubits, self.B.subspace_out.total_qubits)
         return Subspace(
             self.A.subspace_in.registers,
             max_qubits - self.A.subspace_in.total_qubits,
         )
 
     def _subspace_out(self) -> Subspace:
-        max_qubits = max(self.A.subspace_in.total_qubits,
-                         self.B.subspace_out.total_qubits)
+        max_qubits = max(self.A.subspace_in.total_qubits, self.B.subspace_out.total_qubits)
         return Subspace(
             self.B.subspace_out.registers,
             max_qubits - self.B.subspace_out.total_qubits,
@@ -102,6 +99,7 @@ class Tensor(Node):
     :ivar B:
         The second factor
     """
+
     A: Node
     B: Node
 
@@ -124,17 +122,11 @@ class Tensor(Node):
         batch_shape = list(input.shape[:-1])
         input = input.reshape([-1, self.A.subspace_in.dimension])
         input = self.A.compute(input)
-        input = input.reshape(
-            batch_shape +
-            [self.B.subspace_in.dimension,
-             self.A.subspace_out.dimension])
+        input = input.reshape(batch_shape + [self.B.subspace_in.dimension, self.A.subspace_out.dimension])
         input = np.swapaxes(input, -1, -2)
         input = input.reshape([-1, self.B.subspace_in.dimension])
         input = self.B.compute(input)
-        input = input.reshape(
-            batch_shape +
-            [self.A.subspace_out.dimension,
-             self.B.subspace_out.dimension])
+        input = input.reshape(batch_shape + [self.A.subspace_out.dimension, self.B.subspace_out.dimension])
         input = np.swapaxes(input, -1, -2)
         return np.reshape(input, batch_shape + [-1])
 
@@ -144,17 +136,11 @@ class Tensor(Node):
         batch_shape = list(input.shape[:-1])
         input = input.reshape([-1, self.A.subspace_out.dimension])
         input = self.A.compute_adjoint(input)
-        input = input.reshape(
-            batch_shape +
-            [self.B.subspace_out.dimension,
-             self.A.subspace_in.dimension])
+        input = input.reshape(batch_shape + [self.B.subspace_out.dimension, self.A.subspace_in.dimension])
         input = np.swapaxes(input, -1, -2)
         input = input.reshape([-1, self.B.subspace_out.dimension])
         input = self.B.compute_adjoint(input)
-        input = input.reshape(
-            batch_shape +
-            [self.A.subspace_in.dimension,
-             self.B.subspace_in.dimension])
+        input = input.reshape(batch_shape + [self.A.subspace_in.dimension, self.B.subspace_in.dimension])
         input = np.swapaxes(input, -1, -2)
         return np.reshape(input, batch_shape + [-1])
 
@@ -163,8 +149,7 @@ class Tensor(Node):
 
         circuit_A = self.A.circuit.tq_circuit
         circuit.tq_circuit += circuit_A
-        qubit_map_B = dict([(i, i + self.A.subspace_in.total_qubits)
-                            for i in range(self.B.subspace_in.total_qubits)])
+        qubit_map_B = dict([(i, i + self.A.subspace_in.total_qubits) for i in range(self.B.subspace_in.total_qubits)])
         circuit_B = self.B.circuit.tq_circuit.map_qubits(qubit_map_B)
         circuit.tq_circuit += circuit_B
 
@@ -200,6 +185,7 @@ class Adjoint(Node):
     :ivar A:
         The node of which to compute the adjoint
     """
+
     A: Node
 
     def __init__(self, A: Node):
@@ -242,6 +228,7 @@ class Scale(Node):
     :ivar absolute:
         If ``True``, ``A`` is divided by its normalization first
     """
+
     A: Node
     scale: float
     absolute: bool
@@ -306,6 +293,7 @@ class Scale(Node):
         circuit.tq_circuit += tq.circuit.gates.GlobalPhase(self.global_phase)
         return circuit
 
+
 Node.__rmul__ = lambda A, s: Scale(A, s)
 
 
@@ -318,14 +306,10 @@ class ComputeProjection(Node):
 
     def _subspace_in(self) -> Subspace:
         # TODO: most of the extra zeros are actually ancillas
-        return Subspace(
-            self.subspace.registers,
-            self.circuit.tq_circuit.n_qubits - self.subspace.total_qubits)
+        return Subspace(self.subspace.registers, self.circuit.tq_circuit.n_qubits - self.subspace.total_qubits)
 
     def _subspace_out(self) -> Subspace:
-        return Subspace(
-            self.subspace.registers,
-            self.circuit.tq_circuit.n_qubits - self.subspace.total_qubits)
+        return Subspace(self.subspace.registers, self.circuit.tq_circuit.n_qubits - self.subspace.total_qubits)
 
     def _normalization(self) -> float:
         return 1

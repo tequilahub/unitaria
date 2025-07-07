@@ -7,13 +7,12 @@ from bequem.subspace import Subspace
 from bequem.verifier import verify
 
 
-
 def ref_Q(L, L_MAX):
     """
     Transfer matrix of DP0 spaces from level L to level L_MAX
     """
-    N = 2 ** L - 1
-    M = 2 ** L_MAX - 1
+    N = 2**L - 1
+    M = 2**L_MAX - 1
 
     step = 2 ** (L_MAX - L)
 
@@ -28,7 +27,7 @@ def ref_Q(L, L_MAX):
     data = np.repeat([stencil], N, axis=0).flatten()
 
     Q = np.zeros((N, M))
-    Q[np.repeat(np.arange(N), 2 * step-1), indices] = data
+    Q[np.repeat(np.arange(N), 2 * step - 1), indices] = data
 
     return Q
 
@@ -38,14 +37,14 @@ def ref_P(L, DIM):
     The rectangular preconditioner (F in the paper)
     """
     P = []
-    for j in reversed(range(1, L+1)):
+    for j in reversed(range(1, L + 1)):
         Q_mat = ref_Q(j, L)
 
         X = np.array([[1]])
         for d in range(DIM):
             X = np.kron(X, Q_mat)
 
-        P.append(2 ** (-j * (2 - DIM)/2) * X)
+        P.append(2 ** (-j * (2 - DIM) / 2) * X)
     P = np.vstack(list(reversed(P)))
 
     return P.T
@@ -55,41 +54,43 @@ def ref_S_1d(L):
     """
     1d stiffness matrix
     """
-    N = 2 ** L - 1
-    return 2 ** L * (2 * np.eye(N) - 1 * (np.eye(N, k=1) + np.eye(N, k=-1)))
+    N = 2**L - 1
+    return 2**L * (2 * np.eye(N) - 1 * (np.eye(N, k=1) + np.eye(N, k=-1)))
 
 
 def ref_C_1d(L):
     """
     1d gradient
     """
-    N = 2 ** L - 1
-    return 2 ** (L/2) * (np.eye(N+1, N) - np.eye(N+1, N, k=-1))
+    N = 2**L - 1
+    return 2 ** (L / 2) * (np.eye(N + 1, N) - np.eye(N + 1, N, k=-1))
 
 
 def ref_CM_1d(L):
     """
     1d "half" mass matrix
     """
-    N = 2 ** L - 1
+    N = 2**L - 1
     a = 1 / (2 * np.sqrt(3))
     b = 1 / 2
-    return 2 ** L * np.tensordot(np.array([b, a]), np.eye(N+1, N), 0) + np.tensordot(np.array([b, -a]), np.eye(N+1, N, k=-1), 0)
+    return 2**L * np.tensordot(np.array([b, a]), np.eye(N + 1, N), 0) + np.tensordot(
+        np.array([b, -a]), np.eye(N + 1, N, k=-1), 0
+    )
 
 
 def ref_M_1d(L):
     """
     1d mass matrix
     """
-    N = 2 ** L - 1
-    return 2 ** (2 * L) * (2/3) * np.eye(N) + (1/6) * (np.eye(N, k=1) + np.eye(N, k=-1))
+    N = 2**L - 1
+    return 2 ** (2 * L) * (2 / 3) * np.eye(N) + (1 / 6) * (np.eye(N, k=1) + np.eye(N, k=-1))
 
 
 def ref_C(L, DIM):
     """
     D-dimensional gradient
     """
-    N = (2 ** L - 1) ** DIM
+    N = (2**L - 1) ** DIM
 
     C1d = np.tensordot(np.array([1, 0]), ref_C_1d(L), 0)
     M1d = ref_CM_1d(L)
@@ -112,7 +113,7 @@ def ref_S(L, DIM):
     """
     D-dimensional stiffenss matrix
     """
-    N = (2 ** L - 1) ** DIM
+    N = (2**L - 1) ** DIM
     X = np.zeros((N, N))
 
     S1d = ref_S_1d(L)
@@ -175,10 +176,9 @@ def test_preconditioned_laplace_1d():
     for l in range(L, 0, -1):
         I_l = Identity(Subspace.from_dim(2**l - 1, bits=l), Subspace(l))
         N_l = Increment(l) @ I_l
-        C_l = 2**(l / 2) * (I_l - N_l)
+        C_l = 2 ** (l / 2) * (I_l - N_l)
 
-        T_l = ConstantUnitary(
-            np.sqrt(1 / 2) * np.array([[1], [1]])) & Identity(Subspace(l - 1))
+        T_l = ConstantUnitary(np.sqrt(1 / 2) * np.array([[1], [1]])) & Identity(Subspace(l - 1))
         # T_l = ConstantUnitary(
         #     np.sqrt(1 / 2) * np.array([
         #         [1, -np.sqrt(3) / 2],

@@ -26,7 +26,8 @@ def test_is_trivial():
         [
             ID,
             ControlledSubspace(Subspace(0, 1), Subspace(0, 1)),
-        ], 2
+        ],
+        2,
     ).is_trivial()
 
 
@@ -37,7 +38,9 @@ def test_basis():
     np.testing.assert_allclose(Subspace(0).enumerate_basis(), np.array([0]))
     np.testing.assert_allclose(Subspace(0, 1).enumerate_basis(), np.array([0]))
     np.testing.assert_allclose(Subspace(1).enumerate_basis(), np.array([0, 1]))
-    np.testing.assert_allclose(Subspace([ControlledSubspace(Subspace(1), Subspace(0, 1))]).enumerate_basis(), np.array([0, 1, 2]))
+    np.testing.assert_allclose(
+        Subspace([ControlledSubspace(Subspace(1), Subspace(0, 1))]).enumerate_basis(), np.array([0, 1, 2])
+    )
     # TODO
     # circuit = Circuit()
     np.testing.assert_allclose(
@@ -45,7 +48,8 @@ def test_basis():
             [
                 ID,
                 # Controlled(QubitMap(0, 1), QubitMap(0, 1)),
-            ], 1
+            ],
+            1,
         ).enumerate_basis(),
         np.array([0, 1]),
     )
@@ -61,17 +65,23 @@ def test_total_qubits():
             [
                 ID,
                 ControlledSubspace(Subspace(0, 1), Subspace(0, 1)),
-            ], 2
+            ],
+            2,
         ).total_qubits
         == 5
     )
 
 
-@pytest.mark.parametrize("subspace", [
-    Subspace(0),
-    Subspace(1, 1),
-    Subspace([ID, ControlledSubspace(Subspace(1), Subspace(0, 1))]),
-    Subspace([ID, ControlledSubspace(Subspace([ControlledSubspace(Subspace(0, 1), Subspace(1)), ID]), Subspace(1, 2))]),
-])
+@pytest.mark.parametrize(
+    "subspace",
+    [
+        Subspace(0),
+        Subspace(1, 1),
+        Subspace([ID, ControlledSubspace(Subspace(1), Subspace(0, 1))]),
+        Subspace(
+            [ID, ControlledSubspace(Subspace([ControlledSubspace(Subspace(0, 1), Subspace(1)), ID]), Subspace(1, 2))]
+        ),
+    ],
+)
 def test_circuit(subspace: Subspace):
     subspace.verify_circuit()

@@ -6,10 +6,7 @@ import tequila as tq
 
 
 def multiplexed_Ry(
-        angles: npt.NDArray[float],
-        target: int, controls: Sequence[int],
-        top_level: bool = True,
-        flipped: bool = False
+    angles: npt.NDArray[float], target: int, controls: Sequence[int], top_level: bool = True, flipped: bool = False
 ) -> tq.QCircuit:
     """
     Implements a multiplexed Y-rotation.
@@ -45,11 +42,7 @@ def multiplexed_Ry(
 
 
 def multiplexed_Rz(
-        angles: npt.NDArray[float],
-        target: int,
-        controls: Sequence[int],
-        top_level: bool = True,
-        flipped: bool = False
+    angles: npt.NDArray[float], target: int, controls: Sequence[int], top_level: bool = True, flipped: bool = False
 ) -> tq.QCircuit:
     """
     Implements a multiplexed Z-rotation.

@@ -17,13 +17,9 @@ def verify(node: Node, reference: np.ndarray | None = None):
 
     default_verifier.verify(node, reference)
 
+
 class Verifier:
-
-    def __init__(
-        self,
-        drill: bool = True,
-        up_to_phase: bool = False):
-
+    def __init__(self, drill: bool = True, up_to_phase: bool = False):
         self.drill = drill
         self.up_to_phase = up_to_phase
 
@@ -50,18 +46,16 @@ class Verifier:
     def _compare_compute_simulate(self, node: Node):
         basis_in = node.subspace_in.enumerate_basis()
 
-        for (i, b) in enumerate(basis_in):
+        for i, b in enumerate(basis_in):
             input = np.zeros(node.subspace_in.dimension, dtype=np.complex128)
             input[i] = 1
             computed = node.compute(input)
-            simulated = node.normalization * node.subspace_out.project(
-                    node.circuit.simulate(b, backend="qulacs"))
+            simulated = node.normalization * node.subspace_out.project(node.circuit.simulate(b, backend="qulacs"))
             if self.up_to_phase:
                 simulated = bring_to_same_phase(computed, simulated)
             np.testing.assert_allclose(simulated, computed, atol=1e-8, err_msg=f"On input {i}:")
 
     def _verify(self, node: Node, reference: np.ndarray | None = None):
-
         try:
             self._verify_circuit_qubits(node)
             self._compare_compute_simulate(node)
@@ -102,6 +96,7 @@ class Verifier:
             self.find_error(child)
             self._verify(child)
 
+
 def bring_to_same_phase(a: np.ndarray, b: np.ndarray):
     b_f = b.flatten()
     i = np.argmax(np.abs(b_f))
@@ -109,7 +104,6 @@ def bring_to_same_phase(a: np.ndarray, b: np.ndarray):
 
 
 class VerificationError(Exception):
-
     def __init__(self, node: Node):
         super().__init__()
         self.node = node
@@ -119,7 +113,6 @@ class VerificationError(Exception):
         circuit = self.node.circuit.draw()
         with console.capture() as capture:
             console.print(self.node.tree())
-            console.print(
-                Syntax(circuit, "text", background_color="default"))
+            console.print(Syntax(circuit, "text", background_color="default"))
         output = capture.get()
         return "\n" + output + f"\nnormalization = {self.node.normalization}"

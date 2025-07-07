@@ -70,7 +70,7 @@ class Node(ABC):
     def _subspace_in(self) -> Subspace:
         """
         Method to for computing :py:func:`subspace_in`.
-        
+
         To be implemented in all subclasses of :py:class:`Node`.
         """
         raise NotImplementedError
@@ -92,7 +92,7 @@ class Node(ABC):
     def _subspace_out(self) -> Subspace:
         """
         Method to for computing :py:func:`subspace_out`.
-        
+
         To be implemented in all subclasses of :py:class:`Node`.
         """
         raise NotImplementedError
@@ -111,7 +111,7 @@ class Node(ABC):
     def _normalization(self) -> float:
         """
         Method to for computing :py:func:`normalization`.
-        
+
         To be implemented in all subclasses of :py:class:`Node`.
         """
         raise NotImplementedError
@@ -160,7 +160,7 @@ class Node(ABC):
     def _circuit(self) -> float:
         """
         Method to for computing :py:func:`circuit`.
-        
+
         To be implemented in all subclasses of :py:class:`Node`.
         """
         raise NotImplementedError
@@ -178,16 +178,13 @@ class Node(ABC):
             label += str(parameters)
         return label
 
-    def tree(self,
-             verbose: bool = False,
-             tree: Tree | None = None,
-             holes: list[Node] = []) -> Tree:
+    def tree(self, verbose: bool = False, tree: Tree | None = None, holes: list[Node] = []) -> Tree:
         """
         Method for rich text output of the computational graph.
 
         Typically you should call :py:func:`draw` instead of this method.
         """
-        for (i, hole) in enumerate(holes):
+        for i, hole in enumerate(holes):
             if hole is self:
                 return tree.add(f"child {i}")
 

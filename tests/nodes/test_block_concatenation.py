@@ -11,9 +11,9 @@ def test_block_horizontal():
     verify(BlockHorizontal(A, B))
     verify(BlockHorizontal(B, A))
 
+
 def test_block_vertical():
     A = Identity(Subspace(1))
     B = Increment(1)
     verify(BlockVertical(A, B))
     verify(BlockVertical(B, A))
-

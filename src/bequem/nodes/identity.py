@@ -12,6 +12,7 @@ class Identity(Node):
     :ivar qubits:
         The domain of the identity matrix
     """
+
     subspace: Subspace
 
     def __init__(self, subspace: Subspace | int, project_to: Subspace | None = None):
@@ -51,7 +52,7 @@ class Identity(Node):
         else:
             outer_shape = list(input.shape[:-1])
             input = input.reshape([-1, self.subspace_in.dimension])
-            expanded = np.zeros((input.shape[0], 2 ** self.subspace_in.total_qubits), dtype=np.complex128)
+            expanded = np.zeros((input.shape[0], 2**self.subspace_in.total_qubits), dtype=np.complex128)
             expanded[:, self.subspace_in.enumerate_basis()] = input
             return expanded[:, self.subspace_out.enumerate_basis()].reshape(outer_shape + [-1])
 
@@ -61,7 +62,7 @@ class Identity(Node):
         else:
             outer_shape = list(input.shape[:-1])
             input = input.reshape([-1, self.subspace_out.dimension])
-            expanded = np.zeros((input.shape[0], 2 ** self.subspace_out.total_qubits), dtype=np.complex128)
+            expanded = np.zeros((input.shape[0], 2**self.subspace_out.total_qubits), dtype=np.complex128)
             expanded[:, self.subspace_out.enumerate_basis()] = input
             return expanded[:, self.subspace_in.enumerate_basis()].reshape(outer_shape + [-1])
 

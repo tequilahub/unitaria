@@ -10,7 +10,6 @@ from bequem.circuit import Circuit
 
 
 class Permutation(ProxyNode):
-
     subspace_from: Subspace
     subspace_to: Subspace
 
@@ -28,7 +27,7 @@ class Permutation(ProxyNode):
         raise NotImplementedError
 
     def parameters(self) -> dict:
-        return { "subspace_from": self.subspace_from, "subspace_to": self.subspace_to }
+        return {"subspace_from": self.subspace_from, "subspace_to": self.subspace_to}
 
     def _subspace_in(self) -> Subspace:
         max_qubits = max(self.subspace_from.total_qubits, self.subspace_to.total_qubits)
@@ -51,7 +50,7 @@ class Permutation(ProxyNode):
 def move_zeros_to_end(qubits: Subspace) -> PermuteRegisters:
     nonzero_registers = []
     zero_registers = []
-    for (i, register) in enumerate(qubits.registers):
+    for i, register in enumerate(qubits.registers):
         if isinstance(register, ZeroQubit):
             zero_registers.append(i)
         else:
@@ -63,7 +62,7 @@ def move_zeros_to_end(qubits: Subspace) -> PermuteRegisters:
 class PermuteRegisters(Node):
     """
     Operation permuting the registers of a state
-    
+
     Permutes a vector in the space defined by ``qubits``
     such that the i-th register after the operation will be
     ``qubits.registers[permutation_map[i]]``.
@@ -77,7 +76,7 @@ class PermuteRegisters(Node):
         self.permutation_map = permutation_map
 
     def parameters(self) -> dict:
-        return { "qubits": self.qubits, "permutation_map": self.permutation_map }
+        return {"qubits": self.qubits, "permutation_map": self.permutation_map}
 
     def _subspace_in(self) -> Subspace:
         return self.qubits
@@ -107,7 +106,6 @@ class PermuteRegisters(Node):
         return input.reshape(outer_shape + [-1])
 
     def _circuit(self) -> Circuit:
-
         if self.qubits.total_qubits == 0:
             circuit = Circuit()
             circuit.tq_circuit.n_qubits = 1
@@ -129,7 +127,10 @@ class PermuteRegisters(Node):
             j = permutation_map_qubits[i]
             if i != j:
                 circuit.tq_circuit += tq.gates.SWAP(i, j)
-                permutation_map_qubits[i], permutation_map_qubits[j] = permutation_map_qubits[j], permutation_map_qubits[i]
+                permutation_map_qubits[i], permutation_map_qubits[j] = (
+                    permutation_map_qubits[j],
+                    permutation_map_qubits[i],
+                )
                 n += 1
                 if n > self.qubits.total_qubits:
                     raise ValueError(f"{self.permutation_map} is not a permutation")
@@ -141,12 +142,9 @@ class PermuteRegisters(Node):
         circuit.tq_circuit.n_qubits = self.qubits.total_qubits
 
         return circuit
-    
 
 
-def _find_matching_partitioning(
-    a: Subspace, b: Subspace
-) -> list[tuple[Subspace, Subspace]]:
+def _find_matching_partitioning(a: Subspace, b: Subspace) -> list[tuple[Subspace, Subspace]]:
     """
     Finds a partitoning of a and b, such that the ith subdivision of either
     partitioning has the same dimension.

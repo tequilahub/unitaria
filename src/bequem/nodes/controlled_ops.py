@@ -10,7 +10,6 @@ from bequem.circuit import Circuit
 
 
 class BlockDiagonal(ProxyNode):
-
     A: Node
     B: Node
 
@@ -32,8 +31,7 @@ class BlockDiagonal(ProxyNode):
         controlled_bits_A = A_controlled.subspace_in.total_qubits - A_controlled.subspace_in.trailing_zeros()
         controlled_bits_B = B_controlled.subspace_in.total_qubits - B_controlled.subspace_in.trailing_zeros()
 
-        A_controlled = ModifyControl(
-            A_controlled, max(0, controlled_bits_B - controlled_bits_A), True)
+        A_controlled = ModifyControl(A_controlled, max(0, controlled_bits_B - controlled_bits_A), True)
         A_controlled = UnsafeMul(
             UnsafeMul(
                 Identity(subspace_in, A_controlled.subspace_in),
@@ -41,8 +39,7 @@ class BlockDiagonal(ProxyNode):
             ),
             Identity(A_controlled.subspace_out, subspace_mid),
         )
-        B_controlled = ModifyControl(
-            B_controlled, max(0, controlled_bits_A - controlled_bits_B), False)
+        B_controlled = ModifyControl(B_controlled, max(0, controlled_bits_A - controlled_bits_B), False)
         B_controlled = UnsafeMul(
             UnsafeMul(
                 Identity(subspace_mid, B_controlled.subspace_in),
@@ -70,15 +67,14 @@ class BlockDiagonal(ProxyNode):
         result_B = self.B.compute_adjoint(input_B)
         return np.concatenate((result_A, result_B), axis=-1)
 
+
 def _controlled_qubits(A_controlled: Subspace, B_controlled: Subspace) -> Subspace:
     zeros = max(A_controlled.trailing_zeros(), B_controlled.trailing_zeros())
     A = A_controlled.case_one()
     B = B_controlled.case_one()
     controlled_qubits = max(A.total_qubits, B.total_qubits)
-    case_zero = Subspace(
-        A.registers, max(0, controlled_qubits - A.total_qubits))
-    case_one = Subspace(
-        B.registers, max(0, controlled_qubits - B.total_qubits))
+    case_zero = Subspace(A.registers, max(0, controlled_qubits - A.total_qubits))
+    case_one = Subspace(B.registers, max(0, controlled_qubits - B.total_qubits))
     return Subspace([ControlledSubspace(case_zero, case_one)], zeros)
 
 
@@ -86,7 +82,6 @@ Node.__or__ = lambda A, B: BlockDiagonal(A, B)
 
 
 class Controlled(Node):
-
     A: Node
 
     def __init__(self, A: Node):
@@ -131,7 +126,7 @@ class ModifyControl(Node):
             expand_control = Subspace(expand_control)
         self.expand_control = expand_control
         self.swap_control_state = swap_control_state
-    
+
     def children(self) -> list[Node]:
         return [self.A]
 

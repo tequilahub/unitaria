@@ -23,7 +23,7 @@ class Increment(Node):
         return []
 
     def parameters(self) -> dict:
-        return { "bits": self.bits }
+        return {"bits": self.bits}
 
     def _subspace_in(self) -> Subspace:
         if self.bits <= 3:
@@ -70,7 +70,7 @@ class IntegerAddition(Node):
         return []
 
     def parameters(self) -> dict:
-        return { "source_bits": self.source_bits, "target_bits": self.target_bits }
+        return {"source_bits": self.source_bits, "target_bits": self.target_bits}
 
     def _subspace_in(self) -> Subspace:
         return Subspace(self.source_bits + self.target_bits)
@@ -83,8 +83,8 @@ class IntegerAddition(Node):
 
     def compute(self, input: np.ndarray) -> np.ndarray:
         old_shape = input.shape
-        N = 2 ** self.source_bits
-        M = 2 ** self.target_bits
+        N = 2**self.source_bits
+        M = 2**self.target_bits
         input = input.reshape((-1, M, N))
         result = np.zeros_like(input)
         for val in range(N):
@@ -93,8 +93,8 @@ class IntegerAddition(Node):
 
     def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
         old_shape = input.shape
-        N = 2 ** self.source_bits
-        M = 2 ** self.target_bits
+        N = 2**self.source_bits
+        M = 2**self.target_bits
         input = input.reshape((-1, M, N))
         result = np.zeros_like(input)
         for val in range(N):
@@ -122,7 +122,7 @@ class ConstantIntegerAddition(Node):
         return []
 
     def parameters(self) -> dict:
-        return { "bits": self.bits, "constant": self.constant }
+        return {"bits": self.bits, "constant": self.constant}
 
     def _subspace_in(self) -> Subspace:
         return Subspace(self.bits, 2)
@@ -140,7 +140,7 @@ class ConstantIntegerAddition(Node):
         return np.roll(input, -self.constant, axis=-1)
 
     def _circuit(self) -> Circuit:
-        circuit = const_addition_circuit(list(reversed(range(self.bits))), self.constant, [self.bits, self.bits+1])
+        circuit = const_addition_circuit(list(reversed(range(self.bits))), self.constant, [self.bits, self.bits + 1])
         circuit.n_qubits = self.subspace_in.total_qubits
 
         return Circuit(circuit)
@@ -162,7 +162,7 @@ class ConstantIntegerMultiplication(ProxyNode):
         return []
 
     def parameters(self) -> dict:
-        return { "bits": self.bits, "constant": self.constant }
+        return {"bits": self.bits, "constant": self.constant}
 
     def definition(self) -> Node:
         if self.bits == 1:
@@ -175,9 +175,9 @@ class ConstantIntegerMultiplication(ProxyNode):
             const_add = BlockDiagonal(Identity(Subspace(add_bits)), ConstantIntegerAddition(add_bits, c))
             permutation = PermuteRegisters(Subspace(add_bits + 1), [add_bits] + list(range(add_bits)))
             # TODO: The skip_projection can be removed onces this is done automatically
-            const_add = Mul(Adjoint(permutation),
-                            Mul(const_add, permutation, skip_projection=True),
-                            skip_projection=True)
+            const_add = Mul(
+                Adjoint(permutation), Mul(const_add, permutation, skip_projection=True), skip_projection=True
+            )
             const_add = Identity(Subspace(i)) & const_add
             if result is not None:
                 result = Mul(result, const_add, skip_projection=True)
@@ -188,15 +188,15 @@ class ConstantIntegerMultiplication(ProxyNode):
     def compute(self, input: np.ndarray) -> np.ndarray:
         inv = self._mod_inv()
         outer_shape = list(input.shape[:-1])
-        input = input.reshape([-1, 2 ** self.bits])
-        indices = np.array([(i * inv) % 2 ** self.bits for i in range(2 ** self.bits)], dtype=np.uint32)
+        input = input.reshape([-1, 2**self.bits])
+        indices = np.array([(i * inv) % 2**self.bits for i in range(2**self.bits)], dtype=np.uint32)
         output = input[:, indices]
         return output.reshape(outer_shape + [-1])
 
     def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
         outer_shape = list(input.shape[:-1])
-        input = input.reshape([-1, 2 ** self.bits])
-        indices = np.array([(i * self.constant) % 2 ** self.bits for i in range(2 ** self.bits)], dtype=np.uint32)
+        input = input.reshape([-1, 2**self.bits])
+        indices = np.array([(i * self.constant) % 2**self.bits for i in range(2**self.bits)], dtype=np.uint32)
         output = input[:, indices]
         return output.reshape(outer_shape + [-1])
 
