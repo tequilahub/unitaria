@@ -69,7 +69,7 @@ class Verifier:
             self._compare_batch_compute(node, reference)
             self._compare_batch_compute(Adjoint(node))
         except AssertionError as err:
-            raise VerificationError(node, node.circuit) from err
+            raise VerificationError(node) from err
 
     def verify(self, node: Node, reference: np.ndarray | None = None):
         """
@@ -113,13 +113,13 @@ class VerificationError(Exception):
     def __init__(self, node: Node, circuit: Circuit):
         super().__init__()
         self.node = node
-        self.circuit = tq.draw(circuit.tq_circuit)
 
     def __str__(self):
         console = Console(width=60)
+        circuit = self.node.circuit.draw()
         with console.capture() as capture:
             console.print(self.node.tree())
             console.print(
-                Syntax(self.circuit, "text", background_color="default"))
+                Syntax(circuit, "text", background_color="default"))
         output = capture.get()
         return "\n" + output + f"\nnormalization = {self.node.normalization}"
