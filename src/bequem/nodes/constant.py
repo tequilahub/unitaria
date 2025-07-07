@@ -14,6 +14,7 @@ class ConstantVector(Node):
     :ivar vec:
         The vector represented by this node
     """
+
     vec: np.ndarray
 
     def __init__(self, vec: np.ndarray):
@@ -22,7 +23,7 @@ class ConstantVector(Node):
             The vector represented by this node
         """
         self.n_qubits = round(np.log2(vec.shape[0]))
-        assert 2 ** self.n_qubits == vec.shape[0]
+        assert 2**self.n_qubits == vec.shape[0]
         self.vec = vec
 
     def children(self) -> list[Node]:
@@ -106,6 +107,7 @@ class ConstantUnitary(Node):
         # Reversed because circuit function expects MSB ordering
         target = list(reversed(range(self.bits)))
         return Circuit(generic_unitary(U=self.extended_unitary, target=target))
+
 
 def _extend_basis_by_one(U: np.array, n: int):
     candidates = np.eye(U.shape[0]) - U[:, :n] @ np.conj(U.T)[:n, :]

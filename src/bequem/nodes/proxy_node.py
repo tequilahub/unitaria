@@ -7,6 +7,7 @@ from bequem.nodes.node import Node
 from bequem.circuit import Circuit
 from bequem.subspace import Subspace
 
+
 class ProxyNode(Node):
     """
     Abstract class for nodes that are defined in terms of other nodes

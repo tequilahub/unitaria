@@ -4,14 +4,12 @@ from bequem.nodes import Node
 
 
 class QSVT(Node):
-
     def __init__(self, A: Node, angles: np.ndarray):
         self.A = A
         self.angles = angles
 
 
 class Inverse(QSVT):
-
     def __init__(self, A: Node, condition: float, accuracy: float):
         angles = None
         raise NotImplementedError
@@ -21,7 +19,6 @@ class Inverse(QSVT):
 
 
 class AmplitudeAmplificiation(QSVT):
-
     def __init__(self, A: Node, iterations: int):
         angles = None
         raise NotImplementedError

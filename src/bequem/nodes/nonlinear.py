@@ -19,6 +19,7 @@ class ComponentwiseMul(Node):
     :ivar qubits:
         The vector space in which to perform the element-wise operation
     """
+
     subspace: Subspace
 
     def __init__(self, subspace: Subspace):
@@ -28,9 +29,7 @@ class ComponentwiseMul(Node):
         return Subspace(self.subspace.registers * 2)
 
     def _subspace_out(self) -> Subspace:
-        return Subspace(
-            self.subspace.registers, self.subspace.total_qubits
-        )
+        return Subspace(self.subspace.registers, self.subspace.total_qubits)
 
     def _normalization(self) -> float:
         return 1

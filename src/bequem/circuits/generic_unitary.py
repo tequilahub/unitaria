@@ -17,7 +17,7 @@ def generic_unitary(U: npt.NDArray[complex], target: Sequence[int]) -> tq.QCircu
     :return: A circuit implementing the unitary.
     """
     n = len(target)
-    assert U.shape == (2 ** n, 2 ** n)
+    assert U.shape == (2**n, 2**n)
     U = U.astype(complex)
 
     if n == 0:
@@ -40,8 +40,9 @@ def generic_unitary(U: npt.NDArray[complex], target: Sequence[int]) -> tq.QCircu
     return circuit
 
 
-def _multiplexed_unitary(U1: npt.NDArray[complex], U2: npt.NDArray[complex], target: Sequence[int],
-                         control: int) -> tq.QCircuit():
+def _multiplexed_unitary(
+    U1: npt.NDArray[complex], U2: npt.NDArray[complex], target: Sequence[int], control: int
+) -> tq.QCircuit():
     eigenvalues, eigenvectors = np.linalg.eig(U1 @ U2.T.conjugate())
     V = eigenvectors
     D = np.diag(np.sqrt(eigenvalues))

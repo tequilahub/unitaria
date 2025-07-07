@@ -18,6 +18,7 @@ class Add(ProxyNode):
     :ivar B:
         The second summand
     """
+
     A: Node
     B: Node
 
@@ -33,30 +34,21 @@ class Add(ProxyNode):
         return [self.A, self.B]
 
     def definition(self) -> Node:
-        permutation_in = Permutation(self.A.subspace_in,
-                                     self.B.subspace_in)
-        permutation_out = Permutation(self.A.subspace_out,
-                                      self.B.subspace_out)
+        permutation_in = Permutation(self.A.subspace_in, self.B.subspace_in)
+        permutation_out = Permutation(self.A.subspace_out, self.B.subspace_out)
 
-        A_permuted = Scale(UnsafeMul(
-            Adjoint(permutation_in),
-            UnsafeMul(self.A, permutation_out)),
-                           absolute=True)
+        A_permuted = Scale(UnsafeMul(Adjoint(permutation_in), UnsafeMul(self.A, permutation_out)), absolute=True)
         B_permuted = Scale(self.B, absolute=True)
 
         diag = BlockDiagonal(A_permuted, B_permuted)
 
         sqrt_A = np.sqrt(np.abs(self.A.normalization))
         sqrt_B = np.sqrt(np.abs(self.B.normalization))
-        rotation_in = Tensor(Identity(permutation_in.subspace_in),
-                             ConstantVector(np.array([sqrt_A, sqrt_B])))
+        rotation_in = Tensor(Identity(permutation_in.subspace_in), ConstantVector(np.array([sqrt_A, sqrt_B])))
         rotation_out = Tensor(
             Identity(permutation_out.subspace_out),
-            ConstantVector(
-                np.array([
-                    self.A.normalization / sqrt_A,
-                    self.B.normalization / sqrt_B
-                ])))
+            ConstantVector(np.array([self.A.normalization / sqrt_A, self.B.normalization / sqrt_B])),
+        )
 
         return UnsafeMul(UnsafeMul(rotation_in, diag), Adjoint(rotation_out))
 
@@ -87,6 +79,7 @@ class Mul(ProxyNode):
     :ivar B:
         The second factor
     """
+
     A: Node
     B: Node
     skip_projection: bool
@@ -114,10 +107,8 @@ class Mul(ProxyNode):
             B_permuted = UnsafeMul(permutation, self.B)
             return UnsafeMul(A_permuted, B_permuted)
         else:
-            A_permuted = Tensor(self.A,
-                                Identity(Subspace(0, 1)))
-            B_permuted = Tensor(UnsafeMul(permutation, self.B),
-                                Identity(Subspace(0, 1)))
+            A_permuted = Tensor(self.A, Identity(Subspace(0, 1)))
+            B_permuted = Tensor(UnsafeMul(permutation, self.B), Identity(Subspace(0, 1)))
             # TODO: This can be probably be done more correctly
             # once match_nonzero is improved
             projection_subspace = A_permuted.subspace_out
@@ -127,9 +118,7 @@ class Mul(ProxyNode):
             if projection_subspace == Subspace(projection_subspace.total_qubits):
                 projection_required = False
             if projection_required:
-                return UnsafeMul(
-                    UnsafeMul(A_permuted, ComputeProjection(projection_subspace)),
-                    B_permuted)
+                return UnsafeMul(UnsafeMul(A_permuted, ComputeProjection(projection_subspace)), B_permuted)
             else:
                 return UnsafeMul(A_permuted, B_permuted)
 

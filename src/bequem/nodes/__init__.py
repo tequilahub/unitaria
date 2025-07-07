@@ -8,4 +8,9 @@ from bequem.nodes.ring_ops import Mul, Add
 from bequem.nodes.block_concatenation import BlockHorizontal, BlockVertical
 from bequem.nodes.identity import Identity
 from bequem.nodes.nonlinear import ComponentwiseMul
-from bequem.nodes.integer_arithmetic import Increment, IntegerAddition, ConstantIntegerAddition, ConstantIntegerMultiplication
+from bequem.nodes.integer_arithmetic import (
+    Increment,
+    IntegerAddition,
+    ConstantIntegerAddition,
+    ConstantIntegerMultiplication,
+)

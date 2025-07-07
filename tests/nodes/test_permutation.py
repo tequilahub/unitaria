@@ -34,6 +34,7 @@ def test_brute_force_1_simple_rotation():
     verify(Permutation(d, c))
     verify(Permutation(c, d))
 
+
 @pytest.mark.xfail
 def test_brute_force_2_simple_rotations():
     a = Subspace(2)
@@ -52,6 +53,7 @@ def test_brute_force_2_simple_rotations():
     verify(Permutation(a, b3))
     verify(Permutation(b3, a))
 
+
 @pytest.mark.xfail
 def test_brute_force_double_rotation_left_right():
     a = Subspace(2)
@@ -60,6 +62,7 @@ def test_brute_force_double_rotation_left_right():
     b2 = Subspace([ControlledSubspace(Subspace(0, 1), b1)])
     b3 = Subspace([ControlledSubspace(b2, Subspace(0, 2))])
     verify(Permutation(a, b3))
+
 
 @pytest.mark.xfail
 def test_brute_force_double_rotation_right_left():
@@ -85,9 +88,7 @@ def test_permute_registers():
 
 def test_find_matching_partitioning():
     assert _find_matching_partitioning(Subspace(0), Subspace(0)) == []
-    assert _find_matching_partitioning(Subspace(1), Subspace(1)) == [
-        (Subspace(1), Subspace(1))
-    ]
+    assert _find_matching_partitioning(Subspace(1), Subspace(1)) == [(Subspace(1), Subspace(1))]
     assert _find_matching_partitioning(Subspace(2), Subspace(2)) == [
         (Subspace(1), Subspace(1)),
         (Subspace(1), Subspace(1)),
@@ -103,12 +104,8 @@ def test_find_matching_partitioning():
         (Subspace(1), Subspace(1)),
     ]
     c = ControlledSubspace(Subspace(1), Subspace(0, 1))
-    assert _find_matching_partitioning(Subspace([c]), Subspace([c])) == [
-        (Subspace([c]), Subspace([c]))
-    ]
-    assert _find_matching_partitioning(Subspace([ID, c]), Subspace([c, ID])) == [
-        (Subspace([ID, c]), Subspace([c, ID]))
-    ]
+    assert _find_matching_partitioning(Subspace([c]), Subspace([c])) == [(Subspace([c]), Subspace([c]))]
+    assert _find_matching_partitioning(Subspace([ID, c]), Subspace([c, ID])) == [(Subspace([ID, c]), Subspace([c, ID]))]
     assert _find_matching_partitioning(Subspace([ID, c]), Subspace([ID, c])) == [
         (Subspace(1), Subspace(1)),
         (Subspace([c]), Subspace([c])),

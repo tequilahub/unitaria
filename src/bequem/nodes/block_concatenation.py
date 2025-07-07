@@ -18,6 +18,7 @@ class BlockHorizontal(ProxyNode):
     :ivar B:
         The right block
     """
+
     A: Node
     B: Node
 
@@ -29,27 +30,21 @@ class BlockHorizontal(ProxyNode):
         return [self.A, self.B]
 
     def definition(self) -> Node:
-        permutation = Permutation(self.A.subspace_out,
-                                  self.B.subspace_out)
+        permutation = Permutation(self.A.subspace_out, self.B.subspace_out)
 
-        A_permuted = Scale(UnsafeMul(self.A, permutation),
-                           absolute=True)
+        A_permuted = Scale(UnsafeMul(self.A, permutation), absolute=True)
         B_permuted = Scale(self.B, absolute=True)
 
         diag = BlockDiagonal(A_permuted, B_permuted)
 
         rotation_out = Tensor(
-            Identity(permutation.subspace_out),
-            ConstantVector(
-                np.array([self.A.normalization,
-                          self.B.normalization])))
+            Identity(permutation.subspace_out), ConstantVector(np.array([self.A.normalization, self.B.normalization]))
+        )
 
         return UnsafeMul(diag, Adjoint(rotation_out))
 
     def _normalization(self) -> float:
-        return np.sqrt(
-            np.abs(self.A.normalization)**2 +
-            np.abs(self.B.normalization)**2)
+        return np.sqrt(np.abs(self.A.normalization) ** 2 + np.abs(self.B.normalization) ** 2)
 
     def compute(self, input: np.ndarray) -> np.ndarray:
         dim_A = self.A.subspace_in.dimension
@@ -57,8 +52,7 @@ class BlockHorizontal(ProxyNode):
         return self.A.compute(input_A) + self.B.compute(input_B)
 
     def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
-        return np.concatenate(
-            (self.A.compute_adjoint(input), self.B.compute_adjoint(input)), axis=-1)
+        return np.concatenate((self.A.compute_adjoint(input), self.B.compute_adjoint(input)), axis=-1)
 
 
 class BlockVertical(ProxyNode):
@@ -81,31 +75,24 @@ class BlockVertical(ProxyNode):
     def definition(self) -> Node:
         permutation = Permutation(self.A.subspace_in, self.B.subspace_in)
 
-        A_permuted = Scale(UnsafeMul(Adjoint(permutation), self.A),
-                           absolute=True)
+        A_permuted = Scale(UnsafeMul(Adjoint(permutation), self.A), absolute=True)
         B_permuted = Scale(self.B, absolute=True)
 
         diag = BlockDiagonal(A_permuted, B_permuted)
 
         rotation_in = Tensor(
-            Identity(permutation.subspace_out),
-            ConstantVector(
-                np.array([self.A.normalization,
-                          self.B.normalization])))
+            Identity(permutation.subspace_out), ConstantVector(np.array([self.A.normalization, self.B.normalization]))
+        )
 
         return UnsafeMul(rotation_in, diag)
 
     def _normalization(self) -> float:
-        return np.sqrt(
-            np.abs(self.A.normalization)**2 +
-            np.abs(self.B.normalization)**2)
+        return np.sqrt(np.abs(self.A.normalization) ** 2 + np.abs(self.B.normalization) ** 2)
 
     def compute(self, input: np.ndarray) -> np.ndarray:
-        return np.concatenate((self.A.compute(input), self.B.compute(input)),
-                              axis=-1)
+        return np.concatenate((self.A.compute(input), self.B.compute(input)), axis=-1)
 
     def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
         dim_A = self.A.subspace_in.dimension
         input_A, input_B = np.split(input, [dim_A], axis=-1)
-        return self.A.compute_adjoint(input_A) + self.B.compute_adjoint(
-            input_B)
+        return self.A.compute_adjoint(input_A) + self.B.compute_adjoint(input_B)
