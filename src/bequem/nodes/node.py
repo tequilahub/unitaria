@@ -177,6 +177,28 @@ class Node(ABC):
         if len(parameters) != 0:
             label += str(parameters)
         return label
+    
+    def compute_norm(self, input:np.array) -> float:
+        result = self.compute(input=input) 
+        return np.linalg.norm(result)
+    
+    def simulate_norm(self, input: np.ndarray | int = 0) -> float:
+        """
+        Method to compute the norm of the wavefunction in the subspace.
+        """
+
+        # Simulate the circuit with the given input
+        circuit = self.circuit
+        wavefunction = circuit.simulate(input=input)
+
+        # get the basis vectores spanning the subspace in which the wavefunction is defined
+        subspace = self.subspace_out
+        basis_functions_of_subspace = subspace.enumerate_basis()
+
+        # compute the norm of the wavefunction in the subspace
+        norm = np.linalg.norm([wavefunction[i] for i in basis_functions_of_subspace])
+
+        return norm
 
     def tree(self, verbose: bool = False, tree: Tree | None = None, holes: list[Node] = []) -> Tree:
         """
