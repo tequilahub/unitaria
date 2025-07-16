@@ -177,11 +177,11 @@ class Node(ABC):
         if len(parameters) != 0:
             label += str(parameters)
         return label
-    
-    def compute_norm(self, input:np.array) -> float:
-        result = self.compute(input=input) 
+
+    def compute_norm(self, input: np.array) -> float:
+        result = self.compute(input=input)
         return np.linalg.norm(result)
-    
+
     def simulate_norm(self, input: np.ndarray | int = 0) -> float:
         """
         Method to compute the norm of the wavefunction in the subspace.
