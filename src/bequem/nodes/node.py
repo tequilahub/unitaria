@@ -179,12 +179,15 @@ class Node(ABC):
         return label
 
     def compute_norm(self, input: np.array) -> float:
+        """
+        Method to compute the norm of the wavefunction in the subspace.
+        """
         result = self.compute(input=input)
         return np.linalg.norm(result)
 
     def simulate_norm(self, input: np.ndarray | int = 0) -> float:
         """
-        Method to compute the norm of the wavefunction in the subspace.
+        Method to simulate the norm of the wavefunction in the subspace using a circuit.
         """
         wavefunction = self.circuit.simulate(input=input)
         norm = np.linalg.norm([wavefunction[i] for i in self.subspace_out.enumerate_basis()])
