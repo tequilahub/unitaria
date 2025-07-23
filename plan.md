@@ -60,6 +60,7 @@ Vielleicht von Numpy inspirieren lassen
 * Divide Identity into from dimension / from qubits
 * Projection (Postselection) Node
 * Ancilla als Eigenschaft von Circuit statt Subspace
+* Using .compute(np.eye(...)) is confusing
 
 ## Example projects
 

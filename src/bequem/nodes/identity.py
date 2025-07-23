@@ -25,7 +25,7 @@ class Identity(Node):
         self.subspace = subspace
         self.project_to = project_to
         if project_to is not None and subspace.total_qubits != project_to.total_qubits:
-            raise ValueError
+            raise ValueError("Subspaces must have same number of qubits")
 
     def children(self) -> list[Node]:
         return []
