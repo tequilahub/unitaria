@@ -40,24 +40,26 @@ Vielleicht von Numpy inspirieren lassen
 
 ## TODOS
 
-* Move dimension from subspace to node (discuss next meeting)
+* Move dimension from subspace to node
+* Abstract operations without circuit implementation
+* Operations from circuit implementations
 * Bilineare Operationen besseres interface, z.B. ComponentwiseMul (Matthias)
-* Dependencies qulacs, ~cirq~, ~qiskit~ (Matthias)
-* Alles in Datein aufspalten
+* Dependencies qulacs -> optional machen? (Matthias)
+* Alles in Datein aufspalten (alle)
 * Nonlinear Beispiel (Jessica)
 * QSVT (Matthias)
-* QFT (Matthias)
+* QFT (Oliver)
 * Clean Ancillas (Oliver) (Pull request)
 * Dirty Ancillas (Oliver) (Pull request)
-* Measurements: norm() -> float (Ram)
-* CI
+* CI (Oliver)
 * Documentation
 * plan.md nicht auf PyPi hochladen
 * Verify mit zufälliger Basis
 * Better custom verifications
-* Better circuit output
 * Permutations
-
+* Divide Identity into from dimension / from qubits
+* Projection (Postselection) Node
+* Ancilla als Eigenschaft von Circuit statt Subspace
 
 ## Example projects
 
