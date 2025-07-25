@@ -5,7 +5,7 @@ from rich.panel import Panel
 
 from bequem.nodes.node import Node
 from bequem.circuit import Circuit
-from bequem.subspace import Subspace
+from bequem.subspace.subspace import Subspace
 
 
 class ProxyNode(Node):

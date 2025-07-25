@@ -1,7 +1,7 @@
 import numpy as np
 
 from bequem.nodes.node import Node
-from bequem.nodes.basic_ops import Adjoint
+from bequem.nodes.basic_operations.adjoint import Adjoint
 from rich.console import Console
 from rich.syntax import Syntax
 

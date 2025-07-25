@@ -2,7 +2,7 @@ import numpy as np
 import tequila as tq
 
 from bequem.nodes import Node
-from bequem.subspace import Subspace
+from bequem.subspace.subspace import Subspace
 from bequem.circuit import Circuit
 
 

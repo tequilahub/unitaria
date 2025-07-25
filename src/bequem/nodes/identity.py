@@ -1,7 +1,7 @@
 import numpy as np
 
 from bequem.circuit import Circuit
-from bequem.subspace import Subspace
+from bequem.subspace.subspace import Subspace
 from bequem.nodes.node import Node
 
 
