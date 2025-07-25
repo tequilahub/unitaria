@@ -66,6 +66,8 @@ from unitaria.nodes.integer_arithmetic.constant_integer_multiplication import Co
 from unitaria.nodes.integer_arithmetic.increment import Increment
 from unitaria.nodes.integer_arithmetic.integer_addition import IntegerAddition
 
+from unitaria.nodes.qsvt.qsvt import QSVT
+
 __all__ = [
     "Node",
     "ProxyNode",
@@ -87,4 +89,5 @@ __all__ = [
     "ConstantIntegerMultiplication",
     "Increment",
     "IntegerAddition",
+    "QSVT",
 ]
