@@ -16,12 +16,3 @@ class Inverse(QSVT):
         super().__init__(A, angles)
         self.condition = condition
         self.accuracy = accuracy
-
-
-class AmplitudeAmplificiation(QSVT):
-    def __init__(self, A: Node, iterations: int):
-        angles = None
-        raise NotImplementedError
-        super().__init__(A, angles)
-        self.A = A
-        self.iterations = iterations

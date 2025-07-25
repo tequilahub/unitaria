@@ -5,7 +5,8 @@ import tequila as tq
 from bequem.nodes.node import Node
 from bequem.nodes.proxy_node import ProxyNode
 from bequem.subspace import Subspace, ZeroQubit
-from bequem.nodes.basic_ops import UnsafeMul, Adjoint
+from bequem.nodes.basic_operations.unsafe_multiplication import UnsafeMul
+from bequem.nodes.basic_operations.adjoint import Adjoint
 from bequem.circuit import Circuit
 
 

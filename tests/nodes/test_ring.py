@@ -1,4 +1,4 @@
-from bequem.nodes.integer_arithmetic import Increment
+from bequem.nodes.integer_arithmetic.increment import Increment
 from bequem.nodes.identity import Identity
 from bequem.subspace import Subspace
 from bequem.verifier import verify

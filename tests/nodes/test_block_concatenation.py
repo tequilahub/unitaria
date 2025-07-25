@@ -1,5 +1,6 @@
-from bequem.nodes.block_concatenation import BlockHorizontal, BlockVertical
-from bequem.nodes.integer_arithmetic import Increment
+from bequem.nodes.block_concatenation.block_horizontal import BlockHorizontal
+from bequem.nodes.block_concatenation.block_vertical import BlockVertical
+from bequem.nodes.integer_arithmetic.increment import Increment
 from bequem.nodes.identity import Identity
 from bequem.subspace import Subspace
 from bequem.verifier import verify
