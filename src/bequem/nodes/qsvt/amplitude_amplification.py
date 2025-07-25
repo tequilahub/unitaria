@@ -1,5 +1,3 @@
-import numpy as np
-
 from bequem.nodes import Node
 
 from bequem.nodes.qsvt.qsvt import QSVT
