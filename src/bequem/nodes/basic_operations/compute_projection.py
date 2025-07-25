@@ -2,7 +2,7 @@ from __future__ import annotations
 import numpy as np
 
 from bequem.circuit import Circuit
-from bequem.subspace.subspace import Subspace
+from bequem.subspace import Subspace
 from bequem.nodes.node import Node
 
 

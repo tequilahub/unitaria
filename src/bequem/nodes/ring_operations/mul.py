@@ -8,7 +8,7 @@ from bequem.nodes.basic_operations.compute_projection import ComputeProjection
 from bequem.nodes.proxy_node import ProxyNode
 from bequem.nodes.permutation import Permutation
 from bequem.nodes.identity import Identity
-from bequem.subspace.subspace import Subspace
+from bequem.subspace import Subspace
 
 
 class Mul(ProxyNode):

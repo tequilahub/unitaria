@@ -1,6 +1,6 @@
 import numpy as np
 
-from bequem.subspace.subspace import Subspace, ControlledSubspace
+from bequem.subspace import Subspace, ControlledSubspace
 from bequem.nodes.basic_operations.unsafe_multiplication import UnsafeMul
 from bequem.nodes.identity import Identity
 from bequem.nodes.proxy_node import ProxyNode

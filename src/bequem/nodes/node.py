@@ -6,7 +6,7 @@ import numpy as np
 from rich.tree import Tree
 from rich.console import Console
 
-from bequem.subspace.subspace import Subspace
+from bequem.subspace import Subspace
 from bequem.circuit import Circuit
 
 Uuid = str

@@ -3,7 +3,7 @@ import numpy as np
 from bequem.circuit import Circuit
 from bequem.circuits.generic_unitary import generic_unitary
 from bequem.nodes.node import Node
-from bequem.subspace.subspace import Subspace
+from bequem.subspace import Subspace
 
 
 class ConstantUnitary(Node):

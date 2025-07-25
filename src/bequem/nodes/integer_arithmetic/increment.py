@@ -2,7 +2,7 @@ import numpy as np
 import tequila as tq
 
 from ..node import Node
-from bequem.subspace.subspace import Subspace
+from bequem.subspace import Subspace
 from bequem.circuit import Circuit
 from bequem.circuits.arithmetic import increment_circuit_single_ancilla
 
