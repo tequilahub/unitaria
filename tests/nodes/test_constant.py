@@ -1,5 +1,6 @@
 import numpy as np
-from bequem.nodes.constant import ConstantVector, ConstantUnitary
+from bequem.nodes.constants.constant_vector import ConstantVector
+from bequem.nodes.constants.constant_unitary import ConstantUnitary
 from bequem.verifier import verify
 
 

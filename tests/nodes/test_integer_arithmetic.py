@@ -1,11 +1,11 @@
 import pytest
 
-from bequem.nodes.integer_arithmetic import (
-    Increment,
-    IntegerAddition,
-    ConstantIntegerAddition,
-    ConstantIntegerMultiplication,
-)
+from bequem.nodes.integer_arithmetic.increment import Increment
+
+from bequem.nodes.integer_arithmetic.integer_addition import IntegerAddition
+from bequem.nodes.integer_arithmetic.constant_integer_addition import ConstantIntegerAddition
+from bequem.nodes.integer_arithmetic.constant_integer_multiplication import ConstantIntegerMultiplication
+
 from bequem.verifier import verify
 
 

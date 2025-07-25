@@ -1,6 +1,6 @@
 import pytest
 
-from bequem.subspace import Subspace, ControlledSubspace, ID, ZeroQubit
+from bequem.subspace.subspace import Subspace, ControlledSubspace, ID, ZeroQubit
 from bequem.nodes.permutation import _find_matching_partitioning, Permutation, PermuteRegisters
 from bequem.verifier import verify
 

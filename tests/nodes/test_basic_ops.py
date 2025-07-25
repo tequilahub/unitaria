@@ -1,8 +1,8 @@
 from bequem.nodes.identity import Identity
-from bequem.nodes.integer_arithmetic import Increment
-from bequem.subspace import Subspace
+from bequem.nodes.integer_arithmetic.increment import Increment
+from bequem.subspace.subspace import Subspace
 from bequem.verifier import verify
-from bequem.nodes.basic_ops import Scale
+from bequem.nodes.basic_operations.scale import Scale
 
 
 def test_tensor():
