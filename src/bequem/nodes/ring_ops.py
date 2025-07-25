@@ -102,25 +102,22 @@ class Mul(ProxyNode):
 
     def definition(self) -> Node:
         permutation = Permutation(self.A.subspace_out, self.B.subspace_in)
-        if self.skip_projection:
-            A_permuted = self.A
-            B_permuted = UnsafeMul(permutation, self.B)
-            return UnsafeMul(A_permuted, B_permuted)
-        else:
-            A_permuted = Tensor(self.A, Identity(Subspace(0, 1)))
-            B_permuted = Tensor(UnsafeMul(permutation, self.B), Identity(Subspace(0, 1)))
+        A_permuted = self.A
+        B_permuted = UnsafeMul(permutation, self.B)
+        projection_subspace = A_permuted.subspace_out
+        projection_required = not self.skip_projection
+        if projection_subspace == Subspace(projection_subspace.total_qubits):
+            projection_required = False
+        if projection_required:
             # TODO: This can be probably be done more correctly
             # once match_nonzero is improved
-            projection_subspace = A_permuted.subspace_out
             if A_permuted.subspace_out.total_qubits < B_permuted.subspace_in.total_qubits:
                 projection_subspace = B_permuted.subspace_in
-            projection_required = True
-            if projection_subspace == Subspace(projection_subspace.total_qubits):
-                projection_required = False
-            if projection_required:
-                return UnsafeMul(UnsafeMul(A_permuted, ComputeProjection(projection_subspace)), B_permuted)
-            else:
-                return UnsafeMul(A_permuted, B_permuted)
+            A_permuted = Tensor(A_permuted, Identity(Subspace(0, 1)))
+            B_permuted = Tensor(B_permuted, Identity(Subspace(0, 1)))
+            return UnsafeMul(UnsafeMul(A_permuted, ComputeProjection(projection_subspace)), B_permuted)
+        else:
+            return UnsafeMul(A_permuted, B_permuted)
 
     def compute(self, input: np.ndarray | None) -> np.ndarray:
         input = self.A.compute(input)
