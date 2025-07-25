@@ -3,7 +3,7 @@ import pytest
 import numpy as np
 
 from bequem.nodes import Increment, Identity, Add, Scale, Adjoint, ConstantUnitary, BlockHorizontal
-from bequem.subspace.subspace import Subspace
+from bequem.subspace import Subspace
 from bequem.verifier import verify
 
 

@@ -1,6 +1,6 @@
 import numpy as np
 from bequem.nodes import ProxyNode, Node, ConstantIntegerAddition, ConstantIntegerMultiplication, Identity, Mul
-from bequem.subspace.subspace import Subspace, ID, ZeroQubit
+from bequem.subspace import Subspace, ID, ZeroQubit
 from bequem.verifier import verify
 
 

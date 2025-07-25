@@ -1,5 +1,5 @@
 from bequem.nodes import ComponentwiseMul
-from bequem.subspace.subspace import Subspace, ControlledSubspace, ID
+from bequem.subspace import Subspace, ControlledSubspace, ID
 from bequem.verifier import verify
 
 

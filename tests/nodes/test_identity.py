@@ -1,5 +1,5 @@
 from bequem.nodes.identity import Identity
-from bequem.subspace.subspace import Subspace
+from bequem.subspace import Subspace
 from bequem.verifier import verify
 
 

@@ -1,5 +1,7 @@
 import numpy as np
 
+from bequem.nodes.controlled_operations.controlled import Controlled
+from bequem.nodes.controlled_operations.modify_control import ModifyControl
 from bequem.subspace import Subspace, ControlledSubspace
 from bequem.nodes.basic_operations.unsafe_multiplication import UnsafeMul
 from bequem.nodes.identity import Identity

@@ -3,6 +3,7 @@ import numpy as np
 from ..node import Node
 from bequem.subspace import Subspace
 
+from bequem.nodes.integer_arithmetic.constant_integer_addition import ConstantIntegerAddition
 from bequem.nodes.proxy_node import ProxyNode
 from bequem.nodes.identity import Identity
 from bequem.nodes.controlled_operations.block_diagonal import BlockDiagonal

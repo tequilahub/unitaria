@@ -1,6 +1,6 @@
 from bequem.nodes.identity import Identity
 from bequem.nodes.integer_arithmetic.increment import Increment
-from bequem.subspace.subspace import Subspace
+from bequem.subspace import Subspace
 from bequem.verifier import verify
 
 
