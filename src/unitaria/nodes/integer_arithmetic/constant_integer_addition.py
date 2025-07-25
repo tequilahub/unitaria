@@ -20,6 +20,7 @@ class ConstantIntegerAddition(Node):
     constant: int
 
     def __init__(self, bits: int, constant: int):
+        super().__init__(2**bits, 2**bits)
         if bits < 1:
             raise ValueError()
         self.bits = bits

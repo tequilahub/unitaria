@@ -27,6 +27,10 @@ class BlockHorizontal(ProxyNode):
     B: Node
 
     def __init__(self, A: Node, B: Node):
+        if A.dimension_out != B.dimension_out:
+            raise ValueError(f"Matrices have different output dimension {A.dimension_out} and {B.dimension_out}")
+
+        super().__init__(A.dimension_in + B.dimension_in, A.dimension_out)
         self.A = A
         self.B = B
 
@@ -52,7 +56,7 @@ class BlockHorizontal(ProxyNode):
         return np.sqrt(np.abs(self.A.normalization) ** 2 + np.abs(self.B.normalization) ** 2)
 
     def compute(self, input: np.ndarray) -> np.ndarray:
-        dim_A = self.A.subspace_in.dimension
+        dim_A = self.A.dimension_in
         input_A, input_B = np.split(input, [dim_A], axis=-1)
         return self.A.compute(input_A) + self.B.compute(input_B)
 

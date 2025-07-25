@@ -33,6 +33,7 @@ class Add(ProxyNode):
             raise ValueError(f"dimensions {A.subspace_in.dimension} and {B.subspace_in.dimension} do not match")
         if A.subspace_out.dimension != B.subspace_out.dimension:
             raise ValueError(f"dimensions {A.subspace_out.dimension} and {B.subspace_out.dimension} do not match")
+        super().__init__(A.dimension_in, A.dimension_out)
         self.A = A
         self.B = B
 

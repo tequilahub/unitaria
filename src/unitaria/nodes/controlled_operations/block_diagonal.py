@@ -27,6 +27,7 @@ class BlockDiagonal(ProxyNode):
 
     def __init__(self, A: Node, B: Node):
         assert np.isclose(A.normalization, B.normalization)
+        super().__init__(A.dimension_in + B.dimension_in, A.dimension_out + B.dimension_out)
 
         self.A = A
         self.B = B
@@ -66,14 +67,14 @@ class BlockDiagonal(ProxyNode):
         return self.A.normalization
 
     def compute(self, input: np.ndarray) -> np.ndarray:
-        dim_A = self.A.subspace_in.dimension
+        dim_A = self.A.dimension_in
         input_A, input_B = np.split(input, [dim_A], axis=-1)
         result_A = self.A.compute(input_A)
         result_B = self.B.compute(input_B)
         return np.concatenate((result_A, result_B), axis=-1)
 
     def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
-        dim_A = self.A.subspace_out.dimension
+        dim_A = self.A.dimension_out
         input_A, input_B = np.split(input, [dim_A], axis=-1)
         result_A = self.A.compute_adjoint(input_A)
         result_B = self.B.compute_adjoint(input_B)

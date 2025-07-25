@@ -22,6 +22,7 @@ class IntegerAddition(Node):
     target_bits: int
 
     def __init__(self, source_bits: int, target_bits: int):
+        super().__init__(2 ** (source_bits + target_bits), 2 ** (source_bits + target_bits))
         # TODO: Restriction is because the ancilla free construction needs two source bits.
         #  I know how to fix this but haven't implemented it yet.
         if source_bits < 2 or target_bits < source_bits:

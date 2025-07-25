@@ -31,6 +31,7 @@ class Scale(Node):
         remove_efficiency: float = 1,
         absolute: bool = False,
     ):
+        super().__init__(A.dimension_in, A.dimension_out)
         self.A = A
         # TODO: assert_efficiency not implemented yet
         assert remove_efficiency == 1

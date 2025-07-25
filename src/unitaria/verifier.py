@@ -70,7 +70,9 @@ class Verifier:
         self.drill = drill
         self.up_to_phase = up_to_phase
 
-    def _verify_circuit_qubits(self, node: Node):
+    def _verify_circuit_subspaces(self, node: Node):
+        assert node.dimension_in == node.subspace_in.dimension
+        assert node.dimension_out == node.subspace_out.dimension
         if node.subspace_in.total_qubits == 0:
             # TODO: Tequila does not support circuits without qubits
             assert node.circuit.tq_circuit.n_qubits == 1
@@ -82,8 +84,8 @@ class Verifier:
     def _compare_batch_compute(self, node: Node, reference: np.ndarray | None = None):
         batch_computed = node.toarray(force_matrix=True)
         computed = np.zeros_like(batch_computed.T)
-        for i in range(node.subspace_in.dimension):
-            input = np.zeros(node.subspace_in.dimension, dtype=np.complex128)
+        for i in range(node.dimension_in):
+            input = np.zeros(node.dimension_in, dtype=np.complex128)
             input[i] = 1
             computed[i, :] = node.compute(input)
         np.testing.assert_allclose(batch_computed, computed.T, atol=1e-8)
@@ -107,7 +109,7 @@ class Verifier:
 
     def _verify(self, node: Node, reference: np.ndarray | None = None):
         try:
-            self._verify_circuit_qubits(node)
+            self._verify_circuit_subspaces(node)
             self._compare_compute_simulate(node)
             self._compare_compute_simulate(Adjoint(node))
             self._compare_batch_compute(node, reference)

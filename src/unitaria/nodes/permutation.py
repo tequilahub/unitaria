@@ -30,6 +30,7 @@ class Permutation(ProxyNode):
     def __init__(self, subspace_from: Subspace, subspace_to: Subspace):
         if subspace_from.dimension != subspace_to.dimension:
             raise ValueError(f"dimensions {subspace_from.dimension} and {subspace_to.dimension} do not match")
+        super().__init__(subspace_from.dimension, subspace_from.dimension)
         self.subspace_from = subspace_from
         self.subspace_to = subspace_to
 
@@ -86,6 +87,7 @@ class PermuteRegisters(Node):
     permutation_map: list[int]
 
     def __init__(self, subspace: Subspace, permutation_map: list[int]):
+        super().__init__(subspace.dimension, subspace.dimension)
         self.subspace = subspace
         self.permutation_map = permutation_map
 

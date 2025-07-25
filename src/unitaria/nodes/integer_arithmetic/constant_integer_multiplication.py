@@ -28,6 +28,7 @@ class ConstantIntegerMultiplication(ProxyNode):
     constant: int
 
     def __init__(self, bits: int, constant: int):
+        super().__init__(2**bits, 2**bits)
         if constant < 0:
             raise ValueError(f"Constant factor {constant} is negative.")
         if constant & 1 != 1:

@@ -27,6 +27,10 @@ class BlockVertical(ProxyNode):
     B: Node
 
     def __init__(self, A: Node, B: Node):
+        if A.dimension_out != B.dimension_out:
+            raise ValueError(f"Matrices have different input dimension {A.dimension_in} and {B.dimension_in}")
+
+        super().__init__(A.dimension_in, A.dimension_out + B.dimension_out)
         self.A = A
         self.B = B
 
@@ -55,6 +59,6 @@ class BlockVertical(ProxyNode):
         return np.concatenate((self.A.compute(input), self.B.compute(input)), axis=-1)
 
     def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
-        dim_A = self.A.subspace_in.dimension
+        dim_A = self.A.dimension_out
         input_A, input_B = np.split(input, [dim_A], axis=-1)
         return self.A.compute_adjoint(input_A) + self.B.compute_adjoint(input_B)

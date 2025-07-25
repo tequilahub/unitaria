@@ -7,6 +7,7 @@ from unitaria.circuit import Circuit
 
 class Controlled(Node):
     def __init__(self, A: Node):
+        super().__init__(A.dimension_in + 1, A.dimension_out + 1)
         self.A = A
 
     def children(self) -> list[Node]:
