@@ -27,6 +27,8 @@ class UnsafeMul(Node):
         if not A.subspace_out.match_nonzero(B.subspace_in):
             raise ValueError(f"Non matching qubit maps {A.subspace_out} and {B.subspace_in}")
 
+        super().__init__(A.dimension_in, B.dimension_out)
+
         self.A = A
         self.B = B
 

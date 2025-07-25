@@ -22,6 +22,7 @@ class ComputeProjection(Node):
     subspace: Subspace
 
     def __init__(self, subspace: Subspace):
+        super().__init__(subspace.dimension, subspace.dimension)
         self.subspace = subspace
 
     def children(self) -> list[Node]:

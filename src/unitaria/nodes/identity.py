@@ -18,6 +18,10 @@ class Identity(Node):
     def __init__(self, subspace: Subspace | int, project_to: Subspace | None = None):
         if not isinstance(subspace, Subspace):
             subspace = Subspace(subspace)
+        if project_to is None:
+            super().__init__(subspace.dimension, subspace.dimension)
+        else:
+            super().__init__(subspace.dimension, project_to.dimension)
         self.subspace = subspace
         self.project_to = project_to
         if project_to is not None and subspace.total_qubits != project_to.total_qubits:
@@ -47,7 +51,7 @@ class Identity(Node):
             return input
         else:
             outer_shape = list(input.shape[:-1])
-            input = input.reshape([-1, self.subspace_in.dimension])
+            input = input.reshape([-1, self.dimension_in])
             expanded = np.zeros((input.shape[0], 2**self.subspace_in.total_qubits), dtype=np.complex128)
             expanded[:, self.subspace_in.enumerate_basis()] = input
             return expanded[:, self.subspace_out.enumerate_basis()].reshape(outer_shape + [-1])
@@ -57,7 +61,7 @@ class Identity(Node):
             return input
         else:
             outer_shape = list(input.shape[:-1])
-            input = input.reshape([-1, self.subspace_out.dimension])
+            input = input.reshape([-1, self.dimension_out])
             expanded = np.zeros((input.shape[0], 2**self.subspace_out.total_qubits), dtype=np.complex128)
             expanded[:, self.subspace_out.enumerate_basis()] = input
             return expanded[:, self.subspace_in.enumerate_basis()].reshape(outer_shape + [-1])

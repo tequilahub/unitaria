@@ -45,6 +45,7 @@ class ComponentwiseMulMultilinear(Node):
     subspace: Subspace
 
     def __init__(self, subspace: Subspace):
+        super().__init__(subspace.dimension**2, subspace.dimension)
         self.subspace = subspace
 
     def _subspace_in(self) -> Subspace:

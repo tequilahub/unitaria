@@ -36,6 +36,10 @@ class Node(ABC):
     create a subclass of `~unitaria.nodes.ProxyNode`.
     """
 
+    def __init__(self, dimension_in: int, dimension_out: int):
+        self.dimension_in = dimension_in
+        self.dimension_out = dimension_out
+
     # TODO
     # @abstractmethod
     # def __init__(children: list[Node], data: str | None):

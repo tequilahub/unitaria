@@ -17,6 +17,7 @@ class Adjoint(Node):
     A: Node
 
     def __init__(self, A: Node):
+        super().__init__(A.dimension_out, A.dimension_in)
         self.A = A
 
     def children(self) -> list[Node]:

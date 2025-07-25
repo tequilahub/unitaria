@@ -42,6 +42,7 @@ class Tensor(Node):
     B: Node
 
     def __init__(self, A: Node, B: Node):
+        super().__init__(A.dimension_in * B.dimension_in, A.dimension_out * B.dimension_out)
         self.A = A
         self.B = B
 
@@ -52,13 +53,13 @@ class Tensor(Node):
         if input is None:
             input = np.array([1])
         batch_shape = list(input.shape[:-1])
-        input = input.reshape([-1, self.A.subspace_in.dimension])
+        input = input.reshape([-1, self.A.dimension_in])
         input = self.A.compute(input)
-        input = input.reshape(batch_shape + [self.B.subspace_in.dimension, self.A.subspace_out.dimension])
+        input = input.reshape(batch_shape + [self.B.dimension_in, self.A.dimension_out])
         input = np.swapaxes(input, -1, -2)
-        input = input.reshape([-1, self.B.subspace_in.dimension])
+        input = input.reshape([-1, self.B.dimension_in])
         input = self.B.compute(input)
-        input = input.reshape(batch_shape + [self.A.subspace_out.dimension, self.B.subspace_out.dimension])
+        input = input.reshape(batch_shape + [self.A.dimension_out, self.B.dimension_out])
         input = np.swapaxes(input, -1, -2)
         return np.reshape(input, batch_shape + [-1])
 
@@ -66,13 +67,13 @@ class Tensor(Node):
         if input is None:
             input = np.array([1])
         batch_shape = list(input.shape[:-1])
-        input = input.reshape([-1, self.A.subspace_out.dimension])
+        input = input.reshape([-1, self.A.dimension_out])
         input = self.A.compute_adjoint(input)
-        input = input.reshape(batch_shape + [self.B.subspace_out.dimension, self.A.subspace_in.dimension])
+        input = input.reshape(batch_shape + [self.B.dimension_out, self.A.dimension_in])
         input = np.swapaxes(input, -1, -2)
-        input = input.reshape([-1, self.B.subspace_out.dimension])
+        input = input.reshape([-1, self.B.dimension_out])
         input = self.B.compute_adjoint(input)
-        input = input.reshape(batch_shape + [self.A.subspace_in.dimension, self.B.subspace_in.dimension])
+        input = input.reshape(batch_shape + [self.A.dimension_in, self.B.dimension_in])
         input = np.swapaxes(input, -1, -2)
         return np.reshape(input, batch_shape + [-1])
 

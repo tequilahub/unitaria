@@ -16,6 +16,9 @@ class ModifyControl(Node):
         self.A = A
         if not isinstance(expand_control, Subspace):
             expand_control = Subspace(expand_control)
+        super().__init__(
+            (A.dimension_in - 1) * expand_control.dimension + 1, (A.dimension_out - 1) * expand_control.dimension + 1
+        )
         self.expand_control = expand_control
         self.swap_control_state = swap_control_state
 

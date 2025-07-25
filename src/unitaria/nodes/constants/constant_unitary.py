@@ -17,6 +17,7 @@ class ConstantUnitary(Node):
     unitary: np.ndarray
 
     def __init__(self, unitary: np.ndarray):
+        super().__init__(unitary.shape[1], unitary.shape[0])
         assert unitary.ndim == 2
         self.unitary = unitary
         n, m = unitary.shape

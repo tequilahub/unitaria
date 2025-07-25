@@ -30,8 +30,9 @@ class Mul(ProxyNode):
     skip_projection: bool
 
     def __init__(self, A: Node, B: Node, skip_projection: bool = False):
-        if A.subspace_out.dimension != B.subspace_in.dimension:
+        if A.dimension_out != B.dimension_in:
             raise ValueError(f"dimensions {A.subspace_out.dimension} and {B.subspace_in.dimension} do not match")
+        super().__init__(A.dimension_in, B.dimension_out)
         self.A = A
         self.B = B
         self.skip_projection = skip_projection

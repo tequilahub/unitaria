@@ -10,6 +10,7 @@ class LCG(ProxyNode):
     constant_mul: int
 
     def __init__(self, bits: int, constant_add: int | None = None, constant_mul: int | None = None):
+        super().__init__(2 ** (2 * bits), 2 ** (2 * bits))
         self.bits = bits
         if constant_add is None:
             self.constant_add = 1 + np.random.randint(0, 2 ** (bits - 1)) * 2

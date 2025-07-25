@@ -31,11 +31,16 @@ class MultilinearNode(ProxyNode):
             raise ValueError(
                 f"{len(apply)} inputs were supplied to {self.__class__.__name__}, but it takes at most {len(dimensions_in)}"
             )
-        for i, a in enumerate(apply):
-            if a is not None and a.subspace_out.dimension != dimensions_in[i]:
-                raise ValueError(
-                    f"Dimension of input does not match. Expected {dimensions_in[i]} got {a.subspace_out.dimension}"
-                )
+        remaining_dimension = 1
+        for i, d in enumerate(dimensions_in):
+            if i < len(apply) and apply[i] is not None:
+                if apply[i].subspace_out.dimension != d:
+                    raise ValueError(
+                        f"Dimension of input does not match. Expected {d} got {apply[i].subspace_out.dimension}"
+                    )
+            else:
+                remaining_dimension *= d
+        super().__init__(remaining_dimension, dimension_out)
 
         self.dimensions_in = dimensions_in
         self.apply = apply
