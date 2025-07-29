@@ -19,9 +19,9 @@ class Mul(ProxyNode):
     first, i.e. this implements ``B @ A``. This requires ``A.dimension_out ==
     B.dimension_in``.
 
-    :ivar A:
+    :param A:
         The first factor
-    :ivar B:
+    :param B:
         The second factor
     """
 

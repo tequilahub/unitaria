@@ -17,9 +17,11 @@ class Circuit:
 
     This is just a wrapper around the Tequila ``QCircuit`` class.
 
-    :ivar tq_circuit:
+    :param tq_circuit:
         The representation of the circuit for the tequila backend.
     """
+
+    tq_circuit: tq.QCircuit
 
     def __init__(self, tq_circuit: tq.QCircuit | None = None):
         if tq_circuit is not None:
@@ -29,7 +31,7 @@ class Circuit:
 
     def simulate(self, input: np.ndarray | int = 0, **kwargs) -> np.ndarray:
         """
-        Simulate this circuit.
+        Simulate this circuit. For additional arguments see `tq.simulate tequila.simulators.simulator_api.simulate`.
 
         :param input:
             The initial state from which the circuit should be simulated.

@@ -17,11 +17,14 @@ class BlockVertical(ProxyNode):
     """
     Node for block matrices of the form ``[A B]^T``
 
-    :ivar A:
+    :param A:
         The top block
-    :ivar B:
+    :param B:
         The bottom block
     """
+
+    A: Node
+    B: Node
 
     def __init__(self, A: Node, B: Node):
         self.A = A

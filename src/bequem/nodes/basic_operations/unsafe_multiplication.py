@@ -14,11 +14,14 @@ class UnsafeMul(Node):
     `~bequem.nodes.prox_node.Mul` instead. The order of operations is such that
     the first argument ``A`` is applied first.
 
-    :ivar A:
+    :param A:
         The first factor
-    :ivar B:
+    :param B:
         The second factor
     """
+
+    A: Node
+    B: Node
 
     def __init__(self, A: Node, B: Node):
         if not A.subspace_out.match_nonzero(B.subspace_in):

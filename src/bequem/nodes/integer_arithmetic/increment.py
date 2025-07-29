@@ -11,9 +11,11 @@ class Increment(Node):
     """
     Node implementing the (wrapping) increment of an integer.
 
-    :ivar bits:
+    :param bits:
         The size of the quantum state. The increment is performed modulo ``2 ** bits``.
     """
+
+    bits: int
 
     def __init__(self, bits: int):
         if bits < 1:

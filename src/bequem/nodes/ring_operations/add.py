@@ -19,9 +19,9 @@ class Add(ProxyNode):
 
     Both summands must have matching `Add.dimension_in` and `Add.dimension_out`.
 
-    :ivar A:
+    :param A:
         The first summand
-    :ivar B:
+    :param B:
         The second summand
     """
 

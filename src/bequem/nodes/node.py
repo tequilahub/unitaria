@@ -81,8 +81,6 @@ class Node(ABC):
         """
         return self._subspace_in()
 
-    # This and other private methods of Node are hardcoded to appear in the
-    # documentation, see the file docs/_templates/autosummary/class.rst.
     @abstractmethod
     def _subspace_in(self) -> Subspace:
         """

@@ -13,7 +13,7 @@ class Subspace:
     """
     Subspace of the statespace of a number of qubits.
 
-    :ivar registers:
+    :param registers:
         List of registers, each describing a subspace. The total subspace of
         all registers is the tensor product of the individual subspaces.
     :param zero_qubits:
@@ -267,9 +267,9 @@ class ControlledSubspace(Register):
     Register where the most significant qubit determines the subspace
     corresponding to lower qubits
 
-    :ivar case_zero:
+    :param case_zero:
         Embedding of lower qubits, if highest qubit is ``|0>``
-    :ivar case_one:
+    :param case_one:
         Embedding of lower qubits, if highest qubit is ``|1>``
     """
 

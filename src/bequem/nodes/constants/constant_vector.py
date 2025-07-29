@@ -10,9 +10,11 @@ class ConstantVector(Node):
     """
     Node representing the given vector
 
-    :ivar vec:
+    :param vec:
         The vector represented by this node
     """
+
+    vec: np.ndarray
 
     def __init__(self, vec: np.ndarray):
         self.n_qubits = round(np.log2(vec.shape[0]))

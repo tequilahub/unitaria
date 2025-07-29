@@ -15,9 +15,11 @@ class ComputeProjection(Node):
     `ComputeProjection.subspace_in` and `ComputeProjection.subspace_out` are set
     to zero.
 
-    :ivar subspace:
+    :param subspace:
         The subspace which the vector should be in.
     """
+
+    subspace: Subspace
 
     def __init__(self, subspace: Subspace):
         self.subspace = subspace

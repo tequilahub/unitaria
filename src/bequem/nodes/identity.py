@@ -9,9 +9,11 @@ class Identity(Node):
     """
     Node representing the identity matrix on a given vectorspace
 
-    :ivar subspace:
+    :param subspace:
         The domain of the identity matrix
     """
+
+    subspace: Subspace
 
     def __init__(self, subspace: Subspace | int, project_to: Subspace | None = None):
         if not isinstance(subspace, Subspace):

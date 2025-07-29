@@ -18,11 +18,14 @@ class Permutation(ProxyNode):
     mapping to qubits in input and output may be different. Both subspaces have
     to have the same dimension.
 
-    :ivar subspace_from:
+    :param subspace_from:
         The source subspace
-    :ivar subspace_to:
+    :param subspace_to:
         The target subspace
     """
+
+    subspace_from: Subspace
+    subspace_to: Subspace
 
     def __init__(self, subspace_from: Subspace, subspace_to: Subspace):
         if subspace_from.dimension != subspace_to.dimension:
@@ -79,28 +82,28 @@ class PermuteRegisters(Node):
     ``qubits.registers[permutation_map[i]]``.
     """
 
-    qubits: Subspace
+    subspace: Subspace
     permutation_map: list[int]
 
-    def __init__(self, qubits: Subspace, permutation_map: list[int]):
-        self.qubits = qubits
+    def __init__(self, subspace: Subspace, permutation_map: list[int]):
+        self.subspace = subspace
         self.permutation_map = permutation_map
 
     def parameters(self) -> dict:
-        return {"qubits": self.qubits, "permutation_map": self.permutation_map}
+        return {"qubits": self.subspace, "permutation_map": self.permutation_map}
 
     def _subspace_in(self) -> Subspace:
-        return self.qubits
+        return self.subspace
 
     def _subspace_out(self) -> Subspace:
-        return Subspace([self.qubits.registers[i] for i in self.permutation_map])
+        return Subspace([self.subspace.registers[i] for i in self.permutation_map])
 
     def _normalization(self) -> float:
         return 1
 
     def compute(self, input: np.ndarray) -> np.ndarray:
         outer_shape = list(input.shape[:-1])
-        register_shape = [r.dimension() for r in self.qubits.registers]
+        register_shape = [r.dimension() for r in self.subspace.registers]
         total_shape = outer_shape + register_shape
         input = input.reshape(outer_shape + register_shape)
         perm = list(range(len(outer_shape))) + [len(total_shape) - i - 1 for i in reversed(self.permutation_map)]
@@ -117,14 +120,14 @@ class PermuteRegisters(Node):
         return input.reshape(outer_shape + [-1])
 
     def _circuit(self) -> Circuit:
-        if self.qubits.total_qubits == 0:
+        if self.subspace.total_qubits == 0:
             circuit = Circuit()
             circuit.tq_circuit.n_qubits = 1
             return circuit
 
         register_qubits = []
         qubit_index = 0
-        for register in self.qubits.registers:
+        for register in self.subspace.registers:
             register_qubits.append(list(range(qubit_index, qubit_index + register.total_qubits())))
             qubit_index += register.total_qubits()
 
@@ -134,7 +137,7 @@ class PermuteRegisters(Node):
 
         i = 0
         n = 0
-        while i < self.qubits.total_qubits:
+        while i < self.subspace.total_qubits:
             j = permutation_map_qubits[i]
             if i != j:
                 circuit.tq_circuit += tq.gates.SWAP(i, j)
@@ -143,14 +146,14 @@ class PermuteRegisters(Node):
                     permutation_map_qubits[i],
                 )
                 n += 1
-                if n > self.qubits.total_qubits:
+                if n > self.subspace.total_qubits:
                     raise ValueError(f"{self.permutation_map} is not a permutation")
             else:
                 i += 1
 
         circuit.tq_circuit = circuit.tq_circuit.dagger()
 
-        circuit.tq_circuit.n_qubits = self.qubits.total_qubits
+        circuit.tq_circuit.n_qubits = self.subspace.total_qubits
 
         return circuit
 

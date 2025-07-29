@@ -18,11 +18,14 @@ class ConstantIntegerMultiplication(ProxyNode):
 
     The constraint for the factor to be odd means the multiplication operation is invertible.
 
-    :ivar bits:
+    :param bits:
         The size of the quantum state. The addition is performed modulo ``2 ** bits``.
-    :ivar constant:
+    :param constant:
         The contant factor that should be multiplied. Has to be positive and odd.
     """
+
+    bits: int
+    constant: int
 
     def __init__(self, bits: int, constant: int):
         if constant < 0:

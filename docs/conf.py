@@ -28,6 +28,7 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.todo",
     "sphinx.ext.autosummary",
+    "sphinx.ext.intersphinx",
 ]
 
 napoleon_google_docstring = True
@@ -38,6 +39,13 @@ templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 autosummary_ignore_module_all = False
 default_role = "py:obj"
+
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3", None),
+    "numpy": ("https://numpy.org/doc/stable/", None),
+    "rich": ("https://rich.readthedocs.io/en/stable/", None),
+    "tequila": ("https://tequilahub.github.io/tequila/", None)
+}
 
 language = "en"
 

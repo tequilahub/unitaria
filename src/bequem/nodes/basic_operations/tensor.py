@@ -22,11 +22,14 @@ class Tensor(Node):
            [0., 0., 0., 1.],
            [0., 0., 1., 0.]])
 
-    :ivar A:
+    :param A:
         The first factor
-    :ivar B:
+    :param B:
         The second factor
     """
+
+    A: Node
+    B: Node
 
     def __init__(self, A: Node, B: Node):
         self.A = A

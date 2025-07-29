@@ -11,13 +11,18 @@ class Scale(Node):
     """
     Node representing the product of a scalar and another node
 
-    :ivar A:
+    :param A:
         The node to scale
-    :ivar scale:
+    :param scale:
         The scalar factor
-    :ivar absolute:
+    :param absolute:
         If ``True``, ``A`` is divided by its normalization first
     """
+
+    A: Node
+    scale: float
+    remove_efficiency: float
+    absolute: bool
 
     def __init__(
         self,

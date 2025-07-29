@@ -10,11 +10,14 @@ class ConstantIntegerAddition(Node):
     """
     Node implementing the (wrapping) addition of a constant to an integer.
 
-    :ivar bits:
+    :param bits:
         The size of the quantum state. The addition is performed modulo ``2 ** bits``.
-    :ivar constant:
+    :param constant:
         The contant that should be added. Has to be positive.
     """
+
+    bits: int
+    constant: int
 
     def __init__(self, bits: int, constant: int):
         if bits < 1:

@@ -17,9 +17,9 @@ class BlockHorizontal(ProxyNode):
     """
     Node for block matrices of the form ``[A B]``
 
-    :ivar A:
+    :param A:
         The left block
-    :ivar B:
+    :param B:
         The right block
     """
 

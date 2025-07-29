@@ -10,9 +10,11 @@ class ConstantUnitary(Node):
     """
     Node representing the given unitary
 
-    :ivar unitary:
+    :param unitary:
         The unitary which should be implemented.
     """
+
+    unitary: np.ndarray
 
     def __init__(self, unitary: np.ndarray):
         assert unitary.ndim == 2

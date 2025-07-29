@@ -10,9 +10,11 @@ class Adjoint(Node):
     """
     Node representing the adjoint of another node
 
-    :ivar A:
+    :param A:
         The node of which to compute the adjoint
     """
+
+    A: Node
 
     def __init__(self, A: Node):
         self.A = A

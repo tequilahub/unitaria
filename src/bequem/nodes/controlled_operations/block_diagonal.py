@@ -13,11 +13,14 @@ class BlockDiagonal(ProxyNode):
     """
     Node for block matrices of the form ``diag(A, B)``
 
-    :ivar A:
+    :param A:
         The left upper block
-    :ivar B:
+    :param B:
         The right lower block
     """
+
+    A: Node
+    B: Node
 
     def __init__(self, A: Node, B: Node):
         assert np.isclose(A.normalization, B.normalization)
