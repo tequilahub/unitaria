@@ -17,8 +17,7 @@ class Add(ProxyNode):
     """
     Node for computing the sum of two vectors or matrices.
 
-    Both summands must have matching :attr:`Add.dimension_in` and
-    :attr:`Add.dimension_out`.
+    Both summands must have matching `Add.dimension_in` and `Add.dimension_out`.
 
     :ivar A:
         The first summand

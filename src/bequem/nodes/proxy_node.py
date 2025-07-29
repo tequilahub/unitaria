@@ -14,10 +14,10 @@ class ProxyNode(Node):
 
     This is useful when the given definition is used in the construction of
     the circuit or QubitMaps, but a simpler representation is avilable for
-    :func:`compute`. Additionally, the simpler structure is used for printing
-    and serialization.
+    `compute`. Additionally, the simpler structure is used for printing and
+    serialization.
 
-    For an example of how to use this class see :class:`Add` and :class:`Mul`.
+    For an example of how to use this class see `Add` and `Mul`.
     """
 
     _definition: Node | None = None
@@ -26,8 +26,8 @@ class ProxyNode(Node):
     def definition(self) -> Node:
         """
         The definition of this node, which is used to implement all other
-        abstract methods of :class:`Node`. The other methods can be overwritten
-        to give a more efficient implementation.
+        abstract methods of `Node`. The other methods can be overwritten to give
+        a more efficient implementation.
         """
         raise NotImplementedError
 

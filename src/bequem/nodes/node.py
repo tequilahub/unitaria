@@ -15,8 +15,25 @@ class Node(ABC):
     Abstract class for all nodes in the computational graph
 
     The encoded vector or the action of the encoded matrix can be obtained
-    either through matrix arithmetic using :func:`compute` or as a quantum
-    circuit using :func:`circuit`.
+    either through matrix arithmetic using `compute` or as a quantum
+    block encoding using `circuit`, `normalization`, `subspace_in`, and
+    `subspace_out`.
+
+    When creating your own subclass of `Node`, you should implement the
+    functions `_subspace_in`, `_subspace_out`, `_normalization`, `_circuit`,
+    `compute`, and `compute_adjoint`. Potentially also `children` and
+    `parameters`.
+
+    Note the prefixed underscores for some of these methods, which are necessary
+    due to how the properties of `Node` are cached.
+
+    To check that these methods are implemented correctly, use
+    `~bequem.verifier.verify`.
+
+    As an alternative if you can represent your custom node in terms of other
+    nodes, and just want to provide a more efficient implementation of some
+    of the functions -- say `compute` and `compute_adjoint` -- you can instead
+    create a subclass of `~bequem.nodes.ProxyNode`.
     """
 
     # TODO
@@ -64,12 +81,14 @@ class Node(ABC):
         """
         return self._subspace_in()
 
+    # This and other private methods of Node are hardcoded to appear in the
+    # documentation, see the file docs/_templates/autosummary/class.rst.
     @abstractmethod
     def _subspace_in(self) -> Subspace:
         """
-        Method to for computing :func:`subspace_in`.
+        Method to for computing `subspace_in`.
 
-        To be implemented in all subclasses of :class:`Node`.
+        To be implemented in all subclasses of `Node`.
         """
         raise NotImplementedError
 
@@ -89,9 +108,9 @@ class Node(ABC):
     @abstractmethod
     def _subspace_out(self) -> Subspace:
         """
-        Method to for computing :func:`subspace_out`.
+        Method to for computing `subspace_out`.
 
-        To be implemented in all subclasses of :class:`Node`.
+        To be implemented in all subclasses of `Node`.
         """
         raise NotImplementedError
 
@@ -108,9 +127,9 @@ class Node(ABC):
     @abstractmethod
     def _normalization(self) -> float:
         """
-        Method to for computing :func:`normalization`.
+        Method to for computing `normalization`.
 
-        To be implemented in all subclasses of :class:`Node`.
+        To be implemented in all subclasses of `Node`.
         """
         raise NotImplementedError
 
@@ -129,10 +148,10 @@ class Node(ABC):
         case the method should simply return the encoded vector.
 
         Input may be a vector or a higher order tensor. If it is a vector
-        it will have dimension equal to the dimension of :func:`qubits_in`.
-        If it is a tensor, the last dimension will be equal to the dimension
-        of :func:`qubits_in`. In this case, the operation should be applied
-        to all vectors ``input[i, j, ..., k, :]`` in parallel. The shape of
+        it will have dimension equal to the dimension of `qubits_in`. If
+        it is a tensor, the last dimension will be equal to the dimension
+        of `qubits_in`. In this case, the operation should be applied to
+        all vectors ``input[i, j, ..., k, :]`` in parallel. The shape of
         the returned array should match the input shape in all but the last
         dimension.
         """
@@ -143,7 +162,7 @@ class Node(ABC):
         """
         Apply the adjoint action of this nodes matrix to the input.
 
-        See :func:`compute` for input and output formats.
+        See `compute` for input and output formats.
         """
         raise NotImplementedError
 
@@ -157,9 +176,9 @@ class Node(ABC):
     @abstractmethod
     def _circuit(self) -> float:
         """
-        Method to for computing :func:`circuit`.
+        Method to for computing `circuit`.
 
-        To be implemented in all subclasses of :class:`Node`.
+        To be implemented in all subclasses of `Node`.
         """
         raise NotImplementedError
 
@@ -195,7 +214,7 @@ class Node(ABC):
         """
         Method for rich text output of the computational graph.
 
-        Typically you should call :func:`draw` instead of this method.
+        Typically you should call `draw` instead of this method.
         """
         for i, hole in enumerate(holes):
             if hole is self:
@@ -218,8 +237,7 @@ class Node(ABC):
 
         :param verbose:
             if set to ``True``, the definition of any
-            :class:`~bequem.nodes.proxy_node.ProxyNode` is inserted into the
-            output.
+            `~bequem.nodes.proxy_node.ProxyNode` is inserted into the
         """
         console = Console()
         with console.capture() as capture:

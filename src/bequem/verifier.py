@@ -10,22 +10,19 @@ default_verifier = None
 
 def verify(node: Node, reference: np.ndarray | None = None):
     """
-    Verify a node using the default :class:`Verifier`.
+    Verify a node using the default `Verifier`.
 
     This checks for ``node`` that
 
-    * The dimesions of :attr:`~bequem.nodes.Node.subspace_in`
-      and :attr:`~bequem.nodes.Node.subspace_out`
-      match :attr:`~bequem.nodes.Node.dimension_in` and
-      :attr:`~bequem.nodes.Node.dimension_out`, and the total qubits of these
-      subspaces matches the qubits in :attr:`~bequem.nodes.Node.circuit`.
-    * :func:`~bequem.nodes.Node.compute` and
-      :func:`~bequem.nodes.Node.compute_adjoint` match and that their batched
-      version are equivalent.
-    * :func:`~bequem.nodes.Node.compute` matches the circuit
-      implementation given through :attr:`~bequem.nodes.Node.subspace_in`,
-      :attr:`~bequem.nodes.Node.subspace_out`, and
-      :attr:`~bequem.nodes.Node.circuit`.
+    * The dimesions of `~bequem.nodes.Node.subspace_in` and
+      `~bequem.nodes.Node.subspace_out` match `~bequem.nodes.Node.dimension_in`
+      and `~bequem.nodes.Node.dimension_out`, and the total qubits of these
+      subspaces matches the qubits in `~bequem.nodes.Node.circuit`.
+    * `~bequem.nodes.Node.compute` and `~bequem.nodes.Node.compute_adjoint`
+      match and that their batched version are equivalent.
+    * `~bequem.nodes.Node.compute` matches the circuit
+      implementation given through `~bequem.nodes.Node.subspace_in`,
+      `~bequem.nodes.Node.subspace_out`, and `~bequem.nodes.Node.circuit`.
 
     If one of these checks does not pass, the same tests will be run for all
     children to find out whether the implementation of this node, or one of its
@@ -49,7 +46,7 @@ class Verifier:
     """
     Object for verifying nodes.
 
-    See :func:`verify` for the checks that are performed.
+    See `verify` for the checks that are performed.
 
     :ivar drill:
         If this is ``True``, upon encountering an error in a node, the
@@ -112,9 +109,8 @@ class Verifier:
         """
         Verify the correctness of this node.
 
-        Checks that the outputs of :func:`qubits_in`, :func:`qubits_out`,
-        :func:`normalization`, and :func:`circuit` are sensible and encode
-        the same matrix.
+        Checks that the outputs of `qubits_in`, `qubits_out`, `normalization`,
+        and `circuit` are sensible and encode the same matrix.
 
         :param drill:
             If True and an error is found, recursivly test this nodes children
@@ -130,10 +126,10 @@ class Verifier:
 
     def find_error(self, node: Node):
         """
-        Convenience function to recursively call :func:`verify` on the
+        Convenience function to recursively call `verify` on the
         children of this node.
 
-        You should typically use :func:`verify` instead.
+        You should typically use `verify` instead.
         """
         for child in node.children():
             self.find_error(child)

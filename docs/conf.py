@@ -37,6 +37,7 @@ napoleon_use_ivar = True
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 autosummary_ignore_module_all = False
+default_role = "py:obj"
 
 language = "en"
 

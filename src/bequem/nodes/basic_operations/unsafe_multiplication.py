@@ -11,8 +11,8 @@ class UnsafeMul(Node):
     Node for chaining the circuits of two nodes
 
     This is mostly for internal usage. To properly multiply two matrices use
-    :class:`~bequem.nodes.prox_node.Mul` instead. The order of operations is
-    such that the first argument ``A`` is applied first.
+    `~bequem.nodes.prox_node.Mul` instead. The order of operations is such that
+    the first argument ``A`` is applied first.
 
     :ivar A:
         The first factor

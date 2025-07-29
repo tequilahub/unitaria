@@ -10,10 +10,10 @@ class ComputeProjection(Node):
     """
     Node, which computes wether a vector is in a given subspace.
 
-    This is mostly used internally, for example for the
-    :class:`bequem.nodes.Mul` node. The result of the check is stored in an
-    additional qubit, for which :attr:`ComputeProjection.subspace_in` and
-    :attr:`ComputeProjection.subspace_out` are set to zero.
+    This is mostly used internally, for example for the `bequem.nodes.Mul`
+    node. The result of the check is stored in an additional qubit, for which
+    `ComputeProjection.subspace_in` and `ComputeProjection.subspace_out` are set
+    to zero.
 
     :ivar subspace:
         The subspace which the vector should be in.

@@ -294,8 +294,8 @@ class ControlledSubspace(Register):
         """
         Returns a potentially simpler representation of this register
 
-        Specifically, if :attr:`case_one` and :attr:`case_zero` agree in a
-        number of lowest qubits, this common part can be factored out. E.g.
+        Specifically, if `case_one` and `case_zero` agree in a number of lowest
+        qubits, this common part can be factored out. E.g.
 
             >>> from bequem.subspace import Subspace, ControlledSubspace
             >>> ControlledSubspace(Subspace(2), Subspace(1, 1)).simplify()
