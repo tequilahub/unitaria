@@ -1,3 +1,33 @@
+"""
+The basic type of this library is `Node` representing a node in a computational
+graph. Consider, for example, the following matrix product
+
+>>> from bequem.nodes import Increment, Identity
+>>> print(Increment(2) @ Identity(2))
+Mul
+├── Identity{'subspace': Subspace(2)}
+└── Increment{'bits': 2}
+
+Note how the operation is transformed into a tree of three nodes. These nodes
+can now be used to compute the result directly
+
+>>> from bequem.nodes import Increment, Identity
+>>> import numpy as np
+>>> (Increment(2) @ Identity(2)).compute(np.eye(2))
+array([[0., 1.],
+       [1., 0.]])
+
+Or the circuit, normalization, and subspaces of the block encoding can be obtain
+through the corresponding properties of `Node`.
+
+Custom nodes
+------------
+
+Most basic operations are implemented already in this library. See `Node` for
+implementing custom nodes directly, or `ProxyNode` for implementing custom nodes
+by decomposing them into other operations.
+"""
+
 from bequem.nodes.node import Node
 from bequem.nodes.proxy_node import ProxyNode
 

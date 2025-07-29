@@ -14,9 +14,8 @@ class Tensor(Node):
     significant digits of the index, i.e.
 
     >>> from bequem.nodes import Tensor, Identity, Increment
-    >>> from bequem.qubit_map import QubitMap
     >>> import numpy as np
-    >>> Tensor(Increment(1), Identity(QubitMap(1))).compute(np.eye(4))
+    >>> Tensor(Increment(1), Identity(1)).compute(np.eye(4))
     array([[0., 1., 0., 0.],
            [1., 0., 0., 0.],
            [0., 0., 0., 1.],

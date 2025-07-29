@@ -239,8 +239,8 @@ class Node(ABC):
         """
         console = Console()
         with console.capture() as capture:
-            console.print(self.tree(verbose))
-        output = capture.get()
+            console.print(self.tree(verbose), end="")
+        output = capture.get().strip()
         return output
 
     def __str__(self):

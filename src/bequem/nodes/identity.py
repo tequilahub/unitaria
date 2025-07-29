@@ -28,7 +28,7 @@ class Identity(Node):
 
     def parameters(self) -> dict:
         params = {}
-        params["qubits"] = self.subspace
+        params["subspace"] = self.subspace
         if self.project_to is not None:
             params["project_to"] = self.project_to
         return params
