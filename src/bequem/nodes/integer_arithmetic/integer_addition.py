@@ -7,6 +7,17 @@ from bequem.circuits.arithmetic import addition_circuit
 
 
 class IntegerAddition(Node):
+    """
+    Node implementing the (wrapping) addition of two integers.
+
+    This is a bilinear operation.
+
+    :ivar source_bits:
+        The size of the first register. The first summand can be at most ``2 ** source_bits``
+    :ivar target_bits:
+        The size of the second register. The addition is performed modulo ``2 ** target_bits``.
+    """
+
     def __init__(self, source_bits: int, target_bits: int):
         # TODO: Restriction is because the ancilla free construction needs two source bits.
         #  I know how to fix this but haven't implemented it yet.

@@ -16,7 +16,8 @@ class Mul(ProxyNode):
     Node for computing the product of two nodes
 
     The order of operations is such that the first argument ``A`` is applied
-    first, i.e. this implements ``B @ A``.
+    first, i.e. this implements ``B @ A``. This requires ``A.dimension_out ==
+    B.dimension_in``.
 
     :ivar A:
         The first factor

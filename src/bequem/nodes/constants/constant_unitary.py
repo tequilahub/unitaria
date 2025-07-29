@@ -9,9 +9,10 @@ from bequem.subspace import Subspace
 class ConstantUnitary(Node):
     """
     Node representing the given unitary
-    """
 
-    unitary: np.ndarray
+    :ivar unitary:
+        The unitary which should be implemented.
+    """
 
     def __init__(self, unitary: np.ndarray):
         assert unitary.ndim == 2

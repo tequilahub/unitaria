@@ -13,8 +13,12 @@ keywords = ["quantum computing"]
 dependencies = [
   "tequila-basic@git+https://github.com/tequilahub/tequila.git@devel",
   "rich==14.0.*",
-  "cirq==1.5.0"
+  "qulacs==0.6.*"
 ]
+
+[project.optional-dependencies]
+qpic = ["qpic==1.1.*"]
+docs = ["sphinx", "furo"]
 
 [project.urls]
 Repository = "https://github.com/bequem-py/bequem.git"

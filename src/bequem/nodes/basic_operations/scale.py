@@ -19,11 +19,6 @@ class Scale(Node):
         If ``True``, ``A`` is divided by its normalization first
     """
 
-    A: Node
-    scale: float
-    absolute: bool
-    remove_efficiency: bool
-
     def __init__(
         self,
         A: Node,
@@ -31,14 +26,6 @@ class Scale(Node):
         remove_efficiency: float = 1,
         absolute: bool = False,
     ):
-        """
-        :param A:
-            The node to scale
-        :param scale:
-            The scalar factor
-        :param absolute:
-            If ``True``, ``A`` is divided by its normalization first
-        """
         self.A = A
         # TODO: assert_efficiency not implemented yet
         assert remove_efficiency == 1

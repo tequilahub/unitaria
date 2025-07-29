@@ -11,8 +11,18 @@ from bequem.circuit import Circuit
 
 
 class Permutation(ProxyNode):
-    subspace_from: Subspace
-    subspace_to: Subspace
+    """
+    Implements the necessary permutation between two subspaces.
+
+    In matrix arithmetic form this is just an identity operation, however the
+    mapping to qubits in input and output may be different. Both subspaces have
+    to have the same dimension.
+
+    :ivar subspace_from:
+        The source subspace
+    :ivar subspace_to:
+        The target subspace
+    """
 
     def __init__(self, subspace_from: Subspace, subspace_to: Subspace):
         if subspace_from.dimension != subspace_to.dimension:

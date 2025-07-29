@@ -14,13 +14,7 @@ class Adjoint(Node):
         The node of which to compute the adjoint
     """
 
-    A: Node
-
     def __init__(self, A: Node):
-        """
-        :param A:
-            The node of which to compute the adjoint
-        """
         self.A = A
 
     def children(self) -> list[Node]:

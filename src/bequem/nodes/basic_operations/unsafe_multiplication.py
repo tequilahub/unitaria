@@ -11,7 +11,7 @@ class UnsafeMul(Node):
     Node for chaining the circuits of two nodes
 
     This is mostly for internal usage. To properly multiply two matrices use
-    :py:class:`~bequem.nodes.prox_node.Mul` instead. The order of operations is
+    :class:`~bequem.nodes.prox_node.Mul` instead. The order of operations is
     such that the first argument ``A`` is applied first.
 
     :ivar A:
@@ -20,19 +20,7 @@ class UnsafeMul(Node):
         The second factor
     """
 
-    A: Node
-    B: Node
-
     def __init__(self, A: Node, B: Node):
-        """
-        The order of operations is such that the first argument ``A`` is applied
-        first.
-
-        :ivar A:
-            The first factor
-        :ivar B:
-            The second factor
-        """
         if not A.subspace_out.match_nonzero(B.subspace_in):
             raise ValueError(f"Non matching qubit maps {A.subspace_out} and {B.subspace_in}")
 

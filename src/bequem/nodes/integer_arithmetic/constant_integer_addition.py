@@ -7,8 +7,14 @@ from bequem.circuits.arithmetic import const_addition_circuit
 
 
 class ConstantIntegerAddition(Node):
-    bits: int
-    constant: int
+    """
+    Node implementing the (wrapping) addition of a constant to an integer.
+
+    :ivar bits:
+        The size of the quantum state. The addition is performed modulo ``2 ** bits``.
+    :ivar constant:
+        The contant that should be added. Has to be positive.
+    """
 
     def __init__(self, bits: int, constant: int):
         if bits < 1:

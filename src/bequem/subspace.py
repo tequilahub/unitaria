@@ -16,6 +16,8 @@ class Subspace:
     :ivar registers:
         List of registers, each describing a subspace. The total subspace of
         all registers is the tensor product of the individual subspaces.
+    :param zero_qubits:
+        Add an additional ``zero_qubits * [ZeroQubit()]`` to ``registers``.
     """
 
     registers: list[Register]
@@ -292,8 +294,8 @@ class ControlledSubspace(Register):
         """
         Returns a potentially simpler representation of this register
 
-        Specifically, if :py:attr:`case_one` and :py:attr:`case_zero` agree in a number of lowest
-        qubits, this common part can be factored out. E.g.
+        Specifically, if :attr:`case_one` and :attr:`case_zero` agree in a
+        number of lowest qubits, this common part can be factored out. E.g.
 
             >>> from bequem.subspace import Subspace, ControlledSubspace
             >>> ControlledSubspace(Subspace(2), Subspace(1, 1)).simplify()

@@ -9,16 +9,14 @@ from rich.console import Console
 from bequem.subspace import Subspace
 from bequem.circuit import Circuit
 
-Uuid = str
-
 
 class Node(ABC):
     """
     Abstract class for all nodes in the computational graph
 
     The encoded vector or the action of the encoded matrix can be obtained
-    either through matrix arithmetic using :py:func:`compute` or as a
-    quantum circuit using :py:func:`circuit`.
+    either through matrix arithmetic using :func:`compute` or as a quantum
+    circuit using :func:`circuit`.
     """
 
     # TODO
@@ -69,9 +67,9 @@ class Node(ABC):
     @abstractmethod
     def _subspace_in(self) -> Subspace:
         """
-        Method to for computing :py:func:`subspace_in`.
+        Method to for computing :func:`subspace_in`.
 
-        To be implemented in all subclasses of :py:class:`Node`.
+        To be implemented in all subclasses of :class:`Node`.
         """
         raise NotImplementedError
 
@@ -91,9 +89,9 @@ class Node(ABC):
     @abstractmethod
     def _subspace_out(self) -> Subspace:
         """
-        Method to for computing :py:func:`subspace_out`.
+        Method to for computing :func:`subspace_out`.
 
-        To be implemented in all subclasses of :py:class:`Node`.
+        To be implemented in all subclasses of :class:`Node`.
         """
         raise NotImplementedError
 
@@ -110,9 +108,9 @@ class Node(ABC):
     @abstractmethod
     def _normalization(self) -> float:
         """
-        Method to for computing :py:func:`normalization`.
+        Method to for computing :func:`normalization`.
 
-        To be implemented in all subclasses of :py:class:`Node`.
+        To be implemented in all subclasses of :class:`Node`.
         """
         raise NotImplementedError
 
@@ -130,10 +128,10 @@ class Node(ABC):
         If this node encodes a vector, then ``input = None`` is valid, in which
         case the method should simply return the encoded vector.
 
-        Input may be a vector or a higher order tensor. If it is a vector it
-        will have dimension equal to the dimension of :py:func:`qubits_in`.
+        Input may be a vector or a higher order tensor. If it is a vector
+        it will have dimension equal to the dimension of :func:`qubits_in`.
         If it is a tensor, the last dimension will be equal to the dimension
-        of :py:func:`qubits_in`. In this case, the operation should be applied
+        of :func:`qubits_in`. In this case, the operation should be applied
         to all vectors ``input[i, j, ..., k, :]`` in parallel. The shape of
         the returned array should match the input shape in all but the last
         dimension.
@@ -145,7 +143,7 @@ class Node(ABC):
         """
         Apply the adjoint action of this nodes matrix to the input.
 
-        See :py:func:`compute` for input and output formats.
+        See :func:`compute` for input and output formats.
         """
         raise NotImplementedError
 
@@ -159,9 +157,9 @@ class Node(ABC):
     @abstractmethod
     def _circuit(self) -> float:
         """
-        Method to for computing :py:func:`circuit`.
+        Method to for computing :func:`circuit`.
 
-        To be implemented in all subclasses of :py:class:`Node`.
+        To be implemented in all subclasses of :class:`Node`.
         """
         raise NotImplementedError
 
@@ -197,7 +195,7 @@ class Node(ABC):
         """
         Method for rich text output of the computational graph.
 
-        Typically you should call :py:func:`draw` instead of this method.
+        Typically you should call :func:`draw` instead of this method.
         """
         for i, hole in enumerate(holes):
             if hole is self:
@@ -220,8 +218,8 @@ class Node(ABC):
 
         :param verbose:
             if set to ``True``, the definition of any
-            :py:class:`~bequem.nodes.proxy_node.ProxyNode` is inserted into
-            the output.
+            :class:`~bequem.nodes.proxy_node.ProxyNode` is inserted into the
+            output.
         """
         console = Console()
         with console.capture() as capture:

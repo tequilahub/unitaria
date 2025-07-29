@@ -6,8 +6,6 @@ from bequem.circuit import Circuit
 
 
 class Controlled(Node):
-    A: Node
-
     def __init__(self, A: Node):
         self.A = A
 

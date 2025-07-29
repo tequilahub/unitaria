@@ -8,6 +8,13 @@ from bequem.circuits.arithmetic import increment_circuit_single_ancilla
 
 
 class Increment(Node):
+    """
+    Node implementing the (wrapping) increment of an integer.
+
+    :ivar bits:
+        The size of the quantum state. The increment is performed modulo ``2 ** bits``.
+    """
+
     def __init__(self, bits: int):
         if bits < 1:
             raise ValueError()

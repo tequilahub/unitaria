@@ -7,10 +7,6 @@ from bequem.circuit import Circuit
 
 
 class ModifyControl(Node):
-    A: Node
-    expand_control: Subspace
-    swap_control_state: bool
-
     def __init__(
         self,
         A: Node,

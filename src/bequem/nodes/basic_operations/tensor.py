@@ -28,16 +28,7 @@ class Tensor(Node):
         The second factor
     """
 
-    A: Node
-    B: Node
-
     def __init__(self, A: Node, B: Node):
-        """
-        :param A:
-            The first factor
-        :param B:
-            The second factor
-        """
         self.A = A
         self.B = B
 

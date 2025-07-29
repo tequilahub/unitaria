@@ -10,8 +10,14 @@ from bequem.nodes.node import Node
 
 
 class BlockDiagonal(ProxyNode):
-    A: Node
-    B: Node
+    """
+    Node for block matrices of the form ``diag(A, B)``
+
+    :ivar A:
+        The left upper block
+    :ivar B:
+        The right lower block
+    """
 
     def __init__(self, A: Node, B: Node):
         assert np.isclose(A.normalization, B.normalization)

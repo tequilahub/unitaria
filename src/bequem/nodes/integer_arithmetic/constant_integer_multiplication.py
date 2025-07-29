@@ -13,10 +13,20 @@ from bequem.nodes.ring_operations.mul import Mul
 
 
 class ConstantIntegerMultiplication(ProxyNode):
-    bits: int
-    constant: int
+    """
+    Node implementing the (wrapping) multiplication of an odd constant with an integer.
+
+    The constraint for the factor to be odd means the multiplication operation is invertible.
+
+    :ivar bits:
+        The size of the quantum state. The addition is performed modulo ``2 ** bits``.
+    :ivar constant:
+        The contant factor that should be multiplied. Has to be positive and odd.
+    """
 
     def __init__(self, bits: int, constant: int):
+        if constant < 0:
+            raise ValueError(f"Constant factor {constant} is negative.")
         if constant & 1 != 1:
             raise ValueError(f"Constant factor {constant} is uneven. This would result in a non-reversible operation.")
         if bits < 1:

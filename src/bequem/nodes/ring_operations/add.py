@@ -15,7 +15,10 @@ from bequem.nodes.identity import Identity
 
 class Add(ProxyNode):
     """
-    Node for computing the sum of two nodes
+    Node for computing the sum of two vectors or matrices.
+
+    Both summands must have matching :attr:`Add.dimension_in` and
+    :attr:`Add.dimension_out`.
 
     :ivar A:
         The first summand

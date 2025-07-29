@@ -9,6 +9,35 @@ default_verifier = None
 
 
 def verify(node: Node, reference: np.ndarray | None = None):
+    """
+    Verify a node using the default :class:`Verifier`.
+
+    This checks for ``node`` that
+
+    * The dimesions of :attr:`~bequem.nodes.Node.subspace_in`
+      and :attr:`~bequem.nodes.Node.subspace_out`
+      match :attr:`~bequem.nodes.Node.dimension_in` and
+      :attr:`~bequem.nodes.Node.dimension_out`, and the total qubits of these
+      subspaces matches the qubits in :attr:`~bequem.nodes.Node.circuit`.
+    * :func:`~bequem.nodes.Node.compute` and
+      :func:`~bequem.nodes.Node.compute_adjoint` match and that their batched
+      version are equivalent.
+    * :func:`~bequem.nodes.Node.compute` matches the circuit
+      implementation given through :attr:`~bequem.nodes.Node.subspace_in`,
+      :attr:`~bequem.nodes.Node.subspace_out`, and
+      :attr:`~bequem.nodes.Node.circuit`.
+
+    If one of these checks does not pass, the same tests will be run for all
+    children to find out whether the implementation of this node, or one of its
+    childrens is erroneous.
+
+    :param node:
+        The node to be checked.
+    :param reference:
+        An optional reference, to which the circuit and matrix arithmetic
+        implementations should be compared. For example for ``Identity(1)`` one
+        could pass ``np.eye(2)``.
+    """
     global default_verifier
     if default_verifier is None:
         default_verifier = Verifier()
@@ -17,6 +46,22 @@ def verify(node: Node, reference: np.ndarray | None = None):
 
 
 class Verifier:
+    """
+    Object for verifying nodes.
+
+    See :func:`verify` for the checks that are performed.
+
+    :ivar drill:
+        If this is ``True``, upon encountering an error in a node, the
+        children of this node are checked recursively, to find out whether the
+        implementation of this node, or one of its childrens is erroneous.
+    :ivar up_to_phase:
+        If this is ``True``, the output from circuit simulation is checked only
+        up to a multiplicative global phase ``np.exp(theta * 1j)``. This might
+        be useful, since some simulation backends to not guarantee to simulate
+        the global phase correctly.
+    """
+
     def __init__(self, drill: bool = True, up_to_phase: bool = False):
         self.drill = drill
         self.up_to_phase = up_to_phase
@@ -50,7 +95,7 @@ class Verifier:
             computed = node.compute(input)
             simulated = node.normalization * node.subspace_out.project(node.circuit.simulate(b, backend="qulacs"))
             if self.up_to_phase:
-                simulated = bring_to_same_phase(computed, simulated)
+                simulated = _bring_to_same_phase(computed, simulated)
             np.testing.assert_allclose(simulated, computed, atol=1e-8, err_msg=f"On input {i}:")
 
     def _verify(self, node: Node, reference: np.ndarray | None = None):
@@ -67,8 +112,8 @@ class Verifier:
         """
         Verify the correctness of this node.
 
-        Checks that the outputs of :py:func:`qubits_in`, :py:func:`qubits_out`,
-        :py:func:`normalization`, and :py:func:`circuit` are sensible and encode
+        Checks that the outputs of :func:`qubits_in`, :func:`qubits_out`,
+        :func:`normalization`, and :func:`circuit` are sensible and encode
         the same matrix.
 
         :param drill:
@@ -85,23 +130,30 @@ class Verifier:
 
     def find_error(self, node: Node):
         """
-        Convenience function to recursively call :py:func:`verify` on the
+        Convenience function to recursively call :func:`verify` on the
         children of this node.
 
-        You should typically use :py:func:`verify` instead.
+        You should typically use :func:`verify` instead.
         """
         for child in node.children():
             self.find_error(child)
             self._verify(child)
 
 
-def bring_to_same_phase(a: np.ndarray, b: np.ndarray):
+def _bring_to_same_phase(a: np.ndarray, b: np.ndarray):
     b_f = b.flatten()
     i = np.argmax(np.abs(b_f))
     return a.flatten()[i] / b_f[i] * b
 
 
 class VerificationError(Exception):
+    """
+    Exception thrown during node verification.
+
+    :ivar node:
+        The node which was found to be invalid.
+    """
+
     def __init__(self, node: Node):
         super().__init__()
         self.node = node

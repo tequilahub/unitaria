@@ -16,11 +16,9 @@ class ComponentwiseMul(Node):
     tensor product of the vectors and then multiplying it with this operation,
     i.e. ``Mul(Tensor(a, b), ComponentwiseMul(a.subspace_out()))``
 
-    :ivar qubits:
+    :ivar subspace:
         The vector space in which to perform the element-wise operation
     """
-
-    subspace: Subspace
 
     def __init__(self, subspace: Subspace):
         self.subspace = subspace
