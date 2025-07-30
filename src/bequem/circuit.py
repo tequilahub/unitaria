@@ -15,7 +15,8 @@ class Circuit:
     """
     Representation of a quantum circuit.
 
-    This is just a wrapper around the Tequila ``QCircuit`` class.
+    This is just a wrapper around the Tequila
+    :external:py:class:`~tequila.circuit.circuit.QCircuit` class.
 
     :param tq_circuit:
         The representation of the circuit for the tequila backend.
@@ -31,11 +32,11 @@ class Circuit:
 
     def simulate(self, input: np.ndarray | int = 0, **kwargs) -> np.ndarray:
         """
-        Simulate this circuit. For additional arguments see `tq.simulate tequila.simulators.simulator_api.simulate`.
+        Simulate this circuit. For additional arguments see
+        :external:py:func:`~tequila.simulators.simulator_api.simulate`.
 
         :param input:
             The initial state from which the circuit should be simulated.
-
             If ``input`` is a vector, it will be interpreted as amplitudes of
             the computational basis states and its dimension should be ``2 **
             n_qubits``. If it is an integer ``i``, it will be interpreted as the
@@ -100,8 +101,9 @@ class Circuit:
         """
         Draw this circuit and return a string representation.
 
-        If qpic is installed, this will generate a pdf of the circuit and return
-        a ``file://`` url to the pdf, which should be printed to the user.
+        If qpic is installed, this will generate a temporary file containing a
+        pdf of the circuit and return a ``file://`` url to the pdf, which should
+        be printed to the user.
         """
         if tq.circuit.qpic.system_has_qpic:
             # TODO: Use IPython if available

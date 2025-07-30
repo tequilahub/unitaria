@@ -44,7 +44,7 @@ intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
     "rich": ("https://rich.readthedocs.io/en/stable/", None),
-    "tequila": ("https://tequilahub.github.io/tequila/", None),
+    "tequila": ("https://tequilahub.github.io/tequila-tutorials/docs/sphinx", "tequila.inv"),
 }
 
 language = "en"
