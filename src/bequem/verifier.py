@@ -1,3 +1,7 @@
+"""
+Module for verifying the correctess of nodes.
+"""
+
 import numpy as np
 
 from bequem.nodes.node import Node

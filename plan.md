@@ -61,6 +61,7 @@ Vielleicht von Numpy inspirieren lassen
 * Projection (Postselection) Node
 * Ancilla als Eigenschaft von Circuit statt Subspace
 * Using .compute(np.eye(...)) is confusing
+* Node should have a methd `simulate`
 
 ## Example projects
 

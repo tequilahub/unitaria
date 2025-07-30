@@ -1,4 +1,6 @@
 """
+Encodings of matrices, vectors, and operations between them.
+
 The basic type of this library is `Node` representing a node in a computational
 graph. Consider, for example, the following matrix product
 
