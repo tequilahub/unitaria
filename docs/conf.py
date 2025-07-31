@@ -29,6 +29,7 @@ extensions = [
     "sphinx.ext.todo",
     "sphinx.ext.autosummary",
     "sphinx.ext.intersphinx",
+    "sphinx.ext.imgmath",
 ]
 
 napoleon_google_docstring = True
@@ -47,6 +48,11 @@ intersphinx_mapping = {
     "tequila": ("https://tequilahub.github.io/tequila-tutorials/docs/sphinx", "tequila.inv"),
 }
 
+imgmath_image_format = "svg"
+imgmath_use_preview = True
+imgmath_font_size = 16
+imgmath_latex_preamble = "\\usepackage{newtx}"
+
 language = "en"
 
 # -- Options for HTML output -------------------------------------------------
@@ -55,6 +61,9 @@ language = "en"
 html_theme = "furo"
 pygments_style = "sphinx"
 html_static_path = ["_static"]
+html_css_files = [
+    "css/imgmath_furo.css",
+]
 
 # -- Options for todo extension ----------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/extensions/todo.html#configuration

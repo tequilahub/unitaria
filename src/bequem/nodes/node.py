@@ -74,10 +74,12 @@ class Node(ABC):
         The embedding of the input vectorspace.
 
         Specifically this specifies how the vectorspace is included in state
-        space nodes circuit, which has dimension 2^n where n is the number of qubits.
-        In other words, this defines whether a particular basis state is "valid" or "invalid".
+        space nodes circuit, which has dimension :math:`2^n` where :math:`n` is
+        the number of qubits. In other words, this defines whether a particular
+        basis state is "valid" or "invalid".
 
-        In the formalism of block encodings this corresponds to the projection Pi_1.
+        In the formalism of block encodings this corresponds to the projection
+        :math:`\Pi_1`.
         """
         return self._subspace_in()
 
@@ -96,10 +98,12 @@ class Node(ABC):
         The embedding of the output vectorspace.
 
         Specifically this specifies how the vectorspace is included in state
-        space nodes circuit, which has dimension 2^n where n is the number of qubits.
-        In other words, this defines whether a particular basis state is "valid" or "invalid".
+        space nodes circuit, which has dimension :math:`2^n` where :math:`n` is
+        the number of qubits. In other words, this defines whether a particular
+        basis state is "valid" or "invalid".
 
-        In the formalism of block encodings this corresponds to the projection Pi_2.
+        In the formalism of block encodings this corresponds to the projection
+        :math:`\Pi_2`.
         """
         return self._subspace_out()
 

@@ -45,14 +45,12 @@ Vielleicht von Numpy inspirieren lassen
 * Operations from circuit implementations
 * Bilineare Operationen besseres interface, z.B. ComponentwiseMul (Matthias)
 * Dependencies qulacs -> optional machen? (Matthias)
-* Alles in Datein aufspalten (alle)
 * Nonlinear Beispiel (Jessica)
 * QSVT (Matthias)
 * QFT (Oliver)
 * Clean Ancillas (Oliver) (Pull request)
 * Dirty Ancillas (Oliver) (Pull request)
 * CI (Oliver)
-* Documentation
 * plan.md nicht auf PyPi hochladen
 * Verify mit zufälliger Basis
 * Better custom verifications
