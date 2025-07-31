@@ -79,7 +79,7 @@ class Node(ABC):
         basis state is "valid" or "invalid".
 
         In the formalism of block encodings this corresponds to the projection
-        :math:`\Pi_1`.
+        :math:`\\Pi_1`.
         """
         return self._subspace_in()
 
@@ -103,7 +103,7 @@ class Node(ABC):
         basis state is "valid" or "invalid".
 
         In the formalism of block encodings this corresponds to the projection
-        :math:`\Pi_2`.
+        :math:`\\Pi_2`.
         """
         return self._subspace_out()
 
@@ -197,19 +197,73 @@ class Node(ABC):
             label += str(parameters)
         return label
 
-    def compute_norm(self, input: np.array) -> float:
+    def toarray(self, force_matrix: bool = False) -> np.ndarray:
+        """
+        Returns a numpy array representing this node, as given by `compute`.
+
+        The output of this method should match `simulate`, which can be checked
+        using `~bequem.verifier.verify`.
+
+        By default this will return a one-dimension array if the node represents
+        a vector. However, this behaviour can be suppressed by setting
+        ``force_matrix = True``
+
+        :param force_matrix:
+            Force the method to return a two-dimensional array, even when the
+            node corresponds to a vector.
+        """
+        if self.is_vector() and not force_matrix:
+            return self.compute(np.array([1], dtype=np.complex128))
+        else:
+            return self.compute(np.eye(self.subspace_in.dimension, dtype=np.complex128))
+
+    def compute_norm(self, input: np.array | None) -> float:
         """
         Method to compute the norm of the wavefunction in the subspace.
         """
-        result = self.compute(input=input)
-        return np.linalg.norm(result)
+        if input is None and not self.is_vector():
+            raise ValueError("Cannot compute norm, since node is a matrix and no input was given")
+        if self.is_vector() and input is None:
+            input = np.array([1])
+        return np.linalg.norm(self.compute(input))
 
-    def simulate_norm(self, input: np.ndarray | int = 0) -> float:
+    def simulate(self, input: int | None = None) -> np.ndarray:
         """
-        Method to simulate the norm of the wavefunction in the subspace using a circuit.
+        Returns a numpy array representing this node, as given by `simulate`.
+
+        When ``input`` is ``None``, the output of this method should match
+        `compute`, which can be checked using `~bequem.verifier.verify`.
+
+        :param input:
+            The index of the optional initial state, whth which this node should
+            be simulated.
         """
-        wavefunction = self.circuit.simulate(input=input)
-        norm = np.linalg.norm([wavefunction[i] for i in self.subspace_out.enumerate_basis()])
+        if self.is_vector() and input is None:
+            input = 0
+        if input is not None:
+            wavefunction = self.circuit.simulate(input=input)
+            return self.normalization * self.subspace_out.project(wavefunction)
+        else:
+            output = np.zeros((self.subspace_out.dimension, self.subspace_in.dimension))
+            for i, b in enumerate(self.subspace_in.enumerate_basis()):
+                input = np.zeros(self.subspace_in.dimension, dtype=np.complex128)
+                input[i] = 1
+                output[i] = self.normalization * self.subspace_out.project(self.circuit.simulate(b, backend="qulacs"))
+            return output
+
+    def simulate_norm(self, input: int | None = None) -> float:
+        """
+        Method to simulate the norm of the encoded vector in the subspace using a circuit.
+
+        When calling this function on a node encoding a matrix, ``input`` has to
+        be a vector. In this case the norm of the matrix applied to ``input`` is given.
+
+        :param input:
+            A vector to which the encoded matrix is applied before computing the norm.
+        """
+        if input is None and not self.is_vector():
+            raise ValueError("Cannot simulate norm, since node is a matrix and no input was given")
+        norm = np.linalg.norm(self.simulate(input))
         return norm
 
     def tree(self, verbose: bool = False, tree: Tree | None = None, holes: list[Node] = []) -> Tree:

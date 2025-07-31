@@ -31,18 +31,29 @@ For a complete list of all available nodes, see `~bequem.nodes`.
 
 There is now two ways in which you can obtain the encoded vector of the above
 example. Each node contains a classical implementation of the operation it
-performs, available through the method `~bequem.nodes.Node.compute`.
+performs, available through the methods `~bequem.nodes.Node.compute` and
+`~bequem.nodes.Node.toarray`.
 
 >>> from bequem.nodes import ConstantVector, Identity
 >>> import numpy as np
->>> (Identity(1) @ ConstantVector(np.array([1, 2])))).compute(np.array([1]))
-array([1, 2])
+>>> (Identity(1) @ ConstantVector(np.array([1, 2]))).toarray().real
+array([1., 2.])
 
 On the other hand, each node can give you a quantum circuit, a normalization
 factor, and subspaces for its input and output, which together make up a block
-encoding of the vector.
+encoding of the vector. The convenience method `~bequem.nodes.Node.simulate`
+combines this data, which should produce the same result as
+`~bequem.nodes.Node.toarray`.
 
-TODO: Node should have a method simulate
+>>> from bequem.nodes import ConstantVector, Identity
+>>> import numpy as np
+>>> (Identity(1) @ ConstantVector(np.array([1, 2]))).simulate().real
+array([1., 2.])
+
+It can be checked wether the results of `~bequem.nodes.Node.toarray` and
+`~bequem.nodes.Node.simulate` actually match by using `~bequem.verifier.verify`.
+This also checks other useful things, such as the number of quibts in the
+circuit being correct.
 
 .. rubric:: Modules
 

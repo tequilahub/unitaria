@@ -15,9 +15,11 @@ can now be used to compute the result directly
 
 >>> from bequem.nodes import Increment, Identity
 >>> import numpy as np
->>> (Increment(2) @ Identity(2)).compute(np.eye(2))
-array([[0., 1.],
-       [1., 0.]])
+>>> (Increment(2) @ Identity(2)).toarray().real
+array([[0., 1., 0., 0.],
+       [0., 0., 1., 0.],
+       [0., 0., 0., 1.],
+       [1., 0., 0., 0.]])
 
 Or the circuit, normalization, and subspaces of the block encoding can be obtain
 through the corresponding properties of `Node`.

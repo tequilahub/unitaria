@@ -80,7 +80,7 @@ class Verifier:
             assert node.circuit.tq_circuit.n_qubits == node.subspace_out.total_qubits
 
     def _compare_batch_compute(self, node: Node, reference: np.ndarray | None = None):
-        batch_computed = node.compute(np.eye(node.subspace_in.dimension, dtype=np.complex128))
+        batch_computed = node.toarray(force_matrix=True)
         computed = np.zeros_like(batch_computed)
         for i in range(node.subspace_in.dimension):
             input = np.zeros(node.subspace_in.dimension, dtype=np.complex128)
@@ -93,6 +93,7 @@ class Verifier:
     def _compare_compute_simulate(self, node: Node):
         basis_in = node.subspace_in.enumerate_basis()
 
+        # TODO: Could now use Node.simulate, but this wont work with `up_to_phase`
         for i, b in enumerate(basis_in):
             input = np.zeros(node.subspace_in.dimension, dtype=np.complex128)
             input[i] = 1

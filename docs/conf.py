@@ -60,6 +60,7 @@ language = "en"
 
 html_theme = "furo"
 pygments_style = "sphinx"
+pygments_dark_style = "github-dark"
 html_static_path = ["_static"]
 html_css_files = [
     "css/imgmath_furo.css",
