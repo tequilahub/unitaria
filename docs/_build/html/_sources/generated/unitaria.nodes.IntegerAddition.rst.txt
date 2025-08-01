@@ -1,0 +1,12 @@
+unitaria.nodes.IntegerAddition
+==============================
+
+.. currentmodule:: unitaria.nodes
+
+
+.. autoclass:: IntegerAddition
+   :show-inheritance:
+   :members:
+   :inherited-members:
+   :undoc-members:
+   :member-order: groupwise

@@ -1,0 +1,29 @@
+﻿unitaria.subspace
+=================
+
+.. rubric:: Description
+
+.. automodule:: unitaria.subspace
+
+.. currentmodule:: unitaria.subspace
+
+
+.. rubric:: Classes
+
+.. autosummary::
+    :toctree: .
+    
+    ControlledSubspace
+    
+    Register
+    
+    Subspace
+    
+    ZeroQubit
+    
+
+
+
+
+
+

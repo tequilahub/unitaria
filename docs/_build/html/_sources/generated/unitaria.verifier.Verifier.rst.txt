@@ -1,0 +1,12 @@
+unitaria.verifier.Verifier
+==========================
+
+.. currentmodule:: unitaria.verifier
+
+
+.. autoclass:: Verifier
+   :show-inheritance:
+   :members:
+   :inherited-members:
+   :undoc-members:
+   :member-order: groupwise

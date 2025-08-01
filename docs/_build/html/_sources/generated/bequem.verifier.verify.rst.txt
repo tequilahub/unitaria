@@ -1,6 +1,0 @@
-bequem.verifier.verify
-======================
-
-.. currentmodule:: bequem.verifier
-
-.. autofunction:: verify

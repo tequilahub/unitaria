@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from bequem.subspace import Subspace, ControlledSubspace, ID
+from unitaria.subspace import Subspace, ControlledSubspace, ID
 
 
 def test_eq():

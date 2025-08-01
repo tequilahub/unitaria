@@ -2,9 +2,9 @@ import pytest
 
 import numpy as np
 
-from bequem.nodes import Increment, Identity, Add, Scale, Adjoint, ConstantUnitary, BlockHorizontal
-from bequem.subspace import Subspace
-from bequem.verifier import verify
+from unitaria.nodes import Increment, Identity, Add, Scale, Adjoint, ConstantUnitary, BlockHorizontal
+from unitaria.subspace import Subspace
+from unitaria.verifier import verify
 
 
 def ref_Q(L, L_MAX):

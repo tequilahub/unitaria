@@ -1,4 +1,4 @@
-from bequem.nodes.constants.constant_unitary import ConstantUnitary
+from unitaria.nodes.constants.constant_unitary import ConstantUnitary
 import numpy as np
 import pytest
 

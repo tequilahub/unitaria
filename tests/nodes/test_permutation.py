@@ -1,8 +1,8 @@
 import pytest
 
-from bequem.subspace import Subspace, ControlledSubspace, ID, ZeroQubit
-from bequem.nodes.permutation import _find_matching_partitioning, Permutation, PermuteRegisters
-from bequem.verifier import verify
+from unitaria.subspace import Subspace, ControlledSubspace, ID, ZeroQubit
+from unitaria.nodes.permutation import _find_matching_partitioning, Permutation, PermuteRegisters
+from unitaria.verifier import verify
 
 
 def test_find_permutation_trivial():

@@ -1,7 +1,7 @@
 import numpy as np
-from bequem.nodes import ProxyNode, Node, ConstantIntegerAddition, ConstantIntegerMultiplication, Identity, Mul
-from bequem.subspace import Subspace, ID, ZeroQubit
-from bequem.verifier import verify
+from unitaria.nodes import ProxyNode, Node, ConstantIntegerAddition, ConstantIntegerMultiplication, Identity, Mul
+from unitaria.subspace import Subspace, ID, ZeroQubit
+from unitaria.verifier import verify
 
 
 class LCG(ProxyNode):

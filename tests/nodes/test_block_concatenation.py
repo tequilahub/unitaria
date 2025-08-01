@@ -1,9 +1,9 @@
-from bequem.nodes.block_concatenation.block_horizontal import BlockHorizontal
-from bequem.nodes.block_concatenation.block_vertical import BlockVertical
-from bequem.nodes.integer_arithmetic.increment import Increment
-from bequem.nodes.identity import Identity
-from bequem.subspace import Subspace
-from bequem.verifier import verify
+from unitaria.nodes.block_concatenation.block_horizontal import BlockHorizontal
+from unitaria.nodes.block_concatenation.block_vertical import BlockVertical
+from unitaria.nodes.integer_arithmetic.increment import Increment
+from unitaria.nodes.identity import Identity
+from unitaria.subspace import Subspace
+from unitaria.verifier import verify
 
 
 def test_block_horizontal():

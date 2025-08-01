@@ -1,7 +1,7 @@
 import numpy as np
-from bequem.nodes.constants.constant_vector import ConstantVector
-from bequem.nodes.constants.constant_unitary import ConstantUnitary
-from bequem.verifier import verify
+from unitaria.nodes.constants.constant_vector import ConstantVector
+from unitaria.nodes.constants.constant_unitary import ConstantUnitary
+from unitaria.verifier import verify
 
 
 def test_constant_vector():

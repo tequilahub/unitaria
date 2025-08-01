@@ -1,6 +1,6 @@
-from bequem.nodes import ComponentwiseMul, ConstantVector
-from bequem.subspace import Subspace, ControlledSubspace, ID
-from bequem.verifier import verify
+from unitaria.nodes import ComponentwiseMul, ConstantVector
+from unitaria.subspace import Subspace, ControlledSubspace, ID
+from unitaria.verifier import verify
 import numpy as np
 
 

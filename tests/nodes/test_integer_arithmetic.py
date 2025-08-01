@@ -1,12 +1,12 @@
 import pytest
 
-from bequem.nodes.integer_arithmetic.increment import Increment
+from unitaria.nodes.integer_arithmetic.increment import Increment
 
-from bequem.nodes.integer_arithmetic.integer_addition import IntegerAddition
-from bequem.nodes.integer_arithmetic.constant_integer_addition import ConstantIntegerAddition
-from bequem.nodes.integer_arithmetic.constant_integer_multiplication import ConstantIntegerMultiplication
+from unitaria.nodes.integer_arithmetic.integer_addition import IntegerAddition
+from unitaria.nodes.integer_arithmetic.constant_integer_addition import ConstantIntegerAddition
+from unitaria.nodes.integer_arithmetic.constant_integer_multiplication import ConstantIntegerMultiplication
 
-from bequem.verifier import verify
+from unitaria.verifier import verify
 
 
 @pytest.mark.parametrize("bits", [-2, 0])

@@ -3,7 +3,7 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "bequem"
+name = "unitaria"
 authors = [
   {name = "Matthias Deiml", email = "matthias.deiml@uni-a.de"},
 ]

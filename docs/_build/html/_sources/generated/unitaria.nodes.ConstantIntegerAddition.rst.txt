@@ -1,0 +1,12 @@
+unitaria.nodes.ConstantIntegerAddition
+======================================
+
+.. currentmodule:: unitaria.nodes
+
+
+.. autoclass:: ConstantIntegerAddition
+   :show-inheritance:
+   :members:
+   :inherited-members:
+   :undoc-members:
+   :member-order: groupwise

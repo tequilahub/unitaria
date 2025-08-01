@@ -1,0 +1,41 @@
+﻿unitaria.verifier
+=================
+
+.. rubric:: Description
+
+.. automodule:: unitaria.verifier
+
+.. currentmodule:: unitaria.verifier
+
+
+.. rubric:: Classes
+
+.. autosummary::
+    :toctree: .
+    
+    Verifier
+    
+
+
+
+
+.. rubric:: Functions
+
+.. autosummary::
+    :toctree: .
+    
+    verify
+    
+
+
+
+
+.. rubric:: Exceptions
+
+.. autosummary::
+    :toctree: .
+    
+    VerificationError
+    
+
+
