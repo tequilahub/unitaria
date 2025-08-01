@@ -1,0 +1,12 @@
+bequem.nodes.ConstantIntegerAddition
+====================================
+
+.. currentmodule:: bequem.nodes
+
+
+.. autoclass:: ConstantIntegerAddition
+   :show-inheritance:
+   :members:
+   :inherited-members:
+   :undoc-members:
+   :member-order: groupwise

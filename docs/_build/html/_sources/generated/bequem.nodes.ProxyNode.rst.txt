@@ -1,0 +1,12 @@
+bequem.nodes.ProxyNode
+======================
+
+.. currentmodule:: bequem.nodes
+
+
+.. autoclass:: ProxyNode
+   :show-inheritance:
+   :members:
+   :inherited-members:
+   :undoc-members:
+   :member-order: groupwise

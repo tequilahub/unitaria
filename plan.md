@@ -43,8 +43,6 @@ Vielleicht von Numpy inspirieren lassen
 * Move dimension from subspace to node
 * Abstract operations without circuit implementation
 * Operations from circuit implementations
-* Bilineare Operationen besseres interface, z.B. ComponentwiseMul (Matthias)
-* Dependencies qulacs -> optional machen? (Matthias)
 * Nonlinear Beispiel (Jessica)
 * QSVT (Matthias)
 * QFT (Oliver)

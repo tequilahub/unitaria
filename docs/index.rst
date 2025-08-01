@@ -1,7 +1,7 @@
 API Reference
 =============
 
-Bequem is a library for working with so called "block encodings" of matrices
+`unitaria` is a library for working with so called "block encodings" of matrices
 and vectors. These are format for performing linear algebra calculations on
 quantum computers; see also this :doc:`introduction <block_encodings>` and the
 :doc:`references`, which contains a list of paper references.

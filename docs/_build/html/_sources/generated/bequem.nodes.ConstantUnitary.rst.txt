@@ -1,0 +1,12 @@
+bequem.nodes.ConstantUnitary
+============================
+
+.. currentmodule:: bequem.nodes
+
+
+.. autoclass:: ConstantUnitary
+   :show-inheritance:
+   :members:
+   :inherited-members:
+   :undoc-members:
+   :member-order: groupwise

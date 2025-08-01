@@ -1,0 +1,12 @@
+bequem.verifier.Verifier
+========================
+
+.. currentmodule:: bequem.verifier
+
+
+.. autoclass:: Verifier
+   :show-inheritance:
+   :members:
+   :inherited-members:
+   :undoc-members:
+   :member-order: groupwise

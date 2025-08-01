@@ -1,0 +1,12 @@
+bequem.nodes.ComponentwiseMul
+=============================
+
+.. currentmodule:: bequem.nodes
+
+
+.. autoclass:: ComponentwiseMul
+   :show-inheritance:
+   :members:
+   :inherited-members:
+   :undoc-members:
+   :member-order: groupwise

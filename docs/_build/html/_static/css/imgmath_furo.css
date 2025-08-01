@@ -1,0 +1,9 @@
+body[data-theme="dark"] .math {
+  filter: invert(100%) sepia(1%) saturate(1556%) hue-rotate(156deg) brightness(81%) contrast(101%);
+}
+
+@media (prefers-color-scheme: dark) {
+  body[data-theme="auto"] .math {
+    filter: invert(100%) sepia(1%) saturate(1556%) hue-rotate(156deg) brightness(81%) contrast(101%);
+  }
+}

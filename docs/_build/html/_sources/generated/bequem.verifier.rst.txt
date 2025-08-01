@@ -1,0 +1,41 @@
+﻿bequem.verifier
+===============
+
+.. rubric:: Description
+
+.. automodule:: bequem.verifier
+
+.. currentmodule:: bequem.verifier
+
+
+.. rubric:: Classes
+
+.. autosummary::
+    :toctree: .
+    
+    Verifier
+    
+
+
+
+
+.. rubric:: Functions
+
+.. autosummary::
+    :toctree: .
+    
+    verify
+    
+
+
+
+
+.. rubric:: Exceptions
+
+.. autosummary::
+    :toctree: .
+    
+    VerificationError
+    
+
+

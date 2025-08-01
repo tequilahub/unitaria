@@ -1,0 +1,14 @@
+bequem.nodes.Node
+=================
+
+.. currentmodule:: bequem.nodes
+
+
+.. autoclass:: Node
+   :show-inheritance:
+   :members:
+   :inherited-members:
+   :exclude-members: _abc_impl
+   :undoc-members:
+   :private-members:
+   :member-order: groupwise

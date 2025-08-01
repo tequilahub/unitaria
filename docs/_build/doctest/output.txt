@@ -1,0 +1,41 @@
+Results of doctest builder run on 2025-08-01 15:58:59
+=====================================================
+
+Document: generated/bequem.nodes
+--------------------------------
+1 items passed all tests:
+   5 tests in default
+5 tests in 1 items.
+5 passed and 0 failed.
+Test passed.
+
+Document: generated/bequem.nodes.Tensor
+---------------------------------------
+1 items passed all tests:
+   3 tests in default
+3 tests in 1 items.
+3 passed and 0 failed.
+Test passed.
+
+Document: generated/bequem.subspace.ControlledSubspace
+------------------------------------------------------
+1 items passed all tests:
+   2 tests in default
+2 tests in 1 items.
+2 passed and 0 failed.
+Test passed.
+
+Document: index
+---------------
+1 items passed all tests:
+  13 tests in default
+13 tests in 1 items.
+13 passed and 0 failed.
+Test passed.
+
+Doctest summary
+===============
+   23 tests
+    0 failures in tests
+    0 failures in setup code
+    0 failures in cleanup code

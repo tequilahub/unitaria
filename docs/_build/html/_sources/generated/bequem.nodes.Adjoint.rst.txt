@@ -1,0 +1,12 @@
+bequem.nodes.Adjoint
+====================
+
+.. currentmodule:: bequem.nodes
+
+
+.. autoclass:: Adjoint
+   :show-inheritance:
+   :members:
+   :inherited-members:
+   :undoc-members:
+   :member-order: groupwise

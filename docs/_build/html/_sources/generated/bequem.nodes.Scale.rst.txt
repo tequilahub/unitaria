@@ -1,0 +1,12 @@
+bequem.nodes.Scale
+==================
+
+.. currentmodule:: bequem.nodes
+
+
+.. autoclass:: Scale
+   :show-inheritance:
+   :members:
+   :inherited-members:
+   :undoc-members:
+   :member-order: groupwise

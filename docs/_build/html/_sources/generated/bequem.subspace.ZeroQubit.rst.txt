@@ -1,0 +1,12 @@
+bequem.subspace.ZeroQubit
+=========================
+
+.. currentmodule:: bequem.subspace
+
+
+.. autoclass:: ZeroQubit
+   :show-inheritance:
+   :members:
+   :inherited-members:
+   :undoc-members:
+   :member-order: groupwise

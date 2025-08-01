@@ -1,0 +1,6 @@
+bequem.verifier.VerificationError
+=================================
+
+.. currentmodule:: bequem.verifier
+
+.. autoexception:: VerificationError

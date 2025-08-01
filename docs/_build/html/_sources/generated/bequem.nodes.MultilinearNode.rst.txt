@@ -1,0 +1,12 @@
+bequem.nodes.MultilinearNode
+============================
+
+.. currentmodule:: bequem.nodes
+
+
+.. autoclass:: MultilinearNode
+   :show-inheritance:
+   :members:
+   :inherited-members:
+   :undoc-members:
+   :member-order: groupwise

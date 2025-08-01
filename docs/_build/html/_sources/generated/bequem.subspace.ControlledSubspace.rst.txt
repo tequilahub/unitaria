@@ -1,0 +1,12 @@
+bequem.subspace.ControlledSubspace
+==================================
+
+.. currentmodule:: bequem.subspace
+
+
+.. autoclass:: ControlledSubspace
+   :show-inheritance:
+   :members:
+   :inherited-members:
+   :undoc-members:
+   :member-order: groupwise

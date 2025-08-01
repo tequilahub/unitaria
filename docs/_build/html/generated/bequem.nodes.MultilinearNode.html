@@ -1,0 +1,582 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="bequem.nodes.ConstantVector" href="bequem.nodes.ConstantVector.html" /><link rel="prev" title="bequem.nodes.ProxyNode" href="bequem.nodes.ProxyNode.html" />
+
+    <!-- Generated with Sphinx 8.1.3 and Furo 2025.07.19 -->
+        <title>bequem.nodes.MultilinearNode - bequem 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=25af2a20" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/imgmath_furo.css?v=e90ab77c" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #eeffcc;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #0d1117;
+  --color-code-foreground: #e6edf3;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #0d1117;
+  --color-code-foreground: #e6edf3;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">bequem 0.1 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  <span class="sidebar-brand-text">bequem 0.1 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="bequem.nodes.html">bequem.nodes</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of bequem.nodes</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="bequem.nodes.Node.html">bequem.nodes.Node</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bequem.nodes.ProxyNode.html">bequem.nodes.ProxyNode</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">bequem.nodes.MultilinearNode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bequem.nodes.ConstantVector.html">bequem.nodes.ConstantVector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bequem.nodes.ConstantUnitary.html">bequem.nodes.ConstantUnitary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bequem.nodes.Tensor.html">bequem.nodes.Tensor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bequem.nodes.Adjoint.html">bequem.nodes.Adjoint</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bequem.nodes.Scale.html">bequem.nodes.Scale</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bequem.nodes.Permutation.html">bequem.nodes.Permutation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bequem.nodes.BlockDiagonal.html">bequem.nodes.BlockDiagonal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bequem.nodes.Mul.html">bequem.nodes.Mul</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bequem.nodes.Add.html">bequem.nodes.Add</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bequem.nodes.BlockHorizontal.html">bequem.nodes.BlockHorizontal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bequem.nodes.BlockVertical.html">bequem.nodes.BlockVertical</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bequem.nodes.Identity.html">bequem.nodes.Identity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bequem.nodes.ComponentwiseMul.html">bequem.nodes.ComponentwiseMul</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bequem.nodes.ConstantIntegerAddition.html">bequem.nodes.ConstantIntegerAddition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bequem.nodes.ConstantIntegerMultiplication.html">bequem.nodes.ConstantIntegerMultiplication</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bequem.nodes.Increment.html">bequem.nodes.Increment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bequem.nodes.IntegerAddition.html">bequem.nodes.IntegerAddition</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="bequem.subspace.html">bequem.subspace</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of bequem.subspace</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="bequem.subspace.ControlledSubspace.html">bequem.subspace.ControlledSubspace</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bequem.subspace.Register.html">bequem.subspace.Register</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bequem.subspace.Subspace.html">bequem.subspace.Subspace</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bequem.subspace.ZeroQubit.html">bequem.subspace.ZeroQubit</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="bequem.circuit.html">bequem.circuit</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of bequem.circuit</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="bequem.circuit.Circuit.html">bequem.circuit.Circuit</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="bequem.verifier.html">bequem.verifier</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of bequem.verifier</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="bequem.verifier.Verifier.html">bequem.verifier.Verifier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bequem.verifier.verify.html">bequem.verifier.verify</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bequem.verifier.VerificationError.html">bequem.verifier.VerificationError</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../block_encodings.html">Introduction to block encodings</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../_sources/generated/bequem.nodes.MultilinearNode.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="bequem-nodes-multilinearnode">
+<h1>bequem.nodes.MultilinearNode<a class="headerlink" href="#bequem-nodes-multilinearnode" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="bequem.nodes.MultilinearNode">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bequem.nodes.</span></span><span class="sig-name descname"><span class="pre">MultilinearNode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dimensions_in</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dimension_out</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">apply</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="bequem.nodes.Node.html#bequem.nodes.Node" title="bequem.nodes.node.Node"><span class="pre">Node</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bequem/nodes/multilinear_node.html#MultilinearNode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bequem.nodes.MultilinearNode" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="bequem.nodes.ProxyNode.html#bequem.nodes.ProxyNode" title="bequem.nodes.proxy_node.ProxyNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProxyNode</span></code></a></p>
+<p>Class for simplified syntax of multilinear node.</p>
+<p>This class helps with implementing convenient syntax for multilinear
+nodes, like <a class="reference internal" href="bequem.nodes.ComponentwiseMul.html#bequem.nodes.ComponentwiseMul" title="bequem.nodes.ComponentwiseMul"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ComponentwiseMul</span></code></a>. The node itself corresponds
+to the bilinear operator which maps a tensor product of two vectors to
+their componentwise product. This means that for two nodes <code class="docutils literal notranslate"><span class="pre">a</span></code> and <code class="docutils literal notranslate"><span class="pre">b</span></code>
+corresponding to vectors, their componentwise product would have to be
+written as <code class="docutils literal notranslate"><span class="pre">ComponentwiseMul(a.subspace_out)</span> <span class="pre">&#64;</span> <span class="pre">(a.subspace</span> <span class="pre">*</span> <span class="pre">b.subspace)</span></code>.
+It would be more natural to write <code class="docutils literal notranslate"><span class="pre">ComponentwiseMul(a,</span> <span class="pre">b)</span></code>, or maybe
+<code class="docutils literal notranslate"><span class="pre">ComponentwiseMul(a)</span></code> to get a matrix with <code class="docutils literal notranslate"><span class="pre">a</span></code> on its diagonal.</p>
+<p>This is what this class enables. See the source for <a class="reference internal" href="bequem.nodes.ComponentwiseMul.html#bequem.nodes.ComponentwiseMul" title="bequem.nodes.ComponentwiseMul"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ComponentwiseMul</span></code></a> for
+how to use this class.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="bequem.nodes.MultilinearNode.children">
+<span class="sig-name descname"><span class="pre">children</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="bequem.nodes.Node.html#bequem.nodes.Node" title="bequem.nodes.node.Node"><span class="pre">Node</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#bequem.nodes.MultilinearNode.children" title="Link to this definition">¶</a></dt>
+<dd><p>The children nodes of this node</p>
+<p>Mostly used for serialization and systematic verification of the
+computational graph. Children and parameters together should fully
+define the matrix encoded by any node.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bequem.nodes.MultilinearNode.compute">
+<span class="sig-name descname"><span class="pre">compute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">ndarray</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">ndarray</span></a></span></span><a class="headerlink" href="#bequem.nodes.MultilinearNode.compute" title="Link to this definition">¶</a></dt>
+<dd><p>Apply the action of this nodes matrix to the input.</p>
+<p>If this node encodes a vector, then <code class="docutils literal notranslate"><span class="pre">input</span> <span class="pre">=</span> <span class="pre">None</span></code> is valid, in which
+case the method should simply return the encoded vector.</p>
+<p>Input may be a vector or a higher order tensor. If it is a vector
+it will have dimension equal to the dimension of <code class="xref py py-obj docutils literal notranslate"><span class="pre">qubits_in</span></code>. If
+it is a tensor, the last dimension will be equal to the dimension
+of <code class="xref py py-obj docutils literal notranslate"><span class="pre">qubits_in</span></code>. In this case, the operation should be applied to
+all vectors <code class="docutils literal notranslate"><span class="pre">input[i,</span> <span class="pre">j,</span> <span class="pre">...,</span> <span class="pre">k,</span> <span class="pre">:]</span></code> in parallel. The shape of
+the returned array should match the input shape in all but the last
+dimension.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bequem.nodes.MultilinearNode.compute_adjoint">
+<span class="sig-name descname"><span class="pre">compute_adjoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">ndarray</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">ndarray</span></a></span></span><a class="headerlink" href="#bequem.nodes.MultilinearNode.compute_adjoint" title="Link to this definition">¶</a></dt>
+<dd><p>Apply the adjoint action of this nodes matrix to the input.</p>
+<p>See <a class="reference internal" href="#bequem.nodes.MultilinearNode.compute" title="bequem.nodes.MultilinearNode.compute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute</span></code></a> for input and output formats.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bequem.nodes.MultilinearNode.compute_norm">
+<span class="sig-name descname"><span class="pre">compute_norm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">np.array</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a></span></span><a class="headerlink" href="#bequem.nodes.MultilinearNode.compute_norm" title="Link to this definition">¶</a></dt>
+<dd><p>Method to compute the norm of the wavefunction in the subspace.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bequem.nodes.MultilinearNode.definition">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="bequem.nodes.Node.html#bequem.nodes.Node" title="bequem.nodes.node.Node"><span class="pre">Node</span></a></span></span><a class="headerlink" href="#bequem.nodes.MultilinearNode.definition" title="Link to this definition">¶</a></dt>
+<dd><p>The definition of this node.</p>
+<p>This is used to implement all other
+abstract methods of <a class="reference internal" href="bequem.nodes.Node.html#bequem.nodes.Node" title="bequem.nodes.Node"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Node</span></code></a>. The other methods can be overwritten to give
+a more efficient implementation.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bequem.nodes.MultilinearNode.draw">
+<span class="sig-name descname"><span class="pre">draw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></span><a class="headerlink" href="#bequem.nodes.MultilinearNode.draw" title="Link to this definition">¶</a></dt>
+<dd><p>Rich text output of the computational graph</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>verbose</strong> – if set to <code class="docutils literal notranslate"><span class="pre">True</span></code>, the definition of any
+<a class="reference internal" href="bequem.nodes.ProxyNode.html#bequem.nodes.ProxyNode" title="bequem.nodes.proxy_node.ProxyNode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ProxyNode</span></code></a> is inserted into the</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bequem.nodes.MultilinearNode.is_vector">
+<span class="sig-name descname"><span class="pre">is_vector</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span></span><a class="headerlink" href="#bequem.nodes.MultilinearNode.is_vector" title="Link to this definition">¶</a></dt>
+<dd><p>Tests whether this node encodes a vector or a matrix.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bequem.nodes.MultilinearNode.parameters">
+<span class="sig-name descname"><span class="pre">parameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><span class="pre">dict</span></a></span></span><a class="headerlink" href="#bequem.nodes.MultilinearNode.parameters" title="Link to this definition">¶</a></dt>
+<dd><p>The parameters of this graph</p>
+<p>Mostly used for serialization and systematic verification of the
+computational graph. Children and parameters together should fully
+define the matrix encoded by any node.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bequem.nodes.MultilinearNode.simulate">
+<span class="sig-name descname"><span class="pre">simulate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">ndarray</span></a></span></span><a class="headerlink" href="#bequem.nodes.MultilinearNode.simulate" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a numpy array representing this node, as given by <a class="reference internal" href="#bequem.nodes.MultilinearNode.simulate" title="bequem.nodes.MultilinearNode.simulate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">simulate</span></code></a>.</p>
+<p>When <code class="docutils literal notranslate"><span class="pre">input</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code>, the output of this method should match
+<a class="reference internal" href="#bequem.nodes.MultilinearNode.compute" title="bequem.nodes.MultilinearNode.compute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute</span></code></a>, which can be checked using <a class="reference internal" href="bequem.verifier.verify.html#bequem.verifier.verify" title="bequem.verifier.verify"><code class="xref py py-obj docutils literal notranslate"><span class="pre">verify</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>input</strong> – The index of the optional initial state, with which this node
+should be simulated. Should be a number between <code class="docutils literal notranslate"><span class="pre">0</span></code> and
+<code class="docutils literal notranslate"><span class="pre">node.subspace_out.dimension</span> <span class="pre">-</span> <span class="pre">1</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bequem.nodes.MultilinearNode.simulate_norm">
+<span class="sig-name descname"><span class="pre">simulate_norm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a></span></span><a class="headerlink" href="#bequem.nodes.MultilinearNode.simulate_norm" title="Link to this definition">¶</a></dt>
+<dd><p>Method to simulate the norm of the encoded vector in the subspace using a circuit.</p>
+<p>When calling this function on a node encoding a matrix, <code class="docutils literal notranslate"><span class="pre">input</span></code> has to
+be a vector. In this case the norm of the matrix applied to <code class="docutils literal notranslate"><span class="pre">input</span></code> is given.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>input</strong> – A vector to which the encoded matrix is applied before computing the norm.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bequem.nodes.MultilinearNode.toarray">
+<span class="sig-name descname"><span class="pre">toarray</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">force_matrix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">ndarray</span></a></span></span><a class="headerlink" href="#bequem.nodes.MultilinearNode.toarray" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a numpy array representing this node, as given by <a class="reference internal" href="#bequem.nodes.MultilinearNode.compute" title="bequem.nodes.MultilinearNode.compute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute</span></code></a>.</p>
+<p>The output of this method should match <a class="reference internal" href="#bequem.nodes.MultilinearNode.simulate" title="bequem.nodes.MultilinearNode.simulate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">simulate</span></code></a>, which can be checked
+using <a class="reference internal" href="bequem.verifier.verify.html#bequem.verifier.verify" title="bequem.verifier.verify"><code class="xref py py-obj docutils literal notranslate"><span class="pre">verify</span></code></a>.</p>
+<p>By default this will return a one-dimension array if the node represents
+a vector. However, this behaviour can be suppressed by setting
+<code class="docutils literal notranslate"><span class="pre">force_matrix</span> <span class="pre">=</span> <span class="pre">True</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>force_matrix</strong> – Force the method to return a two-dimensional array, even when the
+node corresponds to a vector.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bequem.nodes.MultilinearNode.tree">
+<span class="sig-name descname"><span class="pre">tree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tree</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://rich.readthedocs.io/en/stable/reference/tree.html#rich.tree.Tree" title="(in Rich)"><span class="pre">Tree</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">holes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="bequem.nodes.Node.html#bequem.nodes.Node" title="bequem.nodes.node.Node"><span class="pre">Node</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://rich.readthedocs.io/en/stable/reference/tree.html#rich.tree.Tree" title="(in Rich)"><span class="pre">Tree</span></a></span></span><a class="headerlink" href="#bequem.nodes.MultilinearNode.tree" title="Link to this definition">¶</a></dt>
+<dd><p>Method for rich text output of the computational graph.</p>
+<p>Typically you should call <a class="reference internal" href="#bequem.nodes.MultilinearNode.draw" title="bequem.nodes.MultilinearNode.draw"><code class="xref py py-obj docutils literal notranslate"><span class="pre">draw</span></code></a> instead of this method.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bequem.nodes.MultilinearNode.tree_label">
+<span class="sig-name descname"><span class="pre">tree_label</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bequem.nodes.MultilinearNode.tree_label" title="Link to this definition">¶</a></dt>
+<dd><p>Label by which this node should be represented in textual (debug)
+output.</p>
+<p>Defaults to the name of the nodes class plus its parameters.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="bequem.nodes.MultilinearNode.apply">
+<span class="sig-name descname"><span class="pre">apply</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="bequem.nodes.Node.html#bequem.nodes.Node" title="bequem.nodes.node.Node"><span class="pre">Node</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#bequem.nodes.MultilinearNode.apply" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="bequem.nodes.MultilinearNode.circuit">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">circuit</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="bequem.circuit.Circuit.html#bequem.circuit.Circuit" title="bequem.circuit.Circuit"><span class="pre">Circuit</span></a></em><a class="headerlink" href="#bequem.nodes.MultilinearNode.circuit" title="Link to this definition">¶</a></dt>
+<dd><p>The circuit corresponding to the unitary of the block encoding.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="bequem.nodes.MultilinearNode.dimensions_in">
+<span class="sig-name descname"><span class="pre">dimensions_in</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#bequem.nodes.MultilinearNode.dimensions_in" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="bequem.nodes.MultilinearNode.normalization">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">normalization</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a></em><a class="headerlink" href="#bequem.nodes.MultilinearNode.normalization" title="Link to this definition">¶</a></dt>
+<dd><p>Normalization of the block encoding.</p>
+<p>Non-negative number, which has to be multiplied with the outputs of the
+circuit to ensure proper scaling of the result.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="bequem.nodes.MultilinearNode.subspace_in">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">subspace_in</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="bequem.subspace.Subspace.html#bequem.subspace.Subspace" title="bequem.subspace.Subspace"><span class="pre">Subspace</span></a></em><a class="headerlink" href="#bequem.nodes.MultilinearNode.subspace_in" title="Link to this definition">¶</a></dt>
+<dd><p>The embedding of the input vectorspace.</p>
+<p>Specifically this specifies how the vectorspace is included in state
+space nodes circuit, which has dimension <img class="math" src="../_images/math/80aae5db95d687a920ee0069c7786e13b7f4d6a7.svg" alt="2^n" style="vertical-align: 0px"/> where <img class="math" src="../_images/math/a0d27e57866f6f297a683290c09634936391aa95.svg" alt="n" style="vertical-align: 0px"/> is
+the number of qubits. In other words, this defines whether a particular
+basis state is “valid” or “invalid”.</p>
+<p>In the formalism of block encodings this corresponds to the projection
+<img class="math" src="../_images/math/0d5ab7546221cd315681db09e19939aeca96231b.svg" alt="\Pi_1" style="vertical-align: -3px"/>.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="bequem.nodes.MultilinearNode.subspace_out">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">subspace_out</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="bequem.subspace.Subspace.html#bequem.subspace.Subspace" title="bequem.subspace.Subspace"><span class="pre">Subspace</span></a></em><a class="headerlink" href="#bequem.nodes.MultilinearNode.subspace_out" title="Link to this definition">¶</a></dt>
+<dd><p>The embedding of the output vectorspace.</p>
+<p>Specifically this specifies how the vectorspace is included in state
+space nodes circuit, which has dimension <img class="math" src="../_images/math/80aae5db95d687a920ee0069c7786e13b7f4d6a7.svg" alt="2^n" style="vertical-align: 0px"/> where <img class="math" src="../_images/math/a0d27e57866f6f297a683290c09634936391aa95.svg" alt="n" style="vertical-align: 0px"/> is
+the number of qubits. In other words, this defines whether a particular
+basis state is “valid” or “invalid”.</p>
+<p>In the formalism of block encodings this corresponds to the projection
+<img class="math" src="../_images/math/bccd71b4a67669def55ee7e5896302dc190d836e.svg" alt="\Pi_2" style="vertical-align: -3px"/>.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="bequem.nodes.ConstantVector.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">bequem.nodes.ConstantVector</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="bequem.nodes.ProxyNode.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">bequem.nodes.ProxyNode</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2025, Matthias Deiml
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">bequem.nodes.MultilinearNode</a><ul>
+<li><a class="reference internal" href="#bequem.nodes.MultilinearNode"><code class="docutils literal notranslate"><span class="pre">MultilinearNode</span></code></a><ul>
+<li><a class="reference internal" href="#bequem.nodes.MultilinearNode.children"><code class="docutils literal notranslate"><span class="pre">MultilinearNode.children()</span></code></a></li>
+<li><a class="reference internal" href="#bequem.nodes.MultilinearNode.compute"><code class="docutils literal notranslate"><span class="pre">MultilinearNode.compute()</span></code></a></li>
+<li><a class="reference internal" href="#bequem.nodes.MultilinearNode.compute_adjoint"><code class="docutils literal notranslate"><span class="pre">MultilinearNode.compute_adjoint()</span></code></a></li>
+<li><a class="reference internal" href="#bequem.nodes.MultilinearNode.compute_norm"><code class="docutils literal notranslate"><span class="pre">MultilinearNode.compute_norm()</span></code></a></li>
+<li><a class="reference internal" href="#bequem.nodes.MultilinearNode.definition"><code class="docutils literal notranslate"><span class="pre">MultilinearNode.definition()</span></code></a></li>
+<li><a class="reference internal" href="#bequem.nodes.MultilinearNode.draw"><code class="docutils literal notranslate"><span class="pre">MultilinearNode.draw()</span></code></a></li>
+<li><a class="reference internal" href="#bequem.nodes.MultilinearNode.is_vector"><code class="docutils literal notranslate"><span class="pre">MultilinearNode.is_vector()</span></code></a></li>
+<li><a class="reference internal" href="#bequem.nodes.MultilinearNode.parameters"><code class="docutils literal notranslate"><span class="pre">MultilinearNode.parameters()</span></code></a></li>
+<li><a class="reference internal" href="#bequem.nodes.MultilinearNode.simulate"><code class="docutils literal notranslate"><span class="pre">MultilinearNode.simulate()</span></code></a></li>
+<li><a class="reference internal" href="#bequem.nodes.MultilinearNode.simulate_norm"><code class="docutils literal notranslate"><span class="pre">MultilinearNode.simulate_norm()</span></code></a></li>
+<li><a class="reference internal" href="#bequem.nodes.MultilinearNode.toarray"><code class="docutils literal notranslate"><span class="pre">MultilinearNode.toarray()</span></code></a></li>
+<li><a class="reference internal" href="#bequem.nodes.MultilinearNode.tree"><code class="docutils literal notranslate"><span class="pre">MultilinearNode.tree()</span></code></a></li>
+<li><a class="reference internal" href="#bequem.nodes.MultilinearNode.tree_label"><code class="docutils literal notranslate"><span class="pre">MultilinearNode.tree_label()</span></code></a></li>
+<li><a class="reference internal" href="#bequem.nodes.MultilinearNode.apply"><code class="docutils literal notranslate"><span class="pre">MultilinearNode.apply</span></code></a></li>
+<li><a class="reference internal" href="#bequem.nodes.MultilinearNode.circuit"><code class="docutils literal notranslate"><span class="pre">MultilinearNode.circuit</span></code></a></li>
+<li><a class="reference internal" href="#bequem.nodes.MultilinearNode.dimensions_in"><code class="docutils literal notranslate"><span class="pre">MultilinearNode.dimensions_in</span></code></a></li>
+<li><a class="reference internal" href="#bequem.nodes.MultilinearNode.normalization"><code class="docutils literal notranslate"><span class="pre">MultilinearNode.normalization</span></code></a></li>
+<li><a class="reference internal" href="#bequem.nodes.MultilinearNode.subspace_in"><code class="docutils literal notranslate"><span class="pre">MultilinearNode.subspace_in</span></code></a></li>
+<li><a class="reference internal" href="#bequem.nodes.MultilinearNode.subspace_out"><code class="docutils literal notranslate"><span class="pre">MultilinearNode.subspace_out</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=2709fde1"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>

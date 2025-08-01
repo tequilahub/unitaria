@@ -1,0 +1,12 @@
+bequem.nodes.ConstantVector
+===========================
+
+.. currentmodule:: bequem.nodes
+
+
+.. autoclass:: ConstantVector
+   :show-inheritance:
+   :members:
+   :inherited-members:
+   :undoc-members:
+   :member-order: groupwise

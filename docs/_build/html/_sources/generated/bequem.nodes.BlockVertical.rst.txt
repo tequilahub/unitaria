@@ -1,0 +1,12 @@
+bequem.nodes.BlockVertical
+==========================
+
+.. currentmodule:: bequem.nodes
+
+
+.. autoclass:: BlockVertical
+   :show-inheritance:
+   :members:
+   :inherited-members:
+   :undoc-members:
+   :member-order: groupwise
