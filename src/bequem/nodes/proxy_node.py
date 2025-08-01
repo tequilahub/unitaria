@@ -25,49 +25,52 @@ class ProxyNode(Node):
     @abstractmethod
     def definition(self) -> Node:
         """
-        The definition of this node, which is used to implement all other
+        The definition of this node.
+
+        This is used to implement all other
         abstract methods of `Node`. The other methods can be overwritten to give
         a more efficient implementation.
         """
         raise NotImplementedError
 
+    def _definition_internal(self) -> Node:
+        """
+        :no-index:
+        """
+        if self._definition is None:
+            self._definition = self.definition()
+        return self._definition
+
     def compute(self, input: np.ndarray | None) -> np.ndarray:
         # TODO: Use something more concise for lazy calculation, instead of manually
         #  checking for None everywhere
-        if self._definition is None:
-            self._definition = self.definition()
-        return self._definition.compute(input)
+        definition = self._definition_internal()
+        return definition.compute(input)
 
     def compute_adjoint(self, input: np.ndarray | None) -> np.ndarray:
-        if self._definition is None:
-            self._definition = self.definition()
-        return self._definition.compute_adjoint(input)
+        definition = self._definition_internal()
+        return definition.compute_adjoint(input)
 
     def _circuit(self) -> Circuit:
-        if self._definition is None:
-            self._definition = self.definition()
-        return self._definition.circuit
+        definition = self._definition_internal()
+        return definition.circuit
 
     def _subspace_in(self) -> Subspace:
-        if self._definition is None:
-            self._definition = self.definition()
-        return self._definition.subspace_in
+        definition = self._definition_internal()
+        return definition.subspace_in
 
     def _subspace_out(self) -> Subspace:
-        if self._definition is None:
-            self._definition = self.definition()
-        return self._definition.subspace_out
+        definition = self._definition_internal()
+        return definition.subspace_out
 
     def _normalization(self) -> float:
-        if self._definition is None:
-            self._definition = self.definition()
-        return self._definition.normalization
+        definition = self._definition_internal()
+        return definition.normalization
 
     def tree_label(self, verbose: bool = False):
         label = super().tree_label()
         if not verbose:
             return label
         else:
-            if self._definition is None:
-                self._definition = self.definition()
-            return Panel(self._definition.tree(verbose=True, holes=self.children()), title=label, title_align="left")
+            definition = self._definition_internal()
+            return Panel(definition.tree(verbose=True, holes=self.children()), title=label, title_align="left")

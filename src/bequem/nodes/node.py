@@ -215,7 +215,7 @@ class Node(ABC):
         if self.is_vector() and not force_matrix:
             return self.compute(np.array([1], dtype=np.complex128))
         else:
-            return self.compute(np.eye(self.subspace_in.dimension, dtype=np.complex128))
+            return self.compute(np.eye(self.subspace_in.dimension, dtype=np.complex128)).T
 
     def compute_norm(self, input: np.array | None) -> float:
         """
@@ -235,8 +235,9 @@ class Node(ABC):
         `compute`, which can be checked using `~bequem.verifier.verify`.
 
         :param input:
-            The index of the optional initial state, whth which this node should
-            be simulated.
+            The index of the optional initial state, with which this node
+            should be simulated. Should be a number between ``0`` and
+            ``node.subspace_out.dimension - 1``
         """
         if self.is_vector() and input is None:
             input = 0

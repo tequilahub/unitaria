@@ -1,12 +1,13 @@
 import numpy as np
 import tequila as tq
 
-from bequem.nodes import Node
+from bequem.nodes.node import Node
+from bequem.nodes.multilinear_node import MultilinearNode
 from bequem.subspace import Subspace
 from bequem.circuit import Circuit
 
 
-class ComponentwiseMul(Node):
+class ComponentwiseMul(MultilinearNode):
     """
     Node implementing the (bilinear) componentwise multiplication operator
 
@@ -18,6 +19,27 @@ class ComponentwiseMul(Node):
 
     :param subspace:
         The vector space in which to perform the element-wise operation
+    """
+
+    subspace: Subspace
+
+    def __init__(self, subspace_or_first: Subspace | Node, second: Node | None = None):
+        if isinstance(subspace_or_first, Subspace):
+            self.subspace = subspace_or_first
+            super().__init__([self.subspace.dimension] * 2, self.subspace.dimension)
+        else:
+            self.subspace = subspace_or_first.subspace_out
+            super().__init__([self.subspace.dimension] * 2, self.subspace.dimension, subspace_or_first, second)
+
+    def definition(self) -> Node:
+        return ComponentwiseMulMultilinear(self.subspace)
+
+
+class ComponentwiseMulMultilinear(Node):
+    """
+    :no-index:
+
+    Internal class for implementing `ComponentwiseMul`, see also `MultilinearNode`
     """
 
     subspace: Subspace

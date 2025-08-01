@@ -81,13 +81,15 @@ class Verifier:
 
     def _compare_batch_compute(self, node: Node, reference: np.ndarray | None = None):
         batch_computed = node.toarray(force_matrix=True)
-        computed = np.zeros_like(batch_computed)
+        computed = np.zeros_like(batch_computed.T)
         for i in range(node.subspace_in.dimension):
             input = np.zeros(node.subspace_in.dimension, dtype=np.complex128)
             input[i] = 1
             computed[i, :] = node.compute(input)
-        np.testing.assert_allclose(batch_computed, computed, atol=1e-8)
+        np.testing.assert_allclose(batch_computed, computed.T, atol=1e-8)
         if reference is not None:
+            if reference.ndim == 1:
+                reference = np.expand_dims(reference, 1)
             np.testing.assert_allclose(batch_computed, reference)
 
     def _compare_compute_simulate(self, node: Node):

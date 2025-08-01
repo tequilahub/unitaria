@@ -196,4 +196,4 @@ def test_preconditioned_laplace_1d():
             C_F = BlockHorizontal(TC, C_F)
             T = T @ T_l
 
-    verify(C_F, ref_CP_1d(4, 1).T)
+    verify(C_F, ref_CP_1d(4, 1))

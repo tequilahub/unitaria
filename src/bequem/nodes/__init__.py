@@ -16,10 +16,10 @@ can now be used to compute the result directly
 >>> from bequem.nodes import Increment, Identity
 >>> import numpy as np
 >>> (Increment(2) @ Identity(2)).toarray().real
-array([[0., 1., 0., 0.],
-       [0., 0., 1., 0.],
-       [0., 0., 0., 1.],
-       [1., 0., 0., 0.]])
+array([[0., 0., 0., 1.],
+       [1., 0., 0., 0.],
+       [0., 1., 0., 0.],
+       [0., 0., 1., 0.]])
 
 Or the circuit, normalization, and subspaces of the block encoding can be obtain
 through the corresponding properties of `Node`.
@@ -34,6 +34,7 @@ by decomposing them into other operations.
 
 from bequem.nodes.node import Node
 from bequem.nodes.proxy_node import ProxyNode
+from bequem.nodes.multilinear_node import MultilinearNode
 
 from bequem.nodes.constants.constant_vector import ConstantVector
 from bequem.nodes.constants.constant_unitary import ConstantUnitary
@@ -68,6 +69,7 @@ from bequem.nodes.integer_arithmetic.integer_addition import IntegerAddition
 __all__ = [
     "Node",
     "ProxyNode",
+    "MultilinearNode",
     "ConstantVector",
     "ConstantUnitary",
     "Tensor",

@@ -115,4 +115,4 @@ class Circuit:
             tq.circuit.qpic.export_to(self.tq_circuit, file, always_use_generators=True)
             return f"Circuit stored at file://{file}"
         else:
-            return tq.draw(self.tq_circuit)
+            return self.tq_circuit.__str__()

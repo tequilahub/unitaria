@@ -229,7 +229,9 @@ class Subspace:
         )
 
     @staticmethod
-    def from_dim(dim: int, bits: int) -> Subspace:
+    def from_dim(dim: int, bits: int | None = None) -> Subspace:
+        if bits is None:
+            bits = int(np.ceil(np.log2(dim)))
         if dim == 1:
             return Subspace(0, bits)
         min_bits = int(np.ceil(np.log2(dim)))

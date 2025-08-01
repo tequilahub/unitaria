@@ -7,6 +7,7 @@
    :show-inheritance:
    :members:
    :inherited-members:
+   :exclude-members: _abc_impl
    :undoc-members:
    :private-members:
    :member-order: groupwise

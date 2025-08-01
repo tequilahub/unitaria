@@ -55,9 +55,10 @@ Vielleicht von Numpy inspirieren lassen
 * Verify mit zufälliger Basis
 * Better custom verifications
 * Permutations
-* Divide Identity into from dimension / from qubits
+* Divide Identity into from dimension / from qubits -> PR
 * Projection (Postselection) Node
 * Ancilla als Eigenschaft von Circuit statt Subspace
+* tequila hat viele Dependencies, die hier irgendwie nicht nötig sind und für ziemlich lange load-times sorgen, z.B. sympy, openfermion
 
 ## Example projects
 
