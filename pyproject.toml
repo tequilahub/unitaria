@@ -19,6 +19,7 @@ dependencies = [
 [project.optional-dependencies]
 qpic = ["qpic==1.1.*"]
 docs = ["sphinx", "furo"]
+dev = ["pytest"]
 
 [project.urls]
 Repository = "https://github.com/bequem-py/bequem.git"
