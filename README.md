@@ -6,17 +6,17 @@ quantum computers. It allows constructing quantum algorithms using a simple,
 `numpy`-like syntax.
 
 ```python
->>> from bequem.nodes import ConstantVector, Identity
+>>> from unitaria.nodes import ConstantVector, Identity
 >>> import numpy as np
->>> result = Identity(1) @ ConstantVector(np.array([1, 2]))
->>> result
+>>> result = Identity(1) @ ConstantVector(np.array([3, 4]))
+>>> result.draw()
 Mul
 ├── ConstantVector{'vec': array([3, 4])}
 └── Identity{'subspace': Subspace(1)}
 >>> result.toarray().real
 array([3., 4.])
 >>> result.normalization
-5.0
+np.float64(5.0)
 >>> result.circuit
 Circuit(tq_circuit=circuit: 
 Ry(target=(0,), parameter=1.8545904360032246)
@@ -34,7 +34,7 @@ pip install unitaria
 
 This installs everything needed to work with `unitaria`, including the
 simulation backend `qulacs`. Additional backends compatible with `tequila`,
-which is for commincating with the backends, can also be installed, see
+which is used for communcating with the backends, can also be installed, see
 [tequila](https://github.com/tequilahub/tequila).
 
 ## Development
@@ -49,12 +49,17 @@ To run the test suite you can then execute
 pytest
 ```
 
-To build the documentation, navigate to the `/docs` folder and run
+To build the documentation, some additional dependencies are required, which can be installed using
+```sh
+pip install --editable .[docs]
+```
+Then navigate to the `/docs` folder and run
 ```sh
 rm -r generated
 make html
 ```
-This requires some additional dependencies, which can be installed using
+
+If you get the error `locale.Error: unsupported locale setting`, try adding the environment variable `LC_ALL=C.UTF-8`:
 ```sh
-pip install --editable .[docs]
+LC_ALL=C.UTF-8 make html
 ```

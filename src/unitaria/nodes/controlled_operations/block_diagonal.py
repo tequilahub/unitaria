@@ -13,6 +13,9 @@ class BlockDiagonal(ProxyNode):
     """
     Node for block matrices of the form ``diag(A, B)``
 
+    The and operator for ``Node`` is overloaded to build a BlockDiagonal node,
+    so ``BlockDiagonal(A, B)`` is equivalent to writing ``A | B``.
+
     :param A:
         The left upper block
     :param B:
