@@ -16,7 +16,7 @@ Identity('subspace': Subspace(1))
 >>> ConstantVector(np.array([1, 2]))
 ConstantVector('vec': array([1, 2]))
 
-As you can see, nodes are not executed immediately. After all the operations
+As you can see, nodes are not executed immediately. After all, the operations
 should be executed on a quantum computer. Instead, you can combine nodes to form
 more complex expressions, stored as a computational graph.
 
@@ -29,7 +29,7 @@ Mul
 
 For a complete list of all available nodes, see `~unitaria.nodes`.
 
-There is now two ways in which you can obtain the encoded vector of the above
+There are now two ways in which you can obtain the encoded vector of the above
 example. Each node contains a classical implementation of the operation it
 performs, available through the methods `~unitaria.nodes.Node.compute` and
 `~unitaria.nodes.Node.toarray`.
@@ -52,7 +52,7 @@ array([1., 2.])
 
 It can be checked wether the results of `~unitaria.nodes.Node.toarray` and
 `~unitaria.nodes.Node.simulate` actually match by using `~unitaria.verifier.verify`.
-This also checks other useful things, such as the number of quibts in the
+This also checks other useful things, such as the number of qubits in the
 circuit being correct.
 
 .. rubric:: Modules

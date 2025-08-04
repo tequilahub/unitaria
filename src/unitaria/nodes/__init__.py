@@ -21,7 +21,7 @@ array([[0., 0., 0., 1.],
        [0., 1., 0., 0.],
        [0., 0., 1., 0.]])
 
-Or the circuit, normalization, and subspaces of the block encoding can be obtain
+Or the circuit, normalization, and subspaces of the block encoding can be obtained
 through the corresponding properties of `Node`.
 
 Custom nodes

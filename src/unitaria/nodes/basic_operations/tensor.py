@@ -21,6 +21,17 @@ class Tensor(Node):
            [0., 0., 0., 1.],
            [0., 0., 1., 0.]])
 
+    The and operator for ``Node`` is overloaded to be the tensor product,
+    i.e. you can equivalently write
+
+    >>> from unitaria.nodes import Tensor, Identity, Increment
+    >>> import numpy as np
+    >>> (Increment(1) & Identity(1)).toarray().real
+    array([[0., 1., 0., 0.],
+           [1., 0., 0., 0.],
+           [0., 0., 0., 1.],
+           [0., 0., 1., 0.]])
+
     :param A:
         The first factor
     :param B:

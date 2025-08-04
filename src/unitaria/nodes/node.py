@@ -86,7 +86,7 @@ class Node(ABC):
     @abstractmethod
     def _subspace_in(self) -> Subspace:
         """
-        Method to for computing `subspace_in`.
+        Method for computing `subspace_in`.
 
         To be implemented in all subclasses of `Node`.
         """
@@ -110,7 +110,7 @@ class Node(ABC):
     @abstractmethod
     def _subspace_out(self) -> Subspace:
         """
-        Method to for computing `subspace_out`.
+        Method for computing `subspace_out`.
 
         To be implemented in all subclasses of `Node`.
         """
@@ -129,7 +129,7 @@ class Node(ABC):
     @abstractmethod
     def _normalization(self) -> float:
         """
-        Method to for computing `normalization`.
+        Method for computing `normalization`.
 
         To be implemented in all subclasses of `Node`.
         """
@@ -178,7 +178,7 @@ class Node(ABC):
     @abstractmethod
     def _circuit(self) -> float:
         """
-        Method to for computing `circuit`.
+        Method for computing `circuit`.
 
         To be implemented in all subclasses of `Node`.
         """
