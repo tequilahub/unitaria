@@ -1,6 +1,0 @@
-unitaria.verifier.verify
-========================
-
-.. currentmodule:: unitaria.verifier
-
-.. autofunction:: verify

@@ -1,6 +1,0 @@
-unitaria.verifier.VerificationError
-===================================
-
-.. currentmodule:: unitaria.verifier
-
-.. autoexception:: VerificationError
