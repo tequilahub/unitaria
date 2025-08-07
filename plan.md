@@ -40,14 +40,12 @@ Vielleicht von Numpy inspirieren lassen
 
 ## TODOS
 
+* Munich Software Quantum Forum
 * Move dimension from subspace to node
 * Abstract operations without circuit implementation
-* Operations from circuit implementations
+* Operations from circuit implementations (Ram)
 * Nonlinear Beispiel (Jessica)
 * QSVT (Matthias)
-* QFT (Oliver)
-* Clean Ancillas (Oliver) (Pull request)
-* Dirty Ancillas (Oliver) (Pull request)
 * CI (Oliver)
 * plan.md nicht auf PyPi hochladen
 * Verify mit zufälliger Basis
