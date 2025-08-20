@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Sequence
+
 import numpy as np
 import tequila as tq
 from unitaria.nodes.node import Node
@@ -121,11 +123,11 @@ class PermuteRegisters(Node):
         input = np.transpose(input, np.argsort(perm))
         return input.reshape(outer_shape + [-1])
 
-    def _circuit(self) -> Circuit:
+    def _circuit(
+        self, target: Sequence[int], clean_ancillae: Sequence[int], borrowed_ancillae: Sequence[int]
+    ) -> Circuit:
         if self.subspace.total_qubits == 0:
-            circuit = Circuit()
-            circuit.n_qubits = 1
-            return circuit
+            return Circuit()
 
         register_qubits = []
         qubit_index = 0
@@ -142,7 +144,7 @@ class PermuteRegisters(Node):
         while i < self.subspace.total_qubits:
             j = permutation_map_qubits[i]
             if i != j:
-                circuit += tq.gates.SWAP(i, j)
+                circuit += tq.gates.SWAP(target[i], target[j])
                 permutation_map_qubits[i], permutation_map_qubits[j] = (
                     permutation_map_qubits[j],
                     permutation_map_qubits[i],
@@ -153,10 +155,13 @@ class PermuteRegisters(Node):
             else:
                 i += 1
 
-        circuit = circuit.adjoint()
-        circuit.n_qubits = self.subspace.total_qubits
+        return circuit.adjoint()
 
-        return circuit
+    def clean_ancilla_count(self) -> int:
+        return 0
+
+    def borrowed_ancilla_count(self) -> int:
+        return 0
 
 
 def _find_matching_partitioning(a: Subspace, b: Subspace) -> list[tuple[Subspace, Subspace]]:

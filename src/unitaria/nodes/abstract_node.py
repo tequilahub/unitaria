@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Callable, Sequence
 
 import numpy as np
 
@@ -53,5 +53,17 @@ class AbstractNode(Node):
     def _normalization(self):
         raise NotImplementedError("Abstract node has no circuit implementation")
 
-    def _circuit(self):
+    def _circuit(self, target: Sequence[int], clean_ancillae: Sequence[int], borrowed_ancillae: Sequence[int]):
         raise NotImplementedError("Abstract node has no circuit implementation")
+
+    def clean_ancilla_count(self) -> int:
+        return (
+            max(
+                self.A.subspace_in.clean_ancilla_count(),
+                self.A.subspace_out.clean_ancilla_count(),
+            )
+            + 1
+        )
+
+    def borrowed_ancilla_count(self) -> int:
+        return 0

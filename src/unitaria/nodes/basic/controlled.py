@@ -1,3 +1,5 @@
+from typing import Sequence
+
 import numpy as np
 
 from unitaria.subspace import Subspace, ControlledSubspace
@@ -30,6 +32,16 @@ class Controlled(Node):
     def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
         return input
 
-    def _circuit(self) -> Circuit:
-        control_qubit = self.A.subspace_in.total_qubits
-        return self.A.circuit.add_controls(control_qubit)
+    def _circuit(
+        self, target: Sequence[int], clean_ancillae: Sequence[int], borrowed_ancillae: Sequence[int]
+    ) -> Circuit:
+        control_qubit = target[self.A.target_qubit_count()]
+        circuit = self.A.circuit(target[: self.A.target_qubit_count()], clean_ancillae, borrowed_ancillae)
+        circuit = circuit.add_controls(control_qubit)
+        return Circuit(circuit)
+
+    def clean_ancilla_count(self) -> int:
+        return self.A.clean_ancilla_count()
+
+    def borrowed_ancilla_count(self) -> int:
+        return self.A.borrowed_ancilla_count()

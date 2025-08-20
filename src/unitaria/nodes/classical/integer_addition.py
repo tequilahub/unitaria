@@ -1,3 +1,5 @@
+from typing import Sequence
+
 import numpy as np
 
 from ..node import Node
@@ -65,8 +67,16 @@ class IntegerAddition(Node):
             result[:, :, val] += np.roll(input[:, :, val], -val, axis=-1)
         return result.reshape(old_shape)
 
-    def _circuit(self) -> Circuit:
-        source = range(self.source_bits)
-        target = range(self.source_bits, self.source_bits + self.target_bits)
+    def _circuit(
+        self, target: Sequence[int], clean_ancillae: Sequence[int], borrowed_ancillae: Sequence[int]
+    ) -> Circuit:
+        source = target[: self.source_bits]
+        target = target[self.source_bits :]
         circuit = addition_circuit(source, target)
         return Circuit(circuit)
+
+    def clean_ancilla_count(self) -> int:
+        return 0
+
+    def borrowed_ancilla_count(self) -> int:
+        return 0

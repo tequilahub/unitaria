@@ -1,3 +1,5 @@
+from typing import Sequence
+
 import numpy as np
 import tequila as tq
 
@@ -30,16 +32,10 @@ class Increment(Node):
         return {"bits": self.bits}
 
     def _subspace_in(self) -> Subspace:
-        if self.bits <= 3:
-            return Subspace(self.bits)
-        else:
-            return Subspace(self.bits, 1)
+        return Subspace(self.bits)
 
     def _subspace_out(self) -> Subspace:
-        if self.bits <= 3:
-            return Subspace(self.bits)
-        else:
-            return Subspace(self.bits, 1)
+        return Subspace(self.bits)
 
     def _normalization(self) -> float:
         return 1
@@ -50,12 +46,20 @@ class Increment(Node):
     def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
         return np.roll(input, -1, axis=-1)
 
-    def _circuit(self) -> Circuit:
+    def _circuit(
+        self, target: Sequence[int], clean_ancillae: Sequence[int], borrowed_ancillae: Sequence[int]
+    ) -> Circuit:
         if self.bits <= 3:
             circuit = Circuit()
             for i in reversed(range(self.bits)):
-                circuit += tq.gates.X(target=i, control=list(range(i)))
+                circuit += tq.gates.X(target=target[i], control=target[:i])
             return circuit
         else:
-            circuit = increment_circuit_single_ancilla(target=range(self.bits), ancilla=self.bits)
+            circuit = increment_circuit_single_ancilla(target=target, ancilla=borrowed_ancillae[0])
             return Circuit(circuit)
+
+    def clean_ancilla_count(self) -> int:
+        return 0
+
+    def borrowed_ancilla_count(self) -> int:
+        return 1 if self.bits > 3 else 0

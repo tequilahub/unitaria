@@ -1,4 +1,7 @@
 from __future__ import annotations
+
+from typing import Sequence
+
 import numpy as np
 
 from unitaria.circuit import Circuit
@@ -38,5 +41,13 @@ class Adjoint(Node):
     def compute_adjoint(self, input: np.ndarray | None) -> np.ndarray:
         return self.A.compute(input)
 
-    def _circuit(self) -> Circuit:
-        return self.A.circuit.adjoint()
+    def _circuit(
+        self, target: Sequence[int], clean_ancillae: Sequence[int], borrowed_ancillae: Sequence[int]
+    ) -> Circuit:
+        return self.A.circuit(target, clean_ancillae, borrowed_ancillae).adjoint()
+
+    def clean_ancilla_count(self) -> int:
+        return self.A.clean_ancilla_count()
+
+    def borrowed_ancilla_count(self) -> int:
+        return self.A.borrowed_ancilla_count()

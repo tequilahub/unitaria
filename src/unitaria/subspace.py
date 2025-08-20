@@ -5,6 +5,7 @@ Objects for specifying a subspace of a quantum statespace.
 from __future__ import annotations
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
+from typing import Sequence
 
 import numpy as np
 
@@ -144,7 +145,7 @@ class Subspace:
         """
         return vector[self.enumerate_basis()]
 
-    def circuit(self) -> Circuit:
+    def circuit(self, target: Sequence[int], flag: int, ancillae: Sequence[int]) -> Circuit:
         """
         A circuit which checks whether a state is inside the subspace.
 
@@ -153,58 +154,60 @@ class Subspace:
         Specifically, this qubit will be flipped if the other qubits
         represent a state outside the embedded vector space.
         """
-        # Index of the result flag qubit
-        result = self.total_qubits
-        # Next free qubit that can be used as a flag for one of the registers
-        next_flag = self.total_qubits + 1
-        # Offset to keep track of the index of the current register
-        offset = 0
-        # Set of register flags, if one of them is set, the result flag will be set.
-        # This is achieved by toggling them and then adding a multi-controlled NOT.
-        flags = []
+        # Index of the current register
+        index = 0
+        # Next unused ancilla index
+        ancilla_index = 0
+        # Set of intermediate flags, if one of them is set, the result flag will be set
+        intermediate_flags = []
 
         circuit = Circuit()
 
         for register in self.registers:
             if isinstance(register, ZeroQubit):
                 # Zero qubits already behave like flag qubits, so we only need to toggle it
-                circuit += tq.gates.X(target=offset)
-                flags.append(offset)
-                offset += 1
+                circuit += tq.gates.X(target=target[index])
+                intermediate_flags.append(target[index])
+                index += 1
                 continue
 
             if register == ID:
                 # No need to do anything here
-                offset += 1
+                index += 1
                 continue
 
             if not isinstance(register, ControlledSubspace):
                 raise ValueError("Registers that aren't of type Qubit are unsupported")
 
-            register_circuit = register.circuit()
-            register_ancillae = register_circuit.n_qubits - register.total_qubits()
-            # Main qubits get shifted by the offset
-            register_map = {i: i + offset for i in range(register.total_qubits())}
-            # Ancilla qubits get shifted to the flag qubit and following qubits
-            register_map |= {
-                j: j - register.total_qubits() + next_flag
-                for j in range(register.total_qubits(), register.total_qubits() + register_ancillae)
-            }
-            circuit += register_circuit.map_qubits(register_map)
-            circuit += tq.gates.X(target=next_flag)
-            flags.append(next_flag)
+            circuit += register.circuit(
+                target=target[index : index + register.total_qubits()],
+                flag=ancillae[ancilla_index],
+                ancillae=ancillae[ancilla_index + 1 :],
+            )
+            circuit += tq.gates.X(target=ancillae[ancilla_index])
+            intermediate_flags.append(ancillae[ancilla_index])
 
-            offset += register.total_qubits()
-            next_flag += 1
+            index += register.total_qubits()
+            ancilla_index += 1
 
         # Apply the constructed circuit, add a multi-controlled NOT to determine
         # if the result flag is set, then uncompute the rest of the circuit
-        circuit = circuit + tq.gates.X(target=result, control=flags) + tq.gates.X(target=result) + circuit.adjoint()
+        circuit = (
+            circuit + tq.gates.X(target=flag, control=intermediate_flags) + tq.gates.X(target=flag) + circuit.adjoint()
+        )
 
         return circuit
 
+    def clean_ancilla_count(self) -> int:
+        controlled_subspaces = filter(lambda r: isinstance(r, ControlledSubspace), self.registers)
+        return max([i + r.clean_ancilla_count() for (i, r) in enumerate(controlled_subspaces, start=1)], default=0)
+
     def verify_circuit(self):
-        circuit = self.circuit()
+        circuit = self.circuit(
+            range(self.total_qubits),
+            self.total_qubits,
+            range(self.total_qubits + 1, self.total_qubits + 1 + self.clean_ancilla_count()),
+        )
         for i in range(2**self.total_qubits):
             result = circuit.simulate(i)
             if self.test_basis(i):
@@ -323,28 +326,26 @@ class ControlledSubspace(Register):
             )
         ]
 
-    def circuit(self) -> Circuit:
+    def circuit(self, target: Sequence[int], flag: int, ancillae: Sequence[int]) -> Circuit:
         """
         A circuit which checks whether a state is inside the subspace.
 
-        The result of the check will be stored in a flag qubit where
-        the index is the output of ``total_qubits``.
+        The result of the check will be stored in the flag qubit.
         Specifically, this qubit will be flipped if the other qubits
         represent a state outside the embedded vector space.
         """
         circuit = Circuit()
-        control = self.total_qubits() - 1
-        circuit_zero = self.case_zero.circuit()
-        circuit_one = self.case_one.circuit()
-        max_qubits = max(circuit_zero.n_qubits, circuit_one.n_qubits)
-        shift_map = {i: i for i in range(control)}
-        # Qubits after the control qubit are shifted by one so they don't overlap with the control
-        shift_map |= {j: j + 1 for j in range(control, max_qubits)}
+        control = target[-1]
+        circuit_zero = self.case_zero.circuit(target=target[:-1], flag=flag, ancillae=ancillae)
+        circuit_one = self.case_one.circuit(target=target[:-1], flag=flag, ancillae=ancillae)
         circuit += tq.gates.X(target=control)
-        circuit += circuit_zero.map_qubits(shift_map).add_controls(control)
+        circuit += circuit_zero.add_controls(control)
         circuit += tq.gates.X(target=control)
-        circuit += circuit_one.map_qubits(shift_map).add_controls(control)
+        circuit += circuit_one.add_controls(control)
         return circuit
+
+    def clean_ancilla_count(self) -> int:
+        return max(self.case_zero.clean_ancilla_count(), self.case_one.clean_ancilla_count())
 
 
 ID = ControlledSubspace(Subspace([]), Subspace([]))

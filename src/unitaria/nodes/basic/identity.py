@@ -1,4 +1,6 @@
+from typing import Sequence
 import numpy as np
+import tequila as tq
 
 from unitaria.circuit import Circuit
 from unitaria.subspace import Subspace
@@ -44,9 +46,17 @@ class Identity(Node):
     def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
         return input
 
-    def _circuit(self) -> Circuit:
+    def _circuit(
+        self, target: Sequence[int], clean_ancillae: Sequence[int], borrowed_ancillae: Sequence[int]
+    ) -> Circuit:
         circuit = Circuit()
-        # TODO: Hacky because tequila does not really support circuits without qubits
-        if self.subspace.total_qubits > 0:
-            circuit.n_qubits = self.subspace.total_qubits
+        for qubit in target:
+            # TODO: Replace with identity gate once it's fixed
+            circuit += tq.gates.Rx(target=qubit, angle=0)
         return circuit
+
+    def clean_ancilla_count(self) -> int:
+        return 0
+
+    def borrowed_ancilla_count(self) -> int:
+        return 0

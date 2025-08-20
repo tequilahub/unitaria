@@ -1,4 +1,7 @@
 from __future__ import annotations
+
+from typing import Sequence
+
 import numpy as np
 
 from unitaria.circuit import Circuit
@@ -29,17 +32,10 @@ class SubspaceCircuit(Node):
         return []
 
     def _subspace_in(self) -> Subspace:
-        # TODO: most of the extra zeros are actually ancillas
-        return Subspace(
-            self.subspace.registers,
-            self.circuit.n_qubits - self.subspace.total_qubits,
-        )
+        return Subspace(self.subspace.registers, 1)
 
     def _subspace_out(self) -> Subspace:
-        return Subspace(
-            self.subspace.registers,
-            self.circuit.n_qubits - self.subspace.total_qubits,
-        )
+        return Subspace(self.subspace.registers, 1)
 
     def _normalization(self) -> float:
         return 1
@@ -50,5 +46,13 @@ class SubspaceCircuit(Node):
     def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
         return input
 
-    def _circuit(self) -> Circuit:
-        return self.subspace.circuit()
+    def _circuit(
+        self, target: Sequence[int], clean_ancillae: Sequence[int], borrowed_ancillae: Sequence[int]
+    ) -> Circuit:
+        return self.subspace.circuit(target[:-1], target[-1], clean_ancillae)
+
+    def clean_ancilla_count(self) -> int:
+        return self.subspace.clean_ancilla_count()
+
+    def borrowed_ancilla_count(self) -> int:
+        return 0

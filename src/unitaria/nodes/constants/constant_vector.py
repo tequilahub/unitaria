@@ -1,3 +1,5 @@
+from typing import Sequence
+
 import numpy as np
 
 from unitaria.circuit import Circuit
@@ -46,7 +48,15 @@ class ConstantVector(Node):
     def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
         return (np.array([np.conj(self.vec)]) @ input.T).T
 
-    def _circuit(self) -> Circuit:
+    def _circuit(
+        self, target: Sequence[int], clean_ancillae: Sequence[int], borrowed_ancillae: Sequence[int]
+    ) -> Circuit:
         normalized = self.vec / self.normalization
-        tq_circuit = prepare_state(normalized, range(self.n_qubits))
+        tq_circuit = prepare_state(normalized, target)
         return Circuit(tq_circuit)
+
+    def clean_ancilla_count(self) -> int:
+        return 0
+
+    def borrowed_ancilla_count(self) -> int:
+        return 0
