@@ -31,7 +31,7 @@ class Mul(ProxyNode):
 
     def __init__(self, A: Node, B: Node, skip_projection: bool = False):
         if A.dimension_out != B.dimension_in:
-            raise ValueError(f"dimensions {A.subspace_out.dimension} and {B.subspace_in.dimension} do not match")
+            raise ValueError(f"dimensions {A.dimension_out} and {B.dimension_in} do not match")
         super().__init__(A.dimension_in, B.dimension_out)
         self.A = A
         self.B = B
