@@ -41,19 +41,21 @@ Vielleicht von Numpy inspirieren lassen
 ## TODOS
 
 * Munich Software Quantum Forum
-* Move dimension from subspace to node
+* Move dimension from subspace to node -> PR (Matthias)
 * Abstract operations without circuit implementation
 * Operations from circuit implementations (Ram)
 * Nonlinear Beispiel (Jessica)
 * QSVT (Matthias)
-* CI (Oliver)
 * plan.md nicht auf PyPi hochladen
 * Verify mit zufälliger Basis
 * Better custom verifications
 * Permutations
-* Divide Identity into from dimension / from qubits -> PR
-* Projection (Postselection) Node
-* Ancilla als Eigenschaft von Circuit statt Subspace
+* Divide Identity into from dimension / from qubits
+* Projection (Postselection) Node (Matthias)
+* Ancilla als Eigenschaft von Circuit statt Subspace (Oliver)
+* circuit Code to LSB
+* tq_circuit Zugriffe entfernen
+* Qubits minimieren, z.B. Tensor sequentiell/parallel
 * Soll `*` auch für Tensor operationen benutzt werden?
 
 ## Example projects
