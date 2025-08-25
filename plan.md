@@ -53,7 +53,6 @@ Vielleicht von Numpy inspirieren lassen
 * Divide Identity into from dimension / from qubits
 * Projection (Postselection) Node (Matthias)
 * Ancilla als Eigenschaft von Circuit statt Subspace (Oliver)
-* circuit Code to LSB
 * tq_circuit Zugriffe entfernen
 * Qubits minimieren, z.B. Tensor sequentiell/parallel
 * Soll `*` auch für Tensor operationen benutzt werden?
