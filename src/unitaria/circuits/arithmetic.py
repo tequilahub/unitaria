@@ -61,7 +61,7 @@ def addition_circuit(source: Sequence[int], target: Sequence[int]) -> tq.QCircui
     return U
 
 
-def increment_circuit_single_ancilla(target: Sequence[int], ancilla: int) -> tq.QCircuit:
+def increment_circuit_single_ancilla(target: Sequence[int], ancilla: int, second_ancilla: int = None) -> tq.QCircuit:
     """
     Increments the target register.
     Reference: https://algassert.com/circuits/2015/06/12/Constructing-Large-Increment-Gates.html
@@ -69,6 +69,8 @@ def increment_circuit_single_ancilla(target: Sequence[int], ancilla: int) -> tq.
     :param target: Indices of the target qubits in LSB ordering.
     :param ancilla: Index of the ancilla qubit.
     Can be in any state, and will be returned to that state by the end of the circuit.
+    :param second_ancilla: Optional second ancilla qubit.
+    Is not required, but can be used for a more efficient construction when len(target) is even.
     :return: A circuit implementing the increment.
     """
     assert ancilla not in target
@@ -78,7 +80,23 @@ def increment_circuit_single_ancilla(target: Sequence[int], ancilla: int) -> tq.
 
     U = tq.QCircuit()
 
-    U += increment_circuit_n_ancillae(target=[ancilla] + list(target[split:]), ancillae=target[:split])
+    upper_inc = tq.QCircuit()
+    if len(target) % 2 == 0:
+        if second_ancilla is not None:
+            upper_inc += increment_circuit_n_ancillae(
+                target=[ancilla] + list(target[split:]), ancillae=list(target[:split]) + [second_ancilla]
+            )
+        else:
+            upper_inc += multi_controlled_not(
+                target=target[-1], controls=list(target[split:-1]) + [ancilla], ancillae=target[:split]
+            )
+            upper_inc += increment_circuit_n_ancillae(
+                target=[ancilla] + list(target[split:-1]), ancillae=list(target[:split])
+            )
+    else:
+        upper_inc += increment_circuit_n_ancillae(target=[ancilla] + list(target[split:]), ancillae=target[:split])
+
+    U += copy.deepcopy(upper_inc)
     U += tq.gates.X(target=ancilla)
 
     for i in range(split, n):
@@ -86,7 +104,7 @@ def increment_circuit_single_ancilla(target: Sequence[int], ancilla: int) -> tq.
 
     U += multi_controlled_not(target=ancilla, controls=target[:split], ancillae=target[split:])
 
-    U += increment_circuit_n_ancillae(target=[ancilla] + list(target[split:]), ancillae=target[:split])
+    U += copy.deepcopy(upper_inc)
     U += tq.gates.X(target=ancilla)
 
     U += multi_controlled_not(target=ancilla, controls=target[:split], ancillae=target[split:])
