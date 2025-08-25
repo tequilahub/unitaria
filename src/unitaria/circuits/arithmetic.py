@@ -9,9 +9,9 @@ def addition_circuit(source: Sequence[int], target: Sequence[int]) -> tq.QCircui
     Adds the source register to the target register.
     Reference: https://arxiv.org/abs/0910.2530v1
 
-    :param source: Indices of the source qubits in MSB ordering.
+    :param source: Indices of the source qubits in LSB ordering.
     Requires len(source) >= 2.
-    :param target: Indices of the target qubits in MSB ordering.
+    :param target: Indices of the target qubits in LSB ordering.
     Requires len(target) >= len(source).
     :return: A circuit implementing the addition.
     """
@@ -19,105 +19,82 @@ def addition_circuit(source: Sequence[int], target: Sequence[int]) -> tq.QCircui
     assert set(source).isdisjoint(set(target))
     n = len(source)
 
-    # Change register to LSB ordering and name them like in the paper.
-    # Note that unlike in the paper, A_n does not exist, because of the special handling for larger target registers.
-    a = source[::-1]
-    b = target[::-1]
-
     U = tq.QCircuit()
 
     for i in range(1, n):
-        U += tq.gates.CNOT(control=a[i], target=b[i])
+        U += tq.gates.CNOT(control=source[i], target=target[i])
 
-    if len(target) > n:
-        U += increment_circuit_single_ancilla(target=list(b[n:][::-1]) + [a[n - 1]], ancilla=a[0], second_ancilla=b[0])
-        U += tq.gates.X(target=a[n - 1])
-        for i in range(n, len(b)):
-            U += tq.gates.CNOT(control=a[n - 1], target=b[i])
+    if len(target) == n + 1:
+        U += tq.gates.CNOT(control=source[n - 1], target=target[n])
+    elif len(target) > n + 1:
+        U += increment_circuit_single_ancilla(target=[source[n - 1]] + list(target[n:]), ancilla=source[0])
+        U += tq.gates.X(target=source[n - 1])
+        for i in range(n, len(target)):
+            U += tq.gates.CNOT(control=source[n - 1], target=target[i])
 
     for i in reversed(range(1, n - 1)):
-        U += tq.gates.CNOT(control=a[i], target=a[i + 1])
+        U += tq.gates.CNOT(control=source[i], target=source[i + 1])
     for i in range(n - 1):
-        U += tq.gates.Toffoli(first=a[i], second=b[i], target=a[i + 1])
+        U += tq.gates.Toffoli(first=source[i], second=target[i], target=source[i + 1])
 
-    if len(target) > n:
+    if len(target) == n + 1:
+        U += tq.gates.Toffoli(first=target[n - 1], second=source[n - 1], target=target[n])
+    elif len(target) > n + 1:
         U += increment_circuit_single_ancilla(
-            target=list(b[n:][::-1]) + [a[n - 1], b[n - 1]], ancilla=a[0], second_ancilla=b[0]
+            target=[target[n - 1], source[n - 1]] + list(target[n:]), ancilla=source[0]
         )
-        U += tq.gates.X(target=b[n - 1])
-        U += tq.gates.CNOT(control=b[n - 1], target=a[n - 1])
+        U += tq.gates.X(target=target[n - 1])
+        U += tq.gates.CNOT(control=target[n - 1], target=source[n - 1])
 
     for i in reversed(range(1, n)):
-        U += tq.gates.CNOT(control=a[i], target=b[i])
-        U += tq.gates.Toffoli(first=a[i - 1], second=b[i - 1], target=a[i])
+        U += tq.gates.CNOT(control=source[i], target=target[i])
+        U += tq.gates.Toffoli(first=source[i - 1], second=target[i - 1], target=source[i])
     for i in range(1, n - 1):
-        U += tq.gates.CNOT(control=a[i], target=a[i + 1])
+        U += tq.gates.CNOT(control=source[i], target=source[i + 1])
     for i in range(n):
-        U += tq.gates.CNOT(control=a[i], target=b[i])
+        U += tq.gates.CNOT(control=source[i], target=target[i])
 
-    if len(target) > n:
-        for i in range(n, len(b)):
-            U += tq.gates.CNOT(control=a[n - 1], target=b[i])
+    if len(target) > n + 1:
+        for i in range(n, len(target)):
+            U += tq.gates.CNOT(control=source[n - 1], target=target[i])
 
     return U
 
 
-def increment_circuit_single_ancilla(target: Sequence[int], ancilla: int, second_ancilla: int = None) -> tq.QCircuit:
+def increment_circuit_single_ancilla(target: Sequence[int], ancilla: int) -> tq.QCircuit:
     """
     Increments the target register.
     Reference: https://algassert.com/circuits/2015/06/12/Constructing-Large-Increment-Gates.html
 
-    :param target: Indices of the target qubits in MSB ordering.
+    :param target: Indices of the target qubits in LSB ordering.
     :param ancilla: Index of the ancilla qubit.
     Can be in any state, and will be returned to that state by the end of the circuit.
-    :param second_ancilla: Optional second ancilla qubit.
-    Is not required, but can be used for a more efficient construction when len(target) is even.
     :return: A circuit implementing the increment.
-
-    The ancilla qubits can be in any state, and will be returned to that state by the end of the circuit.
-    Expects MSB ordering.
     """
     assert ancilla not in target
-    if second_ancilla is not None:
-        assert second_ancilla != ancilla and second_ancilla not in target
 
-    split = len(target) // 2
+    n = len(target)
+    split = (n + 1) // 2
 
     U = tq.QCircuit()
 
-    upper_inc = tq.QCircuit()
-    if len(target) % 2 == 0:
-        if second_ancilla is not None:
-            upper_inc += increment_circuit_n_ancillae(
-                target=list(target[:split]) + [ancilla], ancillae=list(target[split:]) + [second_ancilla]
-            )
-        else:
-            upper_inc += multi_controlled_not(
-                target=target[0], controls=list(target[1:split]) + [ancilla], ancillae=target[split:]
-            )
-            upper_inc += increment_circuit_n_ancillae(
-                target=list(target[1:split]) + [ancilla], ancillae=list(target[split:])
-            )
-    else:
-        upper_inc += increment_circuit_n_ancillae(target=list(target[:split]) + [ancilla], ancillae=target[split:])
-
-    U += copy.deepcopy(upper_inc)
+    U += increment_circuit_n_ancillae(target=[ancilla] + list(target[split:]), ancillae=target[:split])
     U += tq.gates.X(target=ancilla)
 
-    for i in range(split):
+    for i in range(split, n):
         U += tq.gates.CNOT(control=ancilla, target=target[i])
 
-    U += multi_controlled_not(target=ancilla, controls=target[split:], ancillae=target[:split])
+    U += multi_controlled_not(target=ancilla, controls=target[:split], ancillae=target[split:])
 
-    U += upper_inc
+    U += increment_circuit_n_ancillae(target=[ancilla] + list(target[split:]), ancillae=target[:split])
     U += tq.gates.X(target=ancilla)
 
-    U += multi_controlled_not(target=ancilla, controls=target[split:], ancillae=target[:split])
+    U += multi_controlled_not(target=ancilla, controls=target[:split], ancillae=target[split:])
 
-    for i in range(split):
+    for i in range(split, n):
         U += tq.gates.CNOT(control=ancilla, target=target[i])
 
-    U += increment_circuit_n_ancillae(target=list(target[split:]), ancillae=list(target[:split]) + [ancilla])
+    U += increment_circuit_n_ancillae(target=list(target[:split]), ancillae=[ancilla] + list(target[split:]))
 
     return U
 
@@ -127,66 +104,38 @@ def increment_circuit_n_ancillae(target: Sequence[int], ancillae: Sequence[int])
     Increments the target register.
     Reference: https://algassert.com/circuits/2015/06/12/Constructing-Large-Increment-Gates.html
 
-    :param target: Indices of the target qubits in MSB ordering.
-    :param ancillae: Indices of the ancilla qubits. Must contain at least len(target) qubits.
+    :param target: Indices of the target qubits in LSB ordering.
+    :param ancillae: Indices of the ancilla qubits. Must contain at least len(target) - 1 qubits.
     Ancillae can be in any state, and will be returned to that state by the end of the circuit.
     :return: A circuit implementing the increment.
     """
-    assert len(target) <= len(ancillae)
+    assert len(ancillae) >= len(target) - 1
     assert len(set(target) & set(ancillae)) == 0
 
-    v = target[::-1]  # LSB ordering
+    # If there are more than n - 1 ancillas, ignore them
+    ancillae = ancillae[: len(target) - 1]
 
-    # If there are more than n ancillas, ignore them
-    g = ancillae[: len(target)]
+    if len(target) == 1:
+        return tq.gates.X(target=target[0])
 
-    U = tq.QCircuit()
-
-    for i in range(len(v)):
-        U += tq.gates.CNOT(control=g[0], target=v[i])
-
-    for i in range(1, len(g)):
-        U += tq.gates.X(target=g[i])
-
-    U += tq.gates.X(target=v[-1])
-
-    U += _subtraction_widget(v, g[1:], g[0])
-
-    for i in range(1, len(g)):
-        U += tq.gates.X(target=g[i])
-
-    U += _subtraction_widget(v, g[1:], g[0])
-
-    for i in range(len(v)):
-        U += tq.gates.CNOT(control=g[0], target=v[i])
-
-    return U
-
-
-def _subtraction_widget(v: Sequence[int], g: Sequence[int], c: int) -> tq.QCircuit:
-    """
-    Implements the subtraction widget from https://algassert.com/circuits/2015/06/12/Constructing-Large-Increment-Gates.html.
-    Stores v - g - c in v and leaves the other registers unchanged. Used for increment_circuit_n_ancillas.
-    Expects LSB ordering.
-    """
-    g = [c] + list(g)
-
-    assert len(v) == len(g)
-    assert len(set(v) & set(g)) == 0
+    if len(target) == 2:
+        return tq.gates.CNOT(target=target[1], control=target[0]) + tq.gates.X(target=target[0])
 
     U = tq.QCircuit()
 
-    for i in range(len(v) - 1):
-        U += tq.gates.CNOT(control=g[i], target=v[i])
-        U += tq.gates.CNOT(control=g[i + 1], target=g[i])
-        U += tq.gates.Toffoli(first=g[i], second=v[i], target=g[i + 1])
+    for i in range(0, len(ancillae)):
+        U += tq.gates.X(target=ancillae[i])
 
-    U += tq.gates.CNOT(control=g[-1], target=v[-1])
+    U += tq.gates.X(target=target[-1])
 
-    for i in reversed(range(len(v) - 1)):
-        U += tq.gates.Toffoli(first=g[i], second=v[i], target=g[i + 1])
-        U += tq.gates.CNOT(control=g[i + 1], target=g[i])
-        U += tq.gates.CNOT(control=g[i + 1], target=v[i])
+    # No need for a separate subtraction widget construction as in the
+    # blog post, we can simply use the adjoint of our addition circuit.
+    U += addition_circuit(target=target, source=ancillae).dagger()
+
+    for i in range(len(ancillae)):
+        U += tq.gates.X(target=ancillae[i])
+
+    U += addition_circuit(target=target, source=ancillae).dagger()
 
     return U
 
@@ -222,7 +171,7 @@ def multi_controlled_not(
     U += tq.gates.Toffoli(first=controls[-1], second=ancillae[len(controls) - 3], target=target)
     U += staircase.dagger()
     U += tq.gates.Toffoli(first=controls[0], second=controls[1], target=ancillae[0])
-    U += staircase
+    U += copy.deepcopy(staircase)
     U += tq.gates.Toffoli(first=controls[-1], second=ancillae[len(controls) - 3], target=target)
 
     if uncompute:
@@ -281,7 +230,7 @@ def const_addition_circuit(target: Sequence[int], const: int, ancillae: Sequence
     Adds a constant to the target register.
     Reference: https://arxiv.org/abs/1611.07995, chapter 2
 
-    :param target: Indices of the target qubits in MSB ordering.
+    :param target: Indices of the target qubits in LSB ordering.
     :param const: The constant to be added.
     :param ancillae: Indices of the ancilla qubits. Must contain at least 2 qubits.
     Ancillae can be in any state, and will be returned to that state by the end of the circuit.
@@ -297,35 +246,35 @@ def const_addition_circuit(target: Sequence[int], const: int, ancillae: Sequence
     assert abs(const) < 2**n
     assert len(ancillae) >= 2
 
-    split = n // 2
+    split = (n + 1) // 2
 
     U = tq.QCircuit()
 
     U += increment_circuit_n_ancillae(
-        target=list(target[:split]) + [ancillae[0]], ancillae=list(target[split:]) + [ancillae[1]]
+        target=[ancillae[0]] + list(target[split:]), ancillae=list(target[:split]) + [ancillae[1]]
     )
     U += tq.gates.X(target=ancillae[0])
 
-    for i in range(split):
+    for i in range(split, n):
         U += tq.gates.CNOT(control=ancillae[0], target=target[i])
 
     U += _carry_circuit(
-        target=target[split:][::-1], const=const % (2 ** (n - split)), carry=ancillae[0], ancillae=list(target[:split])
+        target=target[:split], const=const % (2**split), carry=ancillae[0], ancillae=list(target[split:])
     )
 
     U += increment_circuit_n_ancillae(
-        target=list(target[:split]) + [ancillae[0]], ancillae=list(target[split:]) + [ancillae[1]]
+        target=[ancillae[0]] + list(target[split:]), ancillae=list(target[:split]) + [ancillae[1]]
     )
     U += tq.gates.X(target=ancillae[0])
 
     U += _carry_circuit(
-        target=target[split:][::-1], const=const % (2 ** (n - split)), carry=ancillae[0], ancillae=list(target[:split])
+        target=target[:split], const=const % (2**split), carry=ancillae[0], ancillae=list(target[split:])
     )
 
-    for i in range(split):
+    for i in range(split, n):
         U += tq.gates.CNOT(control=ancillae[0], target=target[i])
 
-    U += const_addition_circuit(target=target[:split], const=const >> (n - split), ancillae=ancillae)
-    U += const_addition_circuit(target=target[split:], const=const % (2 ** (n - split)), ancillae=ancillae)
+    U += const_addition_circuit(target=target[split:], const=const >> split, ancillae=ancillae)
+    U += const_addition_circuit(target=target[:split], const=const % (2**split), ancillae=ancillae)
 
     return U

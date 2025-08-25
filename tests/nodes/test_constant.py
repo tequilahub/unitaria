@@ -1,6 +1,7 @@
 import numpy as np
-from unitaria.nodes.constants.constant_vector import ConstantVector
+
 from unitaria.nodes.constants.constant_unitary import ConstantUnitary
+from unitaria.nodes.constants.constant_vector import ConstantVector
 from unitaria.verifier import verify
 
 

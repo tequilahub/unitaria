@@ -16,7 +16,7 @@ def multiplexed_Ry(
 
     :param angles: The angles for the rotations.
     :param target: The target qubit.
-    :param controls: The control qubits in MSB ordering.
+    :param controls: The control qubits in LSB ordering.
     :param top_level: Used internally to determine if the call is at the first recursion level, should not be used externally.
     :param flipped: Used internally to selectively change the order of the rotations, should not be used externally.
     :return: A circuit implementing the multiplexed rotation.
@@ -30,14 +30,14 @@ def multiplexed_Ry(
     (angles0, angles1) = np.split(angles, 2)
     U = tq.QCircuit()
     if flipped:
-        U += multiplexed_Ry((angles0 - angles1) / 2, target, controls[1:], False, False)
-        U += tq.gates.CNOT(control=controls[0], target=target)
-    U += multiplexed_Ry((angles0 + angles1) / 2, target, controls[1:], False, flipped)
+        U += multiplexed_Ry((angles0 - angles1) / 2, target, controls[:-1], False, False)
+        U += tq.gates.CNOT(control=controls[-1], target=target)
+    U += multiplexed_Ry((angles0 + angles1) / 2, target, controls[:-1], False, flipped)
     if not flipped:
-        U += tq.gates.CNOT(control=controls[0], target=target)
-        U += multiplexed_Ry((angles0 - angles1) / 2, target, controls[1:], False, True)
+        U += tq.gates.CNOT(control=controls[-1], target=target)
+        U += multiplexed_Ry((angles0 - angles1) / 2, target, controls[:-1], False, True)
     if top_level:
-        U += tq.gates.CNOT(control=controls[0], target=target)
+        U += tq.gates.CNOT(control=controls[-1], target=target)
     return U
 
 
@@ -52,7 +52,7 @@ def multiplexed_Rz(
 
     :param angles: The angles for the rotations.
     :param target: The target qubit.
-    :param controls: The control qubits in MSB ordering.
+    :param controls: The control qubits in LSB ordering.
     :param flipped: Used internally to selectively change the order of the rotations, should not be used externally.
     :return: A circuit implementing the multiplexed rotation.
     :return: A circuit implementing the multiplexed rotation.
@@ -66,12 +66,12 @@ def multiplexed_Rz(
     (angles0, angles1) = np.split(angles, 2)
     U = tq.QCircuit()
     if flipped:
-        U += multiplexed_Rz((angles0 - angles1) / 2, target, controls[1:], False, False)
-        U += tq.gates.CNOT(control=controls[0], target=target)
-    U += multiplexed_Rz((angles0 + angles1) / 2, target, controls[1:], False, flipped)
+        U += multiplexed_Rz((angles0 - angles1) / 2, target, controls[:-1], False, False)
+        U += tq.gates.CNOT(control=controls[-1], target=target)
+    U += multiplexed_Rz((angles0 + angles1) / 2, target, controls[:-1], False, flipped)
     if not flipped:
-        U += tq.gates.CNOT(control=controls[0], target=target)
-        U += multiplexed_Rz((angles0 - angles1) / 2, target, controls[1:], False, True)
+        U += tq.gates.CNOT(control=controls[-1], target=target)
+        U += multiplexed_Rz((angles0 - angles1) / 2, target, controls[:-1], False, True)
     if top_level:
-        U += tq.gates.CNOT(control=controls[0], target=target)
+        U += tq.gates.CNOT(control=controls[-1], target=target)
     return U

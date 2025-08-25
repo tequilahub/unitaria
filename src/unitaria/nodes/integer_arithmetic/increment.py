@@ -57,5 +57,5 @@ class Increment(Node):
                 circuit.tq_circuit += tq.gates.X(target=i, control=list(range(i)))
             return circuit
         else:
-            circuit = increment_circuit_single_ancilla(target=list(reversed(range(self.bits))), ancilla=self.bits)
+            circuit = increment_circuit_single_ancilla(target=range(self.bits), ancilla=self.bits)
             return Circuit(circuit)

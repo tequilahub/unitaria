@@ -48,6 +48,5 @@ class ConstantVector(Node):
 
     def _circuit(self) -> Circuit:
         normalized = self.vec / self.normalization
-        # reversed because prepare_state expects MSB ordering
-        tq_circuit = prepare_state(normalized, list(reversed(range(self.n_qubits))))
+        tq_circuit = prepare_state(normalized, range(self.n_qubits))
         return Circuit(tq_circuit)

@@ -48,7 +48,7 @@ class ConstantIntegerAddition(Node):
         return np.roll(input, -self.constant, axis=-1)
 
     def _circuit(self) -> Circuit:
-        circuit = const_addition_circuit(list(reversed(range(self.bits))), self.constant, [self.bits, self.bits + 1])
+        circuit = const_addition_circuit(range(self.bits), self.constant, [self.bits, self.bits + 1])
         circuit.n_qubits = self.subspace_in.total_qubits
 
         return Circuit(circuit)

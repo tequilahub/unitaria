@@ -13,7 +13,7 @@ def generic_unitary(U: npt.NDArray[complex], target: Sequence[int]) -> tq.QCircu
     Reference: https://arxiv.org/abs/quant-ph/0406176, chapter 5
 
     :param U: The unitary to be implemented.
-    :param target: The target qubits in MSB ordering.
+    :param target: The target qubits in LSB ordering.
     :return: A circuit implementing the unitary.
     """
     n = len(target)
@@ -27,15 +27,15 @@ def generic_unitary(U: npt.NDArray[complex], target: Sequence[int]) -> tq.QCircu
 
     circuit = tq.QCircuit()
     if n > 1:
-        circuit += _multiplexed_unitary(U1=a2, U2=b2, target=target[1:], control=target[0])
-        circuit += multiplexed_Ry(angles=2 * theta, target=target[0], controls=target[1:])
-        circuit += _multiplexed_unitary(U1=a1, U2=b1, target=target[1:], control=target[0])
+        circuit += _multiplexed_unitary(U1=a2, U2=b2, target=target[:-1], control=target[-1])
+        circuit += multiplexed_Ry(angles=2 * theta, target=target[-1], controls=target[:-1])
+        circuit += _multiplexed_unitary(U1=a1, U2=b1, target=target[:-1], control=target[-1])
     else:
         a1, b1, a2, b2 = np.angle((a1[0, 0], b1[0, 0], a2[0, 0], b2[0, 0]))
-        circuit += tq.gates.Rz(angle=b2 - a2, target=target[0])
+        circuit += tq.gates.Rz(angle=b2 - a2, target=target[-1])
         circuit += tq.gates.GlobalPhase((b2 + a2) / 2)
-        circuit += tq.gates.Ry(angle=2 * theta[0], target=target[0])
-        circuit += tq.gates.Rz(angle=b1 - a1, target=target[0])
+        circuit += tq.gates.Ry(angle=2 * theta[0], target=target[-1])
+        circuit += tq.gates.Rz(angle=b1 - a1, target=target[-1])
         circuit += tq.gates.GlobalPhase((b1 + a1) / 2)
     return circuit
 
