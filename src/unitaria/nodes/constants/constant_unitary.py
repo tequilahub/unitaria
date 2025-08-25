@@ -57,9 +57,7 @@ class ConstantUnitary(Node):
         return (np.conj(self.unitary.T) @ input.T).T
 
     def _circuit(self) -> Circuit:
-        # Reversed because circuit function expects MSB ordering
-        target = list(reversed(range(self.bits)))
-        return Circuit(generic_unitary(U=self.extended_unitary, target=target))
+        return Circuit(generic_unitary(U=self.extended_unitary, target=range(self.bits)))
 
 
 def _extend_basis_by_one(U: np.array, n: int):

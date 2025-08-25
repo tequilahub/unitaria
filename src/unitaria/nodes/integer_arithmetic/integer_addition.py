@@ -66,7 +66,7 @@ class IntegerAddition(Node):
         return result.reshape(old_shape)
 
     def _circuit(self) -> Circuit:
-        source = list(reversed(range(self.source_bits)))
-        target = list(reversed(range(self.source_bits, self.source_bits + self.target_bits)))
+        source = range(self.source_bits)
+        target = range(self.source_bits, self.source_bits + self.target_bits)
         circuit = addition_circuit(source, target)
         return Circuit(circuit)

@@ -180,7 +180,7 @@ class Node(ABC):
         return self._circuit()
 
     @abstractmethod
-    def _circuit(self) -> float:
+    def _circuit(self) -> Circuit:
         """
         Method for computing `circuit`.
 
