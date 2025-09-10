@@ -16,10 +16,12 @@ dependencies = [
   "qulacs==0.6.*"
 ]
 
-[project.optional-dependencies]
-qpic = ["qpic==1.1.*"]
+[dependency-groups]
 docs = ["sphinx", "furo"]
 dev = ["pytest"]
+
+[project.optional-dependencies]
+qpic = ["qpic==1.1.*"]
 
 [project.urls]
 Repository = "https://github.com/bequem-py/bequem.git"
