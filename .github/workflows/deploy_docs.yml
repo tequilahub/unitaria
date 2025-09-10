@@ -22,7 +22,7 @@ jobs:
         run: uv sync --group docs
       - name: Build documentation
         working-directory: ./docs
-        run: make html
+        run: uv run make html
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v4.0.0
         with:
