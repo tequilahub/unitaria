@@ -5,7 +5,7 @@ from unitaria.nodes.proxy_node import ProxyNode
 from unitaria.nodes.basic.controlled import Controlled
 from unitaria.nodes.basic.modify_control import ModifyControl
 from unitaria.nodes.basic.unsafe_multiplication import UnsafeMul
-from unitaria.nodes.identity import Identity
+from unitaria.nodes.basic.projection import Projection
 from unitaria.subspace import Subspace, ControlledSubspace
 
 
@@ -47,18 +47,18 @@ class BlockDiagonal(ProxyNode):
         A_controlled = ModifyControl(A_controlled, max(0, controlled_bits_B - controlled_bits_A), True)
         A_controlled = UnsafeMul(
             UnsafeMul(
-                Identity(subspace_in, A_controlled.subspace_in),
+                Projection(subspace_in, A_controlled.subspace_in),
                 A_controlled,
             ),
-            Identity(A_controlled.subspace_out, subspace_mid),
+            Projection(A_controlled.subspace_out, subspace_mid),
         )
         B_controlled = ModifyControl(B_controlled, max(0, controlled_bits_A - controlled_bits_B), False)
         B_controlled = UnsafeMul(
             UnsafeMul(
-                Identity(subspace_mid, B_controlled.subspace_in),
+                Projection(subspace_mid, B_controlled.subspace_in),
                 B_controlled,
             ),
-            Identity(B_controlled.subspace_out, subspace_out),
+            Projection(B_controlled.subspace_out, subspace_out),
         )
 
         return UnsafeMul(A_controlled, B_controlled)
