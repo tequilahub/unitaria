@@ -3,11 +3,11 @@ from unitaria.nodes.node import Node
 
 from unitaria.nodes.basic.unsafe_multiplication import UnsafeMul
 from unitaria.nodes.basic.tensor import Tensor
-from unitaria.nodes.basic.compute_projection import ComputeProjection
+from unitaria.nodes.basic.compute_projection import SubspaceCircuit
 
 from unitaria.nodes.proxy_node import ProxyNode
-from unitaria.nodes.permutation import Permutation
-from unitaria.nodes.identity import Identity
+from unitaria.nodes.permutation.permutation import Permutation
+from unitaria.nodes.basic.identity import Identity
 from unitaria.subspace import Subspace
 
 
@@ -61,7 +61,7 @@ class Mul(ProxyNode):
                 projection_subspace = B_permuted.subspace_in
             A_permuted = Tensor(A_permuted, Identity(Subspace(0, 1)))
             B_permuted = Tensor(B_permuted, Identity(Subspace(0, 1)))
-            return UnsafeMul(UnsafeMul(A_permuted, ComputeProjection(projection_subspace)), B_permuted)
+            return UnsafeMul(UnsafeMul(A_permuted, SubspaceCircuit(projection_subspace)), B_permuted)
         else:
             return UnsafeMul(A_permuted, B_permuted)
 

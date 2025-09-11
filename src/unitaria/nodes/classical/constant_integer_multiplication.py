@@ -5,9 +5,9 @@ from unitaria.subspace import Subspace
 
 from unitaria.nodes.classical.constant_integer_addition import ConstantIntegerAddition
 from unitaria.nodes.proxy_node import ProxyNode
-from unitaria.nodes.identity import Identity
+from unitaria.nodes.basic.identity import Identity
 from unitaria.nodes.basic.block_diagonal import BlockDiagonal
-from unitaria.nodes.permutation import PermuteRegisters
+from unitaria.nodes.permutation.permutation import PermuteRegisters
 from unitaria.nodes.basic.adjoint import Adjoint
 from unitaria.nodes.basic.mul import Mul
 

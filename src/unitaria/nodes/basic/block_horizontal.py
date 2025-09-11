@@ -7,9 +7,9 @@ from unitaria.nodes.basic.adjoint import Adjoint
 from unitaria.nodes.basic.unsafe_multiplication import UnsafeMul
 from unitaria.nodes.basic.tensor import Tensor
 from unitaria.nodes.basic.block_diagonal import BlockDiagonal
-from unitaria.nodes.permutation import Permutation
+from unitaria.nodes.permutation.permutation import Permutation
 from unitaria.nodes.constants.constant_vector import ConstantVector
-from unitaria.nodes.identity import Identity
+from unitaria.nodes.basic.identity import Identity
 
 
 class BlockHorizontal(ProxyNode):

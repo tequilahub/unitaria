@@ -2,7 +2,7 @@ import pytest
 
 import numpy as np
 
-from unitaria.nodes import Increment, Identity, Add, Scale, Adjoint, ConstantUnitary, BlockHorizontal
+from unitaria.nodes import Increment, Identity, Add, Scale, Adjoint, ConstantUnitary, BlockHorizontal, Projection
 from unitaria.subspace import Subspace
 from unitaria.verifier import verify
 
@@ -174,7 +174,7 @@ def test_preconditioned_laplace_1d():
     C_F = None
 
     for i in range(L, 0, -1):
-        I_l = Identity(Subspace.from_dim(2**i - 1, bits=i), Subspace(i))
+        I_l = Projection(Subspace.from_dim(2**i - 1, bits=i), Subspace(i))
         N_l = Increment(i) @ I_l
         C_l = 2 ** (i / 2) * (I_l - N_l)
 
