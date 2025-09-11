@@ -323,7 +323,7 @@ class ControlledSubspace(Register):
             )
         ]
 
-    def circuit(self):
+    def circuit(self) -> Circuit:
         """
         A circuit which checks whether a state is inside the subspace.
 

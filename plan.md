@@ -40,12 +40,9 @@ Vielleicht von Numpy inspirieren lassen
 
 ## TODOS
 
-* Munich Software Quantum Forum
-* Move dimension from subspace to node -> PR (Matthias)
 * Abstract operations without circuit implementation
 * Operations from circuit implementations (Ram)
 * Nonlinear Beispiel (Jessica)
-* QSVT (Matthias)
 * plan.md nicht auf PyPi hochladen
 * Verify mit zufälliger Basis
 * Better custom verifications
@@ -56,6 +53,7 @@ Vielleicht von Numpy inspirieren lassen
 * tq_circuit Zugriffe entfernen
 * Qubits minimieren, z.B. Tensor sequentiell/parallel
 * Soll `*` auch für Tensor operationen benutzt werden?
+* Subspace.circuit should be cached property
 
 ## Example projects
 

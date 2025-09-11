@@ -1,3 +1,5 @@
+from functools import cached_property
+
 import numpy as np
 import tequila as tq
 from pyqsp.angle_sequence import QuantumSignalProcessingPhases
@@ -91,16 +93,25 @@ class QSVT(Node):
     def _normalization(self) -> float:
         return self.normalization * self.coefficients.output_normalization
 
+    @cached_property
+    def _subspace_ancillae(self):
+        return (
+            max(
+                self.A.subspace_in.circuit().tq_circuit.n_qubits,
+                self.A.subspace_out.circuit().tq_circuit.n_qubits,
+            )
+            - self.A.subspace_in.total_qubits
+            - 1
+        )
+
     def _subspace_in(self) -> Subspace:
-        # TODO: This might need more bits actually, since the projection
-        # circuits may need ancillas
-        return Subspace(self.A.subspace_in.registers, 1)
+        return Subspace(self.A.subspace_in.registers, 1 + self._subspace_ancillae)
 
     def _subspace_out(self) -> Subspace:
         if self.coefficients.degree() % 2 == 0:
-            return Subspace(self.A.subspace_in.registers, 1)
+            return Subspace(self.A.subspace_in.registers, 1 + self._subspace_ancillae)
         else:
-            return Subspace(self.A.subspace_out.registers, 1)
+            return Subspace(self.A.subspace_out.registers, 1 + self._subspace_ancillae)
 
     def _compute_internal(self, input: np.ndarray, compute, compute_adjoint) -> np.ndarray:
         # TODO: For now, the polynomial should either be odd or even
