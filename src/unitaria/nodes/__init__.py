@@ -38,33 +38,26 @@ from unitaria.nodes.multilinear_node import MultilinearNode
 
 from unitaria.nodes.constants.constant_vector import ConstantVector
 from unitaria.nodes.constants.constant_unitary import ConstantUnitary
+from unitaria.nodes.identity import Identity
 
-from unitaria.nodes.basic_operations.tensor import Tensor
-from unitaria.nodes.basic_operations.adjoint import Adjoint
-from unitaria.nodes.basic_operations.scale import Scale
-
+from unitaria.nodes.basic.tensor import Tensor
+from unitaria.nodes.basic.adjoint import Adjoint
+from unitaria.nodes.basic.scale import Scale
+from unitaria.nodes.basic.block_diagonal import BlockDiagonal
 
 from unitaria.nodes.permutation import Permutation
-from unitaria.nodes.controlled_operations.block_diagonal import BlockDiagonal
 
+from unitaria.nodes.basic.mul import Mul
+from unitaria.nodes.basic.add import Add
+from unitaria.nodes.basic.block_horizontal import BlockHorizontal
+from unitaria.nodes.basic.block_vertical import BlockVertical
 
-from unitaria.nodes.ring_operations.mul import Mul
-from unitaria.nodes.ring_operations.add import Add
-
-
-from unitaria.nodes.block_concatenation.block_horizontal import BlockHorizontal
-from unitaria.nodes.block_concatenation.block_vertical import BlockVertical
-
-
-from unitaria.nodes.identity import Identity
 from unitaria.nodes.nonlinear import ComponentwiseMul
 
-
-from unitaria.nodes.integer_arithmetic.constant_integer_addition import ConstantIntegerAddition
-from unitaria.nodes.integer_arithmetic.constant_integer_multiplication import ConstantIntegerMultiplication
-
-from unitaria.nodes.integer_arithmetic.increment import Increment
-from unitaria.nodes.integer_arithmetic.integer_addition import IntegerAddition
+from unitaria.nodes.classical.constant_integer_addition import ConstantIntegerAddition
+from unitaria.nodes.classical.constant_integer_multiplication import ConstantIntegerMultiplication
+from unitaria.nodes.classical.increment import Increment
+from unitaria.nodes.classical.integer_addition import IntegerAddition
 
 from unitaria.nodes.qsvt.qsvt import QSVT
 

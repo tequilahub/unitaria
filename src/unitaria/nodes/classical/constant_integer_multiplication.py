@@ -3,13 +3,13 @@ import numpy as np
 from ..node import Node
 from unitaria.subspace import Subspace
 
-from unitaria.nodes.integer_arithmetic.constant_integer_addition import ConstantIntegerAddition
+from unitaria.nodes.classical.constant_integer_addition import ConstantIntegerAddition
 from unitaria.nodes.proxy_node import ProxyNode
 from unitaria.nodes.identity import Identity
-from unitaria.nodes.controlled_operations.block_diagonal import BlockDiagonal
+from unitaria.nodes.basic.block_diagonal import BlockDiagonal
 from unitaria.nodes.permutation import PermuteRegisters
-from unitaria.nodes.basic_operations.adjoint import Adjoint
-from unitaria.nodes.ring_operations.mul import Mul
+from unitaria.nodes.basic.adjoint import Adjoint
+from unitaria.nodes.basic.mul import Mul
 
 
 class ConstantIntegerMultiplication(ProxyNode):

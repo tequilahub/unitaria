@@ -5,8 +5,8 @@ import tequila as tq
 from unitaria.nodes.node import Node
 from unitaria.nodes.proxy_node import ProxyNode
 from unitaria.subspace import Subspace, ZeroQubit
-from unitaria.nodes.basic_operations.unsafe_multiplication import UnsafeMul
-from unitaria.nodes.basic_operations.adjoint import Adjoint
+from unitaria.nodes.basic.unsafe_multiplication import UnsafeMul
+from unitaria.nodes.basic.adjoint import Adjoint
 from unitaria.circuit import Circuit
 
 

@@ -1,12 +1,12 @@
 import numpy as np
 
-from unitaria.nodes.controlled_operations.controlled import Controlled
-from unitaria.nodes.controlled_operations.modify_control import ModifyControl
-from unitaria.subspace import Subspace, ControlledSubspace
-from unitaria.nodes.basic_operations.unsafe_multiplication import UnsafeMul
-from unitaria.nodes.identity import Identity
-from unitaria.nodes.proxy_node import ProxyNode
 from unitaria.nodes.node import Node
+from unitaria.nodes.proxy_node import ProxyNode
+from unitaria.nodes.basic.controlled import Controlled
+from unitaria.nodes.basic.modify_control import ModifyControl
+from unitaria.nodes.basic.unsafe_multiplication import UnsafeMul
+from unitaria.nodes.identity import Identity
+from unitaria.subspace import Subspace, ControlledSubspace
 
 
 class BlockDiagonal(ProxyNode):
