@@ -1,9 +1,9 @@
 import numpy as np
 from unitaria.nodes.node import Node
 
-from unitaria.nodes.basic_operations.unsafe_multiplication import UnsafeMul
-from unitaria.nodes.basic_operations.tensor import Tensor
-from unitaria.nodes.basic_operations.compute_projection import ComputeProjection
+from unitaria.nodes.basic.unsafe_multiplication import UnsafeMul
+from unitaria.nodes.basic.tensor import Tensor
+from unitaria.nodes.basic.compute_projection import ComputeProjection
 
 from unitaria.nodes.proxy_node import ProxyNode
 from unitaria.nodes.permutation import Permutation

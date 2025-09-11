@@ -1,7 +1,7 @@
 from unitaria.nodes.proxy_node import ProxyNode
 from unitaria.nodes.node import Node
-from unitaria.nodes.basic_operations.tensor import Tensor
-from unitaria.nodes.ring_operations.mul import Mul
+from unitaria.nodes.basic.tensor import Tensor
+from unitaria.nodes.basic.mul import Mul
 from unitaria.nodes.identity import Identity
 from unitaria.subspace import Subspace
 

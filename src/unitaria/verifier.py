@@ -5,7 +5,7 @@ Module for verifying the correctess of nodes.
 import numpy as np
 
 from unitaria.nodes.node import Node
-from unitaria.nodes.basic_operations.adjoint import Adjoint
+from unitaria.nodes.basic.adjoint import Adjoint
 from rich.console import Console
 from rich.syntax import Syntax
 
