@@ -143,7 +143,7 @@ class Node(ABC):
         """
         Tests whether this node encodes a vector or a matrix.
         """
-        return self.subspace_in.is_trivial()
+        return self.dimension_in == 1
 
     @abstractmethod
     def compute(self, input: np.ndarray) -> np.ndarray:
@@ -219,7 +219,7 @@ class Node(ABC):
         if self.is_vector() and not force_matrix:
             return self.compute(np.array([1], dtype=np.complex128))
         else:
-            return self.compute(np.eye(self.subspace_in.dimension, dtype=np.complex128)).T
+            return self.compute(np.eye(self.dimension_in, dtype=np.complex128)).T
 
     def compute_norm(self, input: np.array | None) -> float:
         """
@@ -241,7 +241,7 @@ class Node(ABC):
         :param input:
             The index of the optional initial state, with which this node
             should be simulated. Should be a number between ``0`` and
-            ``node.subspace_out.dimension - 1``
+            ``node.dimension_out - 1``
         """
         if self.is_vector() and input is None:
             input = 0
@@ -249,9 +249,9 @@ class Node(ABC):
             wavefunction = self.circuit.simulate(input=input)
             return self.normalization * self.subspace_out.project(wavefunction)
         else:
-            output = np.zeros((self.subspace_out.dimension, self.subspace_in.dimension))
+            output = np.zeros((self.dimension_out, self.dimension_in))
             for i, b in enumerate(self.subspace_in.enumerate_basis()):
-                input = np.zeros(self.subspace_in.dimension, dtype=np.complex128)
+                input = np.zeros(self.dimension_in, dtype=np.complex128)
                 input[i] = 1
                 output[i] = self.normalization * self.subspace_out.project(self.circuit.simulate(b, backend="qulacs"))
             return output
