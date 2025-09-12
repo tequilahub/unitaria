@@ -35,6 +35,7 @@ by decomposing them into other operations.
 from unitaria.nodes.node import Node
 from unitaria.nodes.proxy_node import ProxyNode
 from unitaria.nodes.multilinear_node import MultilinearNode
+from unitaria.nodes.abstract_node import AbstractNode
 
 from unitaria.nodes.constants.constant_vector import ConstantVector
 from unitaria.nodes.constants.constant_unitary import ConstantUnitary
@@ -66,6 +67,7 @@ __all__ = [
     "Node",
     "ProxyNode",
     "MultilinearNode",
+    "AbstractNode",
     "ConstantVector",
     "ConstantUnitary",
     "Tensor",
