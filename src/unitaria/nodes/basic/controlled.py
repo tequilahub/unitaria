@@ -37,8 +37,7 @@ class Controlled(Node):
     ) -> Circuit:
         control_qubit = target[self.A.target_qubit_count()]
         circuit = self.A.circuit(target[: self.A.target_qubit_count()], clean_ancillae, borrowed_ancillae)
-        circuit = circuit.add_controls(control_qubit)
-        return Circuit(circuit)
+        return circuit.add_controls(control_qubit)
 
     def clean_ancilla_count(self) -> int:
         return self.A.clean_ancilla_count()

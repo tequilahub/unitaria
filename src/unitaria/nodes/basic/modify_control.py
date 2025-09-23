@@ -89,7 +89,6 @@ class ModifyControl(Node):
         circuit += original_circuit.map_qubits(qubit_map)
         if self.swap_control_state:
             circuit += tq.gates.X(control_qubit_post)
-        circuit.n_qubits = self.target_qubit_count()
         return circuit
 
     def clean_ancilla_count(self) -> int:

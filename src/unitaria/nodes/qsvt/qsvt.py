@@ -152,13 +152,19 @@ class QSVT(Node):
         rotation_bit = clean_ancillae[-1]
         circuit += tq.gates.H(rotation_bit)
 
+        node_circuit = self.A.circuit(target, clean_ancillae[:-1], borrowed_ancillae)
+        subspace_in_circuit = self.A.subspace_in.circuit(target, flag=clean_ancillae[-1], ancillae=clean_ancillae[:-1])
+        subspace_out_circuit = self.A.subspace_out.circuit(
+            target, flag=clean_ancillae[-1], ancillae=clean_ancillae[:-1]
+        )
+
         for i, angle in enumerate(reversed(self.coefficients.angles_Wx())):
             if i % 2 == 0:
-                circuit += self.A.circuit(target, clean_ancillae[:-1], borrowed_ancillae)
-                circuit += self.A.subspace_out.circuit(target, flag=clean_ancillae[-1], ancillae=clean_ancillae[:-1])
+                circuit += node_circuit
+                circuit += subspace_out_circuit
             else:
-                circuit += self.A.circuit(target, clean_ancillae[:-1], borrowed_ancillae).adjoint()
-                circuit += self.A.subspace_in.circuit(target, flag=clean_ancillae[-1], ancillae=clean_ancillae[:-1])
+                circuit += node_circuit.adjoint()
+                circuit += subspace_in_circuit
 
             # TODO: Do not use projection circuits for last rotation
             circuit += tq.gates.Rz(-2 * angle, rotation_bit)
