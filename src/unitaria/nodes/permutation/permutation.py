@@ -124,7 +124,7 @@ class PermuteRegisters(Node):
     def _circuit(self) -> Circuit:
         if self.subspace.total_qubits == 0:
             circuit = Circuit()
-            circuit.tq_circuit.n_qubits = 1
+            circuit.n_qubits = 1
             return circuit
 
         register_qubits = []
@@ -142,7 +142,7 @@ class PermuteRegisters(Node):
         while i < self.subspace.total_qubits:
             j = permutation_map_qubits[i]
             if i != j:
-                circuit.tq_circuit += tq.gates.SWAP(i, j)
+                circuit += tq.gates.SWAP(i, j)
                 permutation_map_qubits[i], permutation_map_qubits[j] = (
                     permutation_map_qubits[j],
                     permutation_map_qubits[i],
@@ -153,9 +153,8 @@ class PermuteRegisters(Node):
             else:
                 i += 1
 
-        circuit.tq_circuit = circuit.tq_circuit.dagger()
-
-        circuit.tq_circuit.n_qubits = self.subspace.total_qubits
+        circuit = circuit.adjoint()
+        circuit.n_qubits = self.subspace.total_qubits
 
         return circuit
 

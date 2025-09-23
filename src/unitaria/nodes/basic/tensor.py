@@ -80,13 +80,11 @@ class Tensor(Node):
     def _circuit(self) -> Circuit:
         circuit = Circuit()
 
-        circuit_A = self.A.circuit.tq_circuit
-        circuit.tq_circuit += circuit_A
+        circuit += self.A.circuit
         qubit_map_B = dict([(i, i + self.A.subspace_in.total_qubits) for i in range(self.B.subspace_in.total_qubits)])
-        circuit_B = self.B.circuit.tq_circuit.map_qubits(qubit_map_B)
-        circuit.tq_circuit += circuit_B
+        circuit += self.B.circuit.map_qubits(qubit_map_B)
 
-        circuit.tq_circuit.n_qubits = self.A.subspace_in.total_qubits + self.B.subspace_in.total_qubits
+        circuit.n_qubits = self.A.subspace_in.total_qubits + self.B.subspace_in.total_qubits
 
         return circuit
 

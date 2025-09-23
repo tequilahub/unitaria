@@ -32,13 +32,13 @@ class SubspaceCircuit(Node):
         # TODO: most of the extra zeros are actually ancillas
         return Subspace(
             self.subspace.registers,
-            self.circuit.tq_circuit.n_qubits - self.subspace.total_qubits,
+            self.circuit.n_qubits - self.subspace.total_qubits,
         )
 
     def _subspace_out(self) -> Subspace:
         return Subspace(
             self.subspace.registers,
-            self.circuit.tq_circuit.n_qubits - self.subspace.total_qubits,
+            self.circuit.n_qubits - self.subspace.total_qubits,
         )
 
     def _normalization(self) -> float:

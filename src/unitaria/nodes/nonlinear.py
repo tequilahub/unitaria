@@ -76,6 +76,6 @@ class ComponentwiseMulMultilinear(Node):
         circuit = Circuit()
 
         for i in range(self.subspace.total_qubits):
-            circuit.tq_circuit += tq.gates.CNOT(i, i + self.subspace.total_qubits)
+            circuit += tq.gates.CNOT(i, i + self.subspace.total_qubits)
 
         return circuit
