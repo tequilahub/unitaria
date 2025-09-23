@@ -205,15 +205,33 @@ class Node(ABC):
             # Make sure that all passed qubit indices are unique
             assert len(set(target) | set(clean_ancillae) | set(borrowed_ancillae)) == total_num
 
-        circuit = self._circuit(
-            target[: self.target_qubit_count()],
-            clean_ancillae[: self.clean_ancilla_count()],
-            borrowed_ancillae[: self.borrowed_ancilla_count()],
+        circuit = self._cached_circuit.map_qubits(
+            {i: target[i] for i in range(self.target_qubit_count())}
+            | {self.target_qubit_count() + i: clean_ancillae[i] for i in range(self.clean_ancilla_count())}
+            | {
+                self.target_qubit_count() + self.clean_ancilla_count() + i: borrowed_ancillae[i]
+                for i in range(self.borrowed_ancilla_count())
+            }
         )
         circuit.n_qubits = (
             max(max(target, default=0), max(clean_ancillae, default=0), max(borrowed_ancillae, default=0)) + 1
         )
         return circuit
+
+    @cached_property
+    def _cached_circuit(self):
+        """
+        Calls _circuit with target, clean_ancillae and borrowed_ancillae
+        being the qubits 0, 1, ... so that the result can be cached.
+        This is then mapped by circuit to the actually requested qubit indices.
+        """
+        target = range(self.target_qubit_count())
+        clean_ancillae = range(self.target_qubit_count(), self.target_qubit_count() + self.clean_ancilla_count())
+        borrowed_ancillae = range(
+            self.target_qubit_count() + self.clean_ancilla_count(),
+            self.target_qubit_count() + self.clean_ancilla_count() + self.borrowed_ancilla_count(),
+        )
+        return self._circuit(target, clean_ancillae, borrowed_ancillae)
 
     @abstractmethod
     def _circuit(
