@@ -73,7 +73,7 @@ class Scale(Node):
     def _circuit(self) -> Circuit:
         circuit = Circuit()
         circuit += self.A.circuit
-        circuit.tq_circuit += tq.circuit.gates.GlobalPhase(self.global_phase)
+        circuit += tq.circuit.gates.GlobalPhase(self.global_phase)
         return circuit
 
 

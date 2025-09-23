@@ -48,5 +48,5 @@ class Identity(Node):
         circuit = Circuit()
         # TODO: Hacky because tequila does not really support circuits without qubits
         if self.subspace.total_qubits > 0:
-            circuit.tq_circuit.n_qubits = self.subspace.total_qubits
+            circuit.n_qubits = self.subspace.total_qubits
         return circuit

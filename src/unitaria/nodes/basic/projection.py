@@ -66,5 +66,5 @@ class Projection(Node):
         circuit = Circuit()
         # TODO: Hacky because tequila does not really support circuits without qubits
         if self.subspace_from.total_qubits > 0:
-            circuit.tq_circuit.n_qubits = self.subspace_from.total_qubits
+            circuit.n_qubits = self.subspace_from.total_qubits
         return circuit
