@@ -2,12 +2,13 @@ import numpy as np
 import tequila as tq
 
 from ..node import Node
+from .classical import Classical
 from unitaria.subspace import Subspace
 from unitaria.circuit import Circuit
 from unitaria.circuits.arithmetic import increment_circuit_single_ancilla
 
 
-class Increment(Node):
+class Increment(Classical):
     """
     Node implementing the (wrapping) increment of an integer.
 
@@ -18,9 +19,7 @@ class Increment(Node):
     bits: int
 
     def __init__(self, bits: int):
-        super().__init__(2**bits, 2**bits)
-        if bits < 1:
-            raise ValueError()
+        super().__init__(bits, bits)
         self.bits = bits
 
     def children(self) -> list[Node]:
@@ -41,14 +40,11 @@ class Increment(Node):
         else:
             return Subspace(self.bits, 1)
 
-    def _normalization(self) -> float:
-        return 1
+    def compute_classical(self, input: np.ndarray) -> np.ndarray:
+        return (input + 1) % 2**self.bits
 
-    def compute(self, input: np.ndarray) -> np.ndarray:
-        return np.roll(input, 1, axis=-1)
-
-    def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
-        return np.roll(input, -1, axis=-1)
+    def compute_reverse_classical(self, input: np.ndarray) -> np.ndarray:
+        return (input - 1) % 2**self.bits
 
     def _circuit(self) -> Circuit:
         if self.bits <= 3:
