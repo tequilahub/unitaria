@@ -106,13 +106,13 @@ class QSVT(Node):
         )
 
     def _subspace_in(self) -> Subspace:
-        return Subspace(self.A.subspace_in.registers, self._subspace_ancillae + 1)
+        return Subspace(self.A.subspace_in.registers, 1)
 
     def _subspace_out(self) -> Subspace:
         if self.coefficients.degree() % 2 == 0:
-            return Subspace(self.A.subspace_in.registers, self._subspace_ancillae + 1)
+            return Subspace(self.A.subspace_in.registers, 1)
         else:
-            return Subspace(self.A.subspace_out.registers, self._subspace_ancillae + 1)
+            return Subspace(self.A.subspace_out.registers, 1)
 
     def _compute_internal(self, input: np.ndarray, compute, compute_adjoint) -> np.ndarray:
         # TODO: For now, the polynomial should either be odd or even
@@ -149,14 +149,12 @@ class QSVT(Node):
         self, target: Sequence[int], clean_ancillae: Sequence[int], borrowed_ancillae: Sequence[int]
     ) -> Circuit:
         circuit = Circuit()
-        rotation_bit = clean_ancillae[-1]
+        rotation_bit = target[-1]
         circuit += tq.gates.H(rotation_bit)
 
-        node_circuit = self.A.circuit(target, clean_ancillae[:-1], borrowed_ancillae)
-        subspace_in_circuit = self.A.subspace_in.circuit(target, flag=clean_ancillae[-1], ancillae=clean_ancillae[:-1])
-        subspace_out_circuit = self.A.subspace_out.circuit(
-            target, flag=clean_ancillae[-1], ancillae=clean_ancillae[:-1]
-        )
+        node_circuit = self.A.circuit(target[:-1], clean_ancillae, borrowed_ancillae)
+        subspace_in_circuit = self.A.subspace_in.circuit(target, flag=target[-1], ancillae=clean_ancillae)
+        subspace_out_circuit = self.A.subspace_out.circuit(target, flag=target[-1], ancillae=clean_ancillae)
 
         for i, angle in enumerate(reversed(self.coefficients.angles_Wx())):
             if i % 2 == 0:
@@ -170,21 +168,19 @@ class QSVT(Node):
             circuit += tq.gates.Rz(-2 * angle, rotation_bit)
 
             if i % 2 == 0:
-                circuit += self.A.subspace_out.circuit(target, flag=clean_ancillae[-1], ancillae=clean_ancillae[:-1])
+                circuit += subspace_out_circuit
             else:
-                circuit += self.A.subspace_in.circuit(target, flag=clean_ancillae[-1], ancillae=clean_ancillae[:-1])
+                circuit += subspace_in_circuit
 
         circuit += tq.gates.H(rotation_bit)
 
         return circuit
 
     def clean_ancilla_count(self) -> int:
-        return (
-            max(
-                self.A.subspace_in.clean_ancilla_count(),
-                self.A.subspace_out.clean_ancilla_count(),
-            )
-            + 1
+        return max(
+            self.A.subspace_in.clean_ancilla_count(),
+            self.A.subspace_out.clean_ancilla_count(),
+            self.A.clean_ancilla_count(),
         )
 
     def borrowed_ancilla_count(self) -> int:

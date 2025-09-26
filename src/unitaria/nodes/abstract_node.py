@@ -57,13 +57,7 @@ class AbstractNode(Node):
         raise NotImplementedError("Abstract node has no circuit implementation")
 
     def clean_ancilla_count(self) -> int:
-        return (
-            max(
-                self.A.subspace_in.clean_ancilla_count(),
-                self.A.subspace_out.clean_ancilla_count(),
-            )
-            + 1
-        )
+        raise NotImplementedError("Abstract node has no circuit implementation")
 
     def borrowed_ancilla_count(self) -> int:
-        return 0
+        raise NotImplementedError("Abstract node has no circuit implementation")
