@@ -1,4 +1,3 @@
-import numpy as np
 from unitaria.nodes.block_encoding import BlockEncoding
 from unitaria.subspace import Subspace
 from unitaria.circuit import Circuit
