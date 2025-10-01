@@ -37,11 +37,27 @@ class BlockEncoding(Node):
         return self._circuit_obj
 
     def compute(self, input: np.ndarray) -> np.ndarray:
-        return self.simulate(input)
+        # handle both verctor and matrix cases
+        if input.ndim == 1:
+            return self.simulate(input)
+        else:
+            # multiple dimentions (batch): apply simulate to each vector in the batch
+            results = np.zeros_like(input)
+            for idx in np.ndindex(input.shape[:-1]):
+                results[idx] = self.simulate(input[idx])
+            return results
 
     def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
-        # Adjoint circuit, project into subspace_out, then subspace_in
-        projected_input = self.subspace_out.project(input)
-        output = self.circuit.adjoint().simulate(projected_input)
-        projected_output = self.subspace_in.project(output)
+        # project input into subspace_out, handle both vector and matrix cases
+        if input.ndim == 1:
+            projected_input = self.subspace_out.project(input)
+            output = self.circuit.adjoint().simulate(projected_input)
+            projected_output = self.subspace_in.project(output)
+        else:
+            shape = input.shape
+            projected_output = np.zeros_like(input)
+            for idx in np.ndindex(shape[:-1]):
+                proj_in = self.subspace_out.project(input[idx])
+                out = self.circuit.adjoint().simulate(proj_in)
+                projected_output[idx] = self.subspace_in.project(out)
         return self.normalization * projected_output

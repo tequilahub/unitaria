@@ -3,6 +3,7 @@ from unitaria.nodes.block_encoding import BlockEncoding
 from unitaria.subspace import Subspace
 from unitaria.circuit import Circuit
 import tequila as tq
+from unitaria.verifier import verify
 
 
 def create_block_encoding():
@@ -19,14 +20,4 @@ def create_block_encoding():
 
 def test_block_encoding_x_gate_on_first_qubit():
     block_encoding = create_block_encoding()
-    input_vec = np.array([1, 0, 0, 0], dtype=np.complex128)
-    expected_output = np.array([0, 1, 0, 0], dtype=np.complex128)
-    expected_output_adj = np.array([0, 1, 0, 0], dtype=np.complex128)
-
-    output = block_encoding.compute(input_vec)
-    output_adj = block_encoding.compute_adjoint(input_vec)
-
-    assert np.array_equal(output, expected_output), "Output does not match expected result after X gate."
-    assert np.array_equal(output_adj, expected_output_adj), (
-        "Adjoint output does not match expected result after X gate."
-    )
+    verify(block_encoding)
