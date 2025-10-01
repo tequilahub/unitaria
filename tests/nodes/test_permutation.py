@@ -1,7 +1,7 @@
 import pytest
 
 from unitaria.subspace import Subspace, ControlledSubspace, ID, ZeroQubit
-from unitaria.nodes.permutation import _find_matching_partitioning, Permutation, PermuteRegisters
+from unitaria.nodes.permutation.permutation import _find_matching_partitioning, Permutation, PermuteRegisters
 from unitaria.verifier import verify
 
 

@@ -77,12 +77,12 @@ class ModifyControl(Node):
 
         circuit = Circuit()
         if self.swap_control_state:
-            circuit.tq_circuit += tq.gates.X(control_qubit_post)
+            circuit += tq.gates.X(control_qubit_post)
 
         qubit_map = dict([(i, i) for i in range(subspace.total_qubits)])
         qubit_map[control_qubit_pre] = control_qubit_post
-        circuit.tq_circuit += self.A.circuit.tq_circuit.map_qubits(qubit_map)
+        circuit += self.A.circuit.map_qubits(qubit_map)
         if self.swap_control_state:
-            circuit.tq_circuit += tq.gates.X(control_qubit_post)
+            circuit += tq.gates.X(control_qubit_post)
         circuit.n_qubits = self.subspace_in.total_qubits
         return circuit

@@ -1,12 +1,13 @@
 import numpy as np
 
 from ..node import Node
+from .classical import Classical
 from unitaria.subspace import Subspace
 from unitaria.circuit import Circuit
 from unitaria.circuits.arithmetic import const_addition_circuit
 
 
-class ConstantIntegerAddition(Node):
+class ConstantIntegerAddition(Classical):
     """
     Node implementing the (wrapping) addition of a constant to an integer.
 
@@ -20,9 +21,7 @@ class ConstantIntegerAddition(Node):
     constant: int
 
     def __init__(self, bits: int, constant: int):
-        super().__init__(2**bits, 2**bits)
-        if bits < 1:
-            raise ValueError()
+        super().__init__(bits, bits)
         self.bits = bits
         self.constant = constant
 
@@ -38,14 +37,11 @@ class ConstantIntegerAddition(Node):
     def _subspace_out(self) -> Subspace:
         return Subspace(self.bits, 2)
 
-    def _normalization(self) -> float:
-        return 1
+    def compute_classical(self, input: np.ndarray) -> np.ndarray:
+        return (input + self.constant) % 2**self.bits
 
-    def compute(self, input: np.ndarray) -> np.ndarray:
-        return np.roll(input, self.constant, axis=-1)
-
-    def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
-        return np.roll(input, -self.constant, axis=-1)
+    def compute_reverse_classical(self, input: np.ndarray) -> np.ndarray:
+        return (input - self.constant) % 2**self.bits
 
     def _circuit(self) -> Circuit:
         circuit = const_addition_circuit(range(self.bits), self.constant, [self.bits, self.bits + 1])

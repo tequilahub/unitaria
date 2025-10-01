@@ -97,8 +97,8 @@ class QSVT(Node):
     def _subspace_ancillae(self):
         return (
             max(
-                self.A.subspace_in.circuit().tq_circuit.n_qubits,
-                self.A.subspace_out.circuit().tq_circuit.n_qubits,
+                self.A.subspace_in.circuit().n_qubits,
+                self.A.subspace_out.circuit().n_qubits,
             )
             - self.A.subspace_in.total_qubits
             - 1
@@ -147,7 +147,7 @@ class QSVT(Node):
     def _circuit(self) -> Circuit:
         circuit = Circuit()
         rotation_bit = self.A.subspace_in.total_qubits
-        circuit.tq_circuit += tq.gates.H(rotation_bit)
+        circuit += tq.gates.H(rotation_bit)
 
         for i, angle in enumerate(reversed(self.coefficients.angles_Wx())):
             if i % 2 == 0:
@@ -158,13 +158,13 @@ class QSVT(Node):
                 circuit += self.A.subspace_in.circuit()
 
             # TODO: Do not use projection circuits for last rotation
-            circuit.tq_circuit += tq.gates.Rz(-2 * angle, rotation_bit)
+            circuit += tq.gates.Rz(-2 * angle, rotation_bit)
 
             if i % 2 == 0:
                 circuit += self.A.subspace_out.circuit()
             else:
                 circuit += self.A.subspace_in.circuit()
 
-        circuit.tq_circuit += tq.gates.H(rotation_bit)
+        circuit += tq.gates.H(rotation_bit)
 
         return circuit

@@ -75,11 +75,11 @@ class Verifier:
         assert node.dimension_out == node.subspace_out.dimension
         if node.subspace_in.total_qubits == 0:
             # TODO: Tequila does not support circuits without qubits
-            assert node.circuit.tq_circuit.n_qubits == 1
+            assert node.circuit.n_qubits == 1
             assert node.subspace_out.total_qubits == 0
         else:
-            assert node.circuit.tq_circuit.n_qubits == node.subspace_in.total_qubits
-            assert node.circuit.tq_circuit.n_qubits == node.subspace_out.total_qubits
+            assert node.circuit.n_qubits == node.subspace_in.total_qubits
+            assert node.circuit.n_qubits == node.subspace_out.total_qubits
 
     def _compare_batch_compute(self, node: Node, reference: np.ndarray | None = None):
         batch_computed = node.toarray(force_matrix=True)

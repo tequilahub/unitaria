@@ -8,9 +8,9 @@ from unitaria.nodes.basic.tensor import Tensor
 
 from unitaria.nodes.proxy_node import ProxyNode
 from unitaria.nodes.basic.block_diagonal import BlockDiagonal
-from unitaria.nodes.permutation import Permutation
+from unitaria.nodes.permutation.permutation import Permutation
 from unitaria.nodes.constants.constant_vector import ConstantVector
-from unitaria.nodes.identity import Identity
+from unitaria.nodes.basic.identity import Identity
 
 
 class Add(ProxyNode):
@@ -29,9 +29,9 @@ class Add(ProxyNode):
     B: Node
 
     def __init__(self, A: Node, B: Node):
-        if A.subspace_in.dimension != B.subspace_in.dimension:
+        if A.dimension_in != B.dimension_in:
             raise ValueError(f"dimensions {A.dimension_in} and {B.dimension_in} do not match")
-        if A.subspace_out.dimension != B.subspace_out.dimension:
+        if A.dimension_out != B.dimension_out:
             raise ValueError(f"dimensions {A.dimension_out} and {B.dimension_out} do not match")
         super().__init__(A.dimension_in, A.dimension_out)
         self.A = A

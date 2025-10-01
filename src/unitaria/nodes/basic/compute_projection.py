@@ -6,13 +6,13 @@ from unitaria.subspace import Subspace
 from unitaria.nodes.node import Node
 
 
-class ComputeProjection(Node):
+class SubspaceCircuit(Node):
     """
     Node, which computes wether a vector is in a given subspace.
 
     This is mostly used internally, for example for the `unitaria.nodes.Mul`
     node. The result of the check is stored in an additional qubit, for which
-    `ComputeProjection.subspace_in` and `ComputeProjection.subspace_out` are set
+    `SubspaceCircuit.subspace_in` and `SubspaceCircuit.subspace_out` are set
     to zero.
 
     :param subspace:
@@ -32,13 +32,13 @@ class ComputeProjection(Node):
         # TODO: most of the extra zeros are actually ancillas
         return Subspace(
             self.subspace.registers,
-            self.circuit.tq_circuit.n_qubits - self.subspace.total_qubits,
+            self.circuit.n_qubits - self.subspace.total_qubits,
         )
 
     def _subspace_out(self) -> Subspace:
         return Subspace(
             self.subspace.registers,
-            self.circuit.tq_circuit.n_qubits - self.subspace.total_qubits,
+            self.circuit.n_qubits - self.subspace.total_qubits,
         )
 
     def _normalization(self) -> float:

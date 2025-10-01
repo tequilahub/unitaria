@@ -1,7 +1,7 @@
 from unitaria.nodes.basic.block_horizontal import BlockHorizontal
 from unitaria.nodes.basic.block_vertical import BlockVertical
 from unitaria.nodes.classical.increment import Increment
-from unitaria.nodes.identity import Identity
+from unitaria.nodes.basic.identity import Identity
 from unitaria.subspace import Subspace
 from unitaria.verifier import verify
 

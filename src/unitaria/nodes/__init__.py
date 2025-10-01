@@ -35,17 +35,19 @@ by decomposing them into other operations.
 from unitaria.nodes.node import Node
 from unitaria.nodes.proxy_node import ProxyNode
 from unitaria.nodes.multilinear_node import MultilinearNode
+from unitaria.nodes.abstract_node import AbstractNode
 
 from unitaria.nodes.constants.constant_vector import ConstantVector
 from unitaria.nodes.constants.constant_unitary import ConstantUnitary
-from unitaria.nodes.identity import Identity
 
+from unitaria.nodes.basic.identity import Identity
+from unitaria.nodes.basic.projection import Projection
 from unitaria.nodes.basic.tensor import Tensor
 from unitaria.nodes.basic.adjoint import Adjoint
 from unitaria.nodes.basic.scale import Scale
 from unitaria.nodes.basic.block_diagonal import BlockDiagonal
 
-from unitaria.nodes.permutation import Permutation
+from unitaria.nodes.permutation.permutation import Permutation
 
 from unitaria.nodes.basic.mul import Mul
 from unitaria.nodes.basic.add import Add
@@ -65,6 +67,7 @@ __all__ = [
     "Node",
     "ProxyNode",
     "MultilinearNode",
+    "AbstractNode",
     "ConstantVector",
     "ConstantUnitary",
     "Tensor",
@@ -77,6 +80,7 @@ __all__ = [
     "BlockHorizontal",
     "BlockVertical",
     "Identity",
+    "Projection",
     "ComponentwiseMul",
     "ConstantIntegerAddition",
     "ConstantIntegerMultiplication",

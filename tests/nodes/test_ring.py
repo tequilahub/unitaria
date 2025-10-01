@@ -1,5 +1,5 @@
 from unitaria.nodes.classical.increment import Increment
-from unitaria.nodes.identity import Identity
+from unitaria.nodes.basic.identity import Identity
 from unitaria.subspace import Subspace
 from unitaria.verifier import verify
 

@@ -32,7 +32,4 @@ class Controlled(Node):
 
     def _circuit(self) -> Circuit:
         control_qubit = self.A.subspace_in.total_qubits
-        circuit = self.A.circuit.tq_circuit
-        circuit = circuit.add_controls(control_qubit)
-        circuit.n_qubits = control_qubit + 1
-        return Circuit(circuit)
+        return self.A.circuit.add_controls(control_qubit)

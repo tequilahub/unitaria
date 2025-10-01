@@ -182,7 +182,7 @@ class Subspace:
                 raise ValueError("Registers that aren't of type Qubit are unsupported")
 
             register_circuit = register.circuit()
-            register_ancillae = register_circuit.tq_circuit.n_qubits - register.total_qubits()
+            register_ancillae = register_circuit.n_qubits - register.total_qubits()
             # Main qubits get shifted by the offset
             register_map = {i: i + offset for i in range(register.total_qubits())}
             # Ancilla qubits get shifted to the flag qubit and following qubits
@@ -336,7 +336,7 @@ class ControlledSubspace(Register):
         control = self.total_qubits() - 1
         circuit_zero = self.case_zero.circuit()
         circuit_one = self.case_one.circuit()
-        max_qubits = max(circuit_zero.tq_circuit.n_qubits, circuit_one.tq_circuit.n_qubits)
+        max_qubits = max(circuit_zero.n_qubits, circuit_one.n_qubits)
         shift_map = {i: i for i in range(control)}
         # Qubits after the control qubit are shifted by one so they don't overlap with the control
         shift_map |= {j: j + 1 for j in range(control, max_qubits)}
