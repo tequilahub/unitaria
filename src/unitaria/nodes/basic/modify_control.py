@@ -1,3 +1,5 @@
+from typing import Sequence
+
 import numpy as np
 import tequila as tq
 
@@ -70,19 +72,27 @@ class ModifyControl(Node):
     def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
         raise NotImplementedError
 
-    def _circuit(self) -> Circuit:
+    def _circuit(
+        self, target: Sequence[int], clean_ancillae: Sequence[int], borrowed_ancillae: Sequence[int]
+    ) -> Circuit:
         subspace = self.A.subspace_in
-        control_qubit_pre = subspace.total_qubits - 1
-        control_qubit_post = control_qubit_pre + self.expand_control.total_qubits
+        control_qubit_pre = target[subspace.total_qubits - 1]
+        control_qubit_post = target[subspace.total_qubits + self.expand_control.total_qubits - 1]
 
         circuit = Circuit()
         if self.swap_control_state:
             circuit += tq.gates.X(control_qubit_post)
 
-        qubit_map = dict([(i, i) for i in range(subspace.total_qubits)])
+        original_circuit = self.A.circuit(target, clean_ancillae, borrowed_ancillae)
+        qubit_map = {t: t for t in range(original_circuit.n_qubits)}
         qubit_map[control_qubit_pre] = control_qubit_post
-        circuit += self.A.circuit.map_qubits(qubit_map)
+        circuit += original_circuit.map_qubits(qubit_map)
         if self.swap_control_state:
             circuit += tq.gates.X(control_qubit_post)
-        circuit.n_qubits = self.subspace_in.total_qubits
         return circuit
+
+    def clean_ancilla_count(self) -> int:
+        return self.A.clean_ancilla_count()
+
+    def borrowed_ancilla_count(self) -> int:
+        return self.A.borrowed_ancilla_count()

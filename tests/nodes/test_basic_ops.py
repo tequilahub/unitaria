@@ -7,7 +7,7 @@ from unitaria.nodes.basic.scale import Scale
 
 def test_tensor():
     A = Increment(1)
-    B = Identity(Subspace(1, 1))
+    B = Identity(Subspace(1))
 
     verify((A & B))
     verify((A & A))

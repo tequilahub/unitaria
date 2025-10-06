@@ -1,3 +1,5 @@
+from typing import Sequence
+
 import numpy as np
 
 from unitaria import Node, Subspace, Circuit
@@ -45,6 +47,14 @@ class FourierTransform(Node):
     def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
         return np.fft.ifft(input) * np.sqrt(2**self.bits)
 
-    def _circuit(self) -> Circuit:
+    def _circuit(
+        self, target: Sequence[int], clean_ancillae: Sequence[int], borrowed_ancillae: Sequence[int]
+    ) -> Circuit:
         # dagger() because the QFT uses different exponent sign conventions than the DFT
-        return Circuit(tq_circuit=qft_circuit(self.bits).dagger())
+        return Circuit(tq_circuit=qft_circuit(self.bits).dagger()).map_qubits({i: target[i] for i in range(self.bits)})
+
+    def clean_ancilla_count(self) -> int:
+        return 0
+
+    def borrowed_ancilla_count(self) -> int:
+        return 0

@@ -73,13 +73,11 @@ class Verifier:
     def _verify_circuit_subspaces(self, node: Node):
         assert node.dimension_in == node.subspace_in.dimension
         assert node.dimension_out == node.subspace_out.dimension
-        if node.subspace_in.total_qubits == 0:
+        expected_qubits = node.target_qubit_count() + node.clean_ancilla_count() + node.borrowed_ancilla_count()
+        if expected_qubits == 0:
             # TODO: Tequila does not support circuits without qubits
-            assert node.circuit.n_qubits == 1
-            assert node.subspace_out.total_qubits == 0
-        else:
-            assert node.circuit.n_qubits == node.subspace_in.total_qubits
-            assert node.circuit.n_qubits == node.subspace_out.total_qubits
+            expected_qubits = 1
+        assert node.circuit().n_qubits == expected_qubits
 
     def _compare_batch_compute(self, node: Node, reference: np.ndarray | None = None):
         batch_computed = node.toarray(force_matrix=True)
@@ -102,7 +100,7 @@ class Verifier:
             input = np.zeros(node.subspace_in.dimension, dtype=np.complex128)
             input[i] = 1
             computed = node.compute(input)
-            simulated = node.normalization * node.subspace_out.project(node.circuit.simulate(b, backend="qulacs"))
+            simulated = node.normalization * node.subspace_out.project(node.circuit().simulate(b, backend="qulacs"))
             if self.up_to_phase:
                 simulated = _bring_to_same_phase(computed, simulated)
             np.testing.assert_allclose(simulated, computed, atol=1e-8, err_msg=f"On input {i}:")

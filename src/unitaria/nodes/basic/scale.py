@@ -1,4 +1,5 @@
 from __future__ import annotations
+from typing import Sequence
 import numpy as np
 import tequila as tq
 
@@ -33,7 +34,7 @@ class Scale(Node):
     ):
         super().__init__(A.dimension_in, A.dimension_out)
         self.A = A
-        # TODO: assert_efficiency not implemented yet
+        # TODO: remove_efficiency not implemented yet
         assert remove_efficiency == 1
         self.remove_efficiency = remove_efficiency
         self.scale = np.abs(scale)
@@ -70,11 +71,19 @@ class Scale(Node):
         else:
             return np.exp(-1j * self.global_phase) * self.scale * self.A.compute_adjoint(input)
 
-    def _circuit(self) -> Circuit:
+    def _circuit(
+        self, target: Sequence[int], clean_ancillae: Sequence[int], borrowed_ancillae: Sequence[int]
+    ) -> Circuit:
         circuit = Circuit()
-        circuit += self.A.circuit
-        circuit += tq.circuit.gates.GlobalPhase(self.global_phase)
+        circuit += self.A.circuit(target, clean_ancillae, borrowed_ancillae)
+        circuit += tq.gates.GlobalPhase(self.global_phase)
         return circuit
+
+    def clean_ancilla_count(self) -> int:
+        return self.A.clean_ancilla_count()
+
+    def borrowed_ancilla_count(self) -> int:
+        return self.A.borrowed_ancilla_count()
 
 
 Node.__rmul__ = lambda A, s: Scale(A, s)

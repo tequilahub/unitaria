@@ -1,3 +1,5 @@
+from typing import Sequence
+
 import numpy as np
 
 from ..node import Node
@@ -48,8 +50,16 @@ class IntegerAddition(Classical):
         input2 = (input2 - input1) % 2**self.target_bits
         return input1 + input2 * 2**self.source_bits
 
-    def _circuit(self) -> Circuit:
-        source = range(self.source_bits)
-        target = range(self.source_bits, self.source_bits + self.target_bits)
+    def _circuit(
+        self, target: Sequence[int], clean_ancillae: Sequence[int], borrowed_ancillae: Sequence[int]
+    ) -> Circuit:
+        source = target[: self.source_bits]
+        target = target[self.source_bits :]
         circuit = addition_circuit(source, target)
         return Circuit(circuit)
+
+    def clean_ancilla_count(self) -> int:
+        return 0
+
+    def borrowed_ancilla_count(self) -> int:
+        return 0
