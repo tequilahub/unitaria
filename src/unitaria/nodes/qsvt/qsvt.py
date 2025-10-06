@@ -1,4 +1,3 @@
-from functools import cached_property
 from typing import Sequence
 
 import numpy as np
@@ -93,17 +92,6 @@ class QSVT(Node):
 
     def _normalization(self) -> float:
         return self.normalization * self.coefficients.output_normalization
-
-    @cached_property
-    def _subspace_ancillae(self):
-        return (
-            max(
-                self.A.subspace_in.clean_ancilla_count(),
-                self.A.subspace_out.clean_ancilla_count(),
-            )
-            - self.A.subspace_in.total_qubits
-            - 1
-        )
 
     def _subspace_in(self) -> Subspace:
         return Subspace(self.A.subspace_in.registers, 1)
