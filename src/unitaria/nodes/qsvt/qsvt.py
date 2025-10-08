@@ -35,7 +35,7 @@ class QSVTCoefficients:
                 ]
             state[0] *= np.exp(self.angles[-1] * 1j)
             state[1] *= np.exp(self.angles[-1] * 1j)
-            self.polynomial = np.polynomial.Chebyshev(state[0].coef.real)
+            self.polynomial = np.polynomial.Chebyshev(state[0].coef.real.astype(np.complex128))
 
             self.output_normalization = 1
         else:
