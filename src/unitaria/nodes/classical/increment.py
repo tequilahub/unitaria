@@ -20,7 +20,9 @@ class Increment(Classical):
 
     bits: int
 
-    def __init__(self, bits: int):
+    def __init__(self, *args, bits: int = None):
+        if len(args) > 0 or bits is None:
+            raise TypeError("Increment constructor requires bits=... as a keyword argument.")
         super().__init__(bits, bits)
         self.bits = bits
 
@@ -31,10 +33,10 @@ class Increment(Classical):
         return {"bits": self.bits}
 
     def _subspace_in(self) -> Subspace:
-        return Subspace(self.bits)
+        return Subspace(bits=self.bits)
 
     def _subspace_out(self) -> Subspace:
-        return Subspace(self.bits)
+        return Subspace(bits=self.bits)
 
     def compute_classical(self, input: np.ndarray) -> np.ndarray:
         return (input + 1) % 2**self.bits
