@@ -37,27 +37,38 @@ class BlockEncoding(Node):
         return self._circuit_obj
 
     def compute(self, input: np.ndarray) -> np.ndarray:
-        # handle both verctor and matrix cases
+        # handle both vector and matrix cases
         if input.ndim == 1:
-            return self.simulate(input)
+            # extend input vector to full hilbert space size
+            full_input = np.zeros(2**self._circuit_obj.n_qubits, dtype=np.complex128)
+            basis_indices = self._subspace_in_obj.enumerate_basis()
+            full_input[basis_indices] = input
+            output = self.simulate(full_input)
+            # project output onto subspace_out
+            return self._subspace_out_obj.project(output)
         else:
-            # multiple dimentions (batch): apply simulate to each vector in the batch
-            results = np.zeros_like(input)
+            # multiple dimensions (batch): apply simulate to each vector in the batch
+            results = np.zeros((input.shape[0], self._subspace_out_obj.dimension), dtype=np.complex128)
             for idx in np.ndindex(input.shape[:-1]):
-                results[idx] = self.simulate(input[idx])
+                full_input = np.zeros(2**self._circuit_obj.n_qubits, dtype=np.complex128)
+                basis_indices = self._subspace_in_obj.enumerate_basis()
+                full_input[basis_indices] = input[idx]
+                output = self.simulate(full_input)
+                # project output onto subspace_out
+                results[idx] = self._subspace_out_obj.project(output)
             return results
 
     def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
         # project input into subspace_out, handle both vector and matrix cases
         if input.ndim == 1:
-            projected_input = self.subspace_out.project(input)
-            output = self.circuit.adjoint().simulate(projected_input)
-            projected_output = self.subspace_in.project(output)
+            projected_input = self._subspace_out_obj.project(input)
+            output = self._circuit_obj.adjoint().simulate(projected_input)
+            projected_output = self._subspace_in_obj.project(output)
         else:
-            shape = input.shape
-            projected_output = np.zeros_like(input)
-            for idx in np.ndindex(shape[:-1]):
-                proj_in = self.subspace_out.project(input[idx])
-                out = self.circuit.adjoint().simulate(proj_in)
-                projected_output[idx] = self.subspace_in.project(out)
-        return self.normalization * projected_output
+            results = np.zeros((input.shape[0], self._subspace_in_obj.dimension), dtype=np.complex128)
+            for idx in np.ndindex(input.shape[:-1]):
+                proj_in = self._subspace_out_obj.project(input[idx])
+                out = self._circuit_obj.adjoint().simulate(proj_in)
+                results[idx] = self._subspace_in_obj.project(out)
+            projected_output = results
+        return self._normalization_value * projected_output

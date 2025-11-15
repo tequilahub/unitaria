@@ -7,7 +7,7 @@ from unitaria.verifier import verify
 
 def create_block_encoding():
     # initialize a block encoding with a simple X gate on the first qubit
-    subspace_in = Subspace(2)
+    subspace_in = Subspace(1, 1)
     subspace_out = Subspace(2)
     tequila_circuit = tq.QCircuit()
     tequila_circuit += tq.gates.X(0)
