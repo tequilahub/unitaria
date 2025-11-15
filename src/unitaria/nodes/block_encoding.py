@@ -33,8 +33,14 @@ class BlockEncoding(Node):
     def _normalization(self) -> float:
         return self._normalization_value
 
-    def _circuit(self) -> Circuit:
+    def _circuit(self, target, clean_ancillae=None, borrowd_ancillae=None) -> Circuit:
         return self._circuit_obj
+
+    def clean_ancilla_count(self):
+        return 0
+
+    def borrowed_ancilla_count(self):
+        return 0
 
     def compute(self, input: np.ndarray) -> np.ndarray:
         # handle both vector and matrix cases

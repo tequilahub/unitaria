@@ -1,4 +1,7 @@
 from __future__ import annotations
+
+from typing import Sequence
+
 import numpy as np
 
 from unitaria.circuit import Circuit
@@ -45,11 +48,12 @@ class UnsafeMul(Node):
         input = self.A.compute_adjoint(input)
         return input
 
-    def _circuit(self) -> Circuit:
+    def _circuit(
+        self, target: Sequence[int], clean_ancillae: Sequence[int], borrowed_ancillae: Sequence[int]
+    ) -> Circuit:
         circuit = Circuit()
-        circuit += self.A.circuit
-        circuit += self.B.circuit
-
+        circuit += self.A.circuit(target, clean_ancillae, borrowed_ancillae)
+        circuit += self.B.circuit(target, clean_ancillae, borrowed_ancillae)
         return circuit
 
     def _subspace_in(self) -> Subspace:
@@ -68,3 +72,9 @@ class UnsafeMul(Node):
 
     def _normalization(self) -> float:
         return self.A.normalization * self.B.normalization
+
+    def clean_ancilla_count(self) -> int:
+        return max(self.A.clean_ancilla_count(), self.B.clean_ancilla_count())
+
+    def borrowed_ancilla_count(self) -> int:
+        return max(self.A.borrowed_ancilla_count(), self.B.borrowed_ancilla_count())

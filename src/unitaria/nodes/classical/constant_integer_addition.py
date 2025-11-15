@@ -1,3 +1,5 @@
+from typing import Sequence
+
 import numpy as np
 
 from ..node import Node
@@ -32,10 +34,10 @@ class ConstantIntegerAddition(Classical):
         return {"bits": self.bits, "constant": self.constant}
 
     def _subspace_in(self) -> Subspace:
-        return Subspace(self.bits, 2)
+        return Subspace(self.bits)
 
     def _subspace_out(self) -> Subspace:
-        return Subspace(self.bits, 2)
+        return Subspace(self.bits)
 
     def compute_classical(self, input: np.ndarray) -> np.ndarray:
         return (input + self.constant) % 2**self.bits
@@ -43,8 +45,14 @@ class ConstantIntegerAddition(Classical):
     def compute_reverse_classical(self, input: np.ndarray) -> np.ndarray:
         return (input - self.constant) % 2**self.bits
 
-    def _circuit(self) -> Circuit:
-        circuit = const_addition_circuit(range(self.bits), self.constant, [self.bits, self.bits + 1])
-        circuit.n_qubits = self.subspace_in.total_qubits
-
+    def _circuit(
+        self, target: Sequence[int], clean_ancillae: Sequence[int], borrowed_ancillae: Sequence[int]
+    ) -> Circuit:
+        circuit = const_addition_circuit(target, self.constant, borrowed_ancillae)
         return Circuit(circuit)
+
+    def clean_ancilla_count(self) -> int:
+        return 0
+
+    def borrowed_ancilla_count(self) -> int:
+        return 2

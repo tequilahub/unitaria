@@ -1,4 +1,5 @@
 from __future__ import annotations
+from typing import Sequence
 import numpy as np
 
 from unitaria.circuit import Circuit
@@ -77,15 +78,21 @@ class Tensor(Node):
         input = np.swapaxes(input, -1, -2)
         return np.reshape(input, batch_shape + [-1])
 
-    def _circuit(self) -> Circuit:
+    def _circuit(
+        self, target: Sequence[int], clean_ancillae: Sequence[int], borrowed_ancillae: Sequence[int]
+    ) -> Circuit:
+        # TODO: Optionally optimize for qubit count instead of depth?
         circuit = Circuit()
-
-        circuit += self.A.circuit
-        qubit_map_B = dict([(i, i + self.A.subspace_in.total_qubits) for i in range(self.B.subspace_in.total_qubits)])
-        circuit += self.B.circuit.map_qubits(qubit_map_B)
-
-        circuit.n_qubits = self.A.subspace_in.total_qubits + self.B.subspace_in.total_qubits
-
+        circuit += self.A.circuit(
+            target[: self.A.target_qubit_count()],
+            clean_ancillae[: self.A.clean_ancilla_count()],
+            borrowed_ancillae[: self.A.borrowed_ancilla_count()],
+        )
+        circuit += self.B.circuit(
+            target[self.A.target_qubit_count() :],
+            clean_ancillae[self.A.clean_ancilla_count() :],
+            borrowed_ancillae[self.A.borrowed_ancilla_count() :],
+        )
         return circuit
 
     def _subspace_in(self) -> Subspace:
@@ -104,6 +111,12 @@ class Tensor(Node):
 
     def _normalization(self) -> float:
         return self.A.normalization * self.B.normalization
+
+    def clean_ancilla_count(self) -> int:
+        return self.A.clean_ancilla_count() + self.B.clean_ancilla_count()
+
+    def borrowed_ancilla_count(self) -> int:
+        return self.A.borrowed_ancilla_count() + self.B.borrowed_ancilla_count()
 
 
 Node.__and__ = lambda A, B: Tensor(A, B)

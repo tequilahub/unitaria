@@ -1,4 +1,5 @@
 from abc import abstractmethod
+from typing import Sequence
 
 import numpy as np
 from rich.panel import Panel
@@ -51,10 +52,6 @@ class ProxyNode(Node):
         definition = self._definition_internal()
         return definition.compute_adjoint(input)
 
-    def _circuit(self) -> Circuit:
-        definition = self._definition_internal()
-        return definition.circuit
-
     def _subspace_in(self) -> Subspace:
         definition = self._definition_internal()
         return definition.subspace_in
@@ -66,6 +63,20 @@ class ProxyNode(Node):
     def _normalization(self) -> float:
         definition = self._definition_internal()
         return definition.normalization
+
+    def _circuit(
+        self, target: Sequence[int], clean_ancillae: Sequence[int], borrowed_ancillae: Sequence[int]
+    ) -> Circuit:
+        definition = self._definition_internal()
+        return definition.circuit(target, clean_ancillae, borrowed_ancillae)
+
+    def clean_ancilla_count(self) -> int:
+        definition = self._definition_internal()
+        return definition.clean_ancilla_count()
+
+    def borrowed_ancilla_count(self) -> int:
+        definition = self._definition_internal()
+        return definition.borrowed_ancilla_count()
 
     def tree_label(self, verbose: bool = False):
         label = super().tree_label()

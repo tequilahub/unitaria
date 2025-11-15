@@ -1,3 +1,5 @@
+from typing import Sequence
+
 import numpy as np
 
 from unitaria.circuit import Circuit
@@ -56,8 +58,16 @@ class ConstantUnitary(Node):
     def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
         return (np.conj(self.unitary.T) @ input.T).T
 
-    def _circuit(self) -> Circuit:
-        return Circuit(generic_unitary(U=self.extended_unitary, target=range(self.bits)))
+    def _circuit(
+        self, target: Sequence[int], clean_ancillae: Sequence[int], borrowed_ancillae: Sequence[int]
+    ) -> Circuit:
+        return Circuit(generic_unitary(U=self.extended_unitary, target=target))
+
+    def clean_ancilla_count(self) -> int:
+        return 0
+
+    def borrowed_ancilla_count(self) -> int:
+        return 0
 
 
 def _extend_basis_by_one(U: np.array, n: int):

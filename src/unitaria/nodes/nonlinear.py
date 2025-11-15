@@ -1,3 +1,5 @@
+from typing import Sequence
+
 import numpy as np
 import tequila as tq
 
@@ -72,10 +74,18 @@ class ComponentwiseMulMultilinear(Node):
             result[:, indices, indices] = input[:, indices]
         return result.reshape(list(input.shape[:-1]) + [input.shape[-1] ** 2])
 
-    def _circuit(self) -> Circuit:
+    def _circuit(
+        self, target: Sequence[int], clean_ancillae: Sequence[int], borrowed_ancillae: Sequence[int]
+    ) -> Circuit:
         circuit = Circuit()
 
         for i in range(self.subspace.total_qubits):
-            circuit += tq.gates.CNOT(i, i + self.subspace.total_qubits)
+            circuit += tq.gates.CNOT(target[i], target[i + self.subspace.total_qubits])
 
         return circuit
+
+    def clean_ancilla_count(self) -> int:
+        return 0
+
+    def borrowed_ancilla_count(self) -> int:
+        return 0
