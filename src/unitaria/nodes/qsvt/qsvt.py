@@ -50,11 +50,12 @@ class QSVTCoefficients:
 
             self.polynomial = self.polynomial(np.polynomial.Chebyshev([0, 1 / input_normalization]))
             maxima = self.polynomial.deriv().roots()
+            maxima = maxima[np.abs(np.imag(maxima)) < 1e-6]
             maxima = maxima[np.abs(maxima) <= 1]
             self.output_normalization = np.max(np.abs(self.polynomial(np.concatenate((maxima, [-1, 1])))))
             self.polynomial /= self.output_normalization
 
-            # TODO: Reimplement, becaues this generates a lot of print output
+            # TODO: Reimplement, because this generates a lot of print output
             self.angles, _, _ = QuantumSignalProcessingPhases(self.polynomial, method="sym_qsp", chebyshev_basis=True)
             # "sym_qsp" method approximates polynomial in imaginary part.
             # By this extra rotation, we turn it into the real part.

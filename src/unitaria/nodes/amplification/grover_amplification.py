@@ -5,12 +5,12 @@ from unitaria.nodes import ProxyNode
 from unitaria.nodes.qsvt.qsvt import QSVT
 
 
-class AmplitudeAmplification(ProxyNode):
+class GroverAmplification(ProxyNode):
     def __init__(self, A: Node, iterations: int):
         assert A.is_vector()
         assert iterations > 0
 
-        super().__init__(1, A.dimension_out)
+        super().__init__(A.dimension_in, A.dimension_out)
 
         self.A = A
         self.iterations = iterations
