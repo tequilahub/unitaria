@@ -35,7 +35,7 @@ class QSVTCoefficients:
                 ]
             state[0] *= np.exp(self.angles[-1] * 1j)
             state[1] *= np.exp(self.angles[-1] * 1j)
-            self.polynomial = np.polynomial.Chebyshev(state[0].coef.real.astype(np.complex128))
+            self.polynomial = np.polynomial.Chebyshev(state[0].coef.real)
 
             self.output_normalization = 1
         else:
@@ -64,7 +64,7 @@ class QSVTCoefficients:
     def degree(self) -> int:
         return self.polynomial.degree()
 
-    def angles_Wx(self) -> np.ndarray:
+    def angles_to_r_convention(self) -> np.ndarray:
         result = self.angles[:-1] - np.pi / 2
         result[0] += self.angles[-1] + self.degree() * np.pi / 2
         print(result)
@@ -145,7 +145,7 @@ class QSVT(Node):
         subspace_in_circuit = self.A.subspace_in.circuit(target, flag=target[-1], ancillae=clean_ancillae)
         subspace_out_circuit = self.A.subspace_out.circuit(target, flag=target[-1], ancillae=clean_ancillae)
 
-        for i, angle in enumerate(reversed(self.coefficients.angles_Wx())):
+        for i, angle in enumerate(reversed(self.coefficients.angles_to_r_convention())):
             if i % 2 == 0:
                 circuit += node_circuit
                 circuit += subspace_out_circuit
@@ -154,7 +154,7 @@ class QSVT(Node):
                 circuit += subspace_in_circuit
 
             # TODO: Do not use projection circuits for last rotation
-            circuit += tq.gates.Rz(-2 * angle, rotation_bit)
+            circuit += tq.gates.Rz(-2 * np.real(angle), rotation_bit)
 
             if i % 2 == 0:
                 circuit += subspace_out_circuit
