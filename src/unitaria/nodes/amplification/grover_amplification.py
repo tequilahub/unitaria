@@ -16,8 +16,5 @@ class GroverAmplification(ProxyNode):
         self.iterations = iterations
 
     def definition(self) -> Node:
-        # Choose coefficients such that they become [pi, ..., pi] in Wx basis
-        coefficients = np.append(
-            np.full(2 * self.iterations + 1, np.pi, dtype=np.complex128), [-(2 * self.iterations + 2) / 2 * np.pi]
-        )
+        coefficients = np.array((2 * self.iterations + 2) * [np.pi])
         return QSVT(A=self.A, coefficients=coefficients, format="angles")

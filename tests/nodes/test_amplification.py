@@ -14,8 +14,14 @@ def test_grover_amplification():
     node = ConstantVector(np.array([1 / 2, 1 / 2, 1 / 2, 1 / 2]))
     proj = Projection(subspace_from=Subspace(2, 0), subspace_to=Subspace(0, 2))
     node = Mul(node, proj)
+
+    # Test amplifying to 1
     amplified = GroverAmplification(node, 1)
     assert np.isclose(amplified.compute_norm(np.array([1])), 1)
+
+    # Test "overshooting" back down to 0.5
+    amplified = GroverAmplification(node, 2)
+    assert np.isclose(amplified.compute_norm(np.array([1])), 0.5)
 
 
 def test_fixed_point_amplification():
