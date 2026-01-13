@@ -11,7 +11,7 @@ from unitaria.nodes.node import Node
 
 class SubspaceCircuit(Node):
     """
-    Node, which computes wether a vector is in a given subspace.
+    Node, which computes whether a vector is in a given subspace.
 
     This is mostly used internally, for example for the `unitaria.nodes.Mul`
     node. The result of the check is stored in an additional qubit, for which

@@ -1,5 +1,6 @@
 from unitaria import Node
 from unitaria.nodes import ProxyNode
+from unitaria.nodes.basic.adjoint import Adjoint
 from unitaria.nodes.basic.scale import Scale
 from unitaria.nodes.qsvt.qsvt import QSVT
 from unitaria.poly_approx import inverse_poly
@@ -21,4 +22,4 @@ class Pseudoinverse(ProxyNode):
         self.poly = inverse_poly(delta, epsilon, guaranteed)
 
     def definition(self):
-        return Scale(QSVT(A=self.A, coefficients=self.poly.coef, format="chebyshev"), 1 / self.delta)
+        return Scale(QSVT(A=Adjoint(self.A), coefficients=self.poly.coef, format="chebyshev"), 1 / self.delta)
