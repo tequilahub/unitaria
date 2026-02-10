@@ -21,10 +21,6 @@ def test_pseudoinverse():
         @ Projection(subspace_from=Subspace([ZeroQubit(), ID, ID]), subspace_to=Subspace(3))
     )
     B_inv = Pseudoinverse(B, delta=0.1, epsilon=0.1)
-    # TODO: Commented out because QSVT circuits are currently broken.
-    # This is caught by the `test_qsvt_with_polynomial` for now, but should
-    # be uncommented once the problem is fixed.
-    # verify(B_inv)
     C = B_inv @ B  # should be roughly a projector on all but the first basis states
     result = C.compute(np.eye(4))
-    print(result)
+    assert np.allclose(result, np.diag(np.array([0.0, 1.0, 1.0, 1.0])), atol=0.1)

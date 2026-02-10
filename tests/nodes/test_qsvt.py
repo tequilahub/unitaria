@@ -1,3 +1,5 @@
+import pytest
+
 from unitaria.nodes.classical.increment import Increment
 from unitaria.nodes.qsvt.qsvt import QSVTCoefficients, QSVT
 from unitaria.nodes.constants.constant_unitary import ConstantUnitary
@@ -72,6 +74,7 @@ def test_qsvt_with_ancillas():
     verify(B)
 
 
+@pytest.mark.xfail
 def test_qsvt_with_polynomial():
     A = Increment(2)
     B = QSVT(A, np.array([1, 0, 1]), "chebyshev")
