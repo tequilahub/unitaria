@@ -64,24 +64,6 @@ def sign_poly(delta: float, epsilon: float, guaranteed: bool = False) -> Chebysh
     return erf_poly(k, epsilon / 2, guaranteed)
 
 
-def _transform_chebyshev_poly_input(poly: Chebyshev, scale: float, offset: float) -> Chebyshev:
-    """
-    For a polynomial P in the Chebyshev basis, returns a new polynomial R such
-    that R(x) = P(scale * (x - offset)).
-    Warning: Depending on the input parameters, this function is prone to numerical instabilities.
-
-    :param poly: The polynomial P
-    :param scale: The scale
-    :param offset: The offset
-    :return: The shifted polynomial R such that R(x) = P(scale * (x - offset))
-    """
-    x = Chebyshev(np.array([0, 1]))
-    transformed_basis = [Chebyshev(np.array([1])), Chebyshev(np.array([-scale * offset, scale]))]
-    for n in range(2, poly.degree() + 1):
-        transformed_basis.append(2 * (scale * (x - offset)) * transformed_basis[n - 1] - transformed_basis[n - 2])
-    return np.sum(poly.coef * transformed_basis)
-
-
 def rect_poly(t: float, delta: float, epsilon: float, guaranteed: bool = False) -> Chebyshev:
     """
     For t >= 0, delta > 0 and 0 < epsilon <= 2 / 5, returns a polynomial P in the
@@ -101,8 +83,8 @@ def rect_poly(t: float, delta: float, epsilon: float, guaranteed: bool = False) 
     """
     k = 1 / (np.sqrt(2) * delta) * np.sqrt(np.log(2 / (np.pi * (epsilon / 2) ** 2)))
     base = erf_poly(k * (1 + t), epsilon / 2, guaranteed)
-    p1 = _transform_chebyshev_poly_input(base, -1 / (1 + t), t)
-    p2 = _transform_chebyshev_poly_input(base, 1 / (1 + t), -t)
+    p1 = base(Chebyshev(-1 / (1 + t) * np.array([-t, 1])))
+    p2 = base(Chebyshev(1 / (1 + t) * np.array([t, 1])))
     return (p1 + p2) / 2
 
 
@@ -133,11 +115,16 @@ def trunc_linear_poly(gamma: float, delta: float, epsilon: float, guaranteed: bo
         return gamma * x * rect_poly(t, delta, epsilon, guaranteed)
 
 
-def _unscaled_inverse_poly(kappa: float, epsilon: float, guaranteed: bool = False) -> Chebyshev:
+def _unscaled_inverse_poly(kappa: float, epsilon: float) -> Chebyshev:
     """
+    For kappa > 1 and 0 < epsilon < 1, returns a polynomial in the Chebyshev basis
+    that approximates the function 1 / x on the interval [-1, 1] \ (-1 / kappa, 1 / kappa).
+
     Implements Lemma 40 from https://arxiv.org/abs/1806.01838
 
-    TODO: Proper docs
+    :param kappa: The approximation is only valid for |x| >= 1 / kappa, requires kappa > 1.
+    :param epsilon: The maximum error of the approximation, requires 0 < epsilon < 1.
+    :return: The polynomial approximating 1 / x
     """
     assert kappa > 1
     assert 0 < epsilon < 1
@@ -153,13 +140,20 @@ def _unscaled_inverse_poly(kappa: float, epsilon: float, guaranteed: bool = Fals
 
 def inverse_poly(delta: float, epsilon: float, guaranteed: bool = False) -> Chebyshev:
     """
-    Implements Theorem 41 from https://arxiv.org/abs/1806.01838,
-    but with delta scaled by 1 / 2
+    For 0 < epsilon < 2 * delta <= 1 / 2, returns a polynomial P which epsilon-approximates
+    delta / x on the domain [-1, 1] \ (-delta, delta) and for which |P| <= 1.
 
-    TODO: Proper docs
+    Implements Theorem 41 from https://arxiv.org/abs/1806.01838, but with delta scaled by 1 / 2.
+
+    :param delta: The approximation is only valid for |x| >= delta, requires epsilon / 2 < delta <= 1 / 4.
+    :param epsilon: The maximum error of the approximation, requires 0 < epsilon < 2 * delta.
+    :param guaranteed: If the accuracy should be guaranteed using analytical bounds (ignoring numerical errors).
+        If this is set to false, the function will return polynomials of lower degrees.
+    :return: The polynomial approximating delta / x
     """
+    assert 0 < epsilon < 2 * delta <= 1 / 2
 
-    poly = delta * _unscaled_inverse_poly(1 / delta, (epsilon / 3) / delta, guaranteed)
+    poly = delta * _unscaled_inverse_poly(1 / delta, (epsilon / 3) / delta)
 
     maxima = poly.deriv().roots()
     maxima = maxima[np.abs((np.imag(maxima)) < 1e-6) & (np.abs(maxima) <= 1)]
