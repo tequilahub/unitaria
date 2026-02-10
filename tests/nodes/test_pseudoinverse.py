@@ -1,9 +1,7 @@
 import numpy as np
 
-from unitaria import verify, Subspace
-from unitaria.nodes.basic.identity import Identity
+from unitaria import Subspace
 from unitaria.nodes.basic.projection import Projection
-from unitaria.nodes.basic.scale import Scale
 from unitaria.nodes.constants.constant_unitary import ConstantUnitary
 from unitaria.nodes.inversion.pseudoinverse import Pseudoinverse
 from unitaria.subspace import ZeroQubit, ID
