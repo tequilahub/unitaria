@@ -2,12 +2,13 @@ import numpy as np
 
 from unitaria import Subspace
 from unitaria.nodes.amplification.fixed_point_amplification import FixedPointAmplification
-from unitaria.nodes.amplification.singular_value_amplification import SingularValueAmplification
+from unitaria.nodes.amplification.linear_amplification import LinearAmplification
 from unitaria.nodes.basic.mul import Mul
 from unitaria.nodes.basic.projection import Projection
-from unitaria.nodes.classical.increment import Increment
+from unitaria.nodes.constants.constant_unitary import ConstantUnitary
 from unitaria.nodes.constants.constant_vector import ConstantVector
 from unitaria.nodes.amplification.grover_amplification import GroverAmplification
+from unitaria.subspace import ZeroQubit, ID
 
 
 def test_grover_amplification():
@@ -38,16 +39,19 @@ def test_fixed_point_amplification():
     assert amplified.compute_norm(np.array([1])) > 1 - 0.1
 
 
-def test_singular_value_amplification():
-    inefficiency = Mul(
-        ConstantVector(np.array([0.45, np.sqrt(1 - 0.45**2)])),
-        Projection(subspace_from=Subspace(1, 0), subspace_to=Subspace(0, 1)),
-    )
-    node = Increment(3) & inefficiency
-    amplified = SingularValueAmplification(node, 2.0, 0.1, 0.1)
-    norm0 = amplified.compute_norm(np.array([1, 0, 0, 0, 0, 0, 0, 0]))
-    norm4 = amplified.compute_norm(np.array([0, 0, 0, 1, 0, 0, 0, 0]))
+def rot_matrix(angle: float) -> np.array:
+    return np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])
 
-    assert norm0 > 1 - 0.1 - 0.1
-    assert norm4 > 1 - 0.1 - 0.1
-    assert np.abs(norm0 - norm4) < 0.1
+
+def test_linear_amplification():
+    A = (ConstantUnitary(rot_matrix(np.arccos(0.0))) | ConstantUnitary(rot_matrix(np.arccos(0.1)))) | (
+        ConstantUnitary(rot_matrix(np.arccos(0.2))) | ConstantUnitary(rot_matrix(np.arccos(0.3)))
+    )
+    node = (
+        Projection(subspace_from=Subspace(3), subspace_to=Subspace([ZeroQubit(), ID, ID]))
+        @ A
+        @ Projection(subspace_from=Subspace([ZeroQubit(), ID, ID]), subspace_to=Subspace(3))
+    )
+    amplified = LinearAmplification(node, 2.0, 0.4, 0.1)
+    result = amplified.compute(np.eye(4))
+    assert np.allclose(result, np.diag(np.array([0.0, 0.2, 0.4, 0.6])), atol=0.1)

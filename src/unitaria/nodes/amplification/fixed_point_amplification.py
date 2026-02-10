@@ -23,9 +23,9 @@ class FixedPointAmplification(ProxyNode):
         The maximum absolute error of this amplification
     :param guaranteed:
         Determines if the accuracy should be guaranteed using analytical
-        bounds (ignoring numerical errors). If this is set to false, the
-        function will return polynomials of lower degrees while usually
-        still providing the required precision most of the time.
+        bounds (ignoring numerical errors). If this is set to false, this
+        function will use a heuristic which will result in polynomials of
+        lower degrees while usually still providing the requested precision.
     """
 
     def __init__(self, A: Node, min_norm: float, accuracy: float, guaranteed: bool = False):
