@@ -64,24 +64,6 @@ def sign_poly(delta: float, epsilon: float, guaranteed: bool = False) -> Chebysh
     return erf_poly(k, epsilon / 2, guaranteed)
 
 
-def _transform_chebyshev_poly_input(poly: Chebyshev, scale: float, offset: float) -> Chebyshev:
-    """
-    For a polynomial P in the Chebyshev basis, returns a new polynomial R such
-    that R(x) = P(scale * (x - offset)).
-    Warning: Depending on the input parameters, this function is prone to numerical instabilities.
-
-    :param poly: The polynomial P
-    :param scale: The scale
-    :param offset: The offset
-    :return: The shifted polynomial R such that R(x) = P(scale * (x - offset))
-    """
-    x = Chebyshev(np.array([0, 1]))
-    transformed_basis = [Chebyshev(np.array([1])), Chebyshev(np.array([-scale * offset, scale]))]
-    for n in range(2, poly.degree() + 1):
-        transformed_basis.append(2 * (scale * (x - offset)) * transformed_basis[n - 1] - transformed_basis[n - 2])
-    return np.sum(poly.coef * transformed_basis)
-
-
 def rect_poly(t: float, delta: float, epsilon: float, guaranteed: bool = False) -> Chebyshev:
     """
     For t >= 0, delta > 0 and 0 < epsilon <= 2 / 5, returns a polynomial P in the
@@ -101,8 +83,8 @@ def rect_poly(t: float, delta: float, epsilon: float, guaranteed: bool = False) 
     """
     k = 1 / (np.sqrt(2) * delta) * np.sqrt(np.log(2 / (np.pi * (epsilon / 2) ** 2)))
     base = erf_poly(k * (1 + t), epsilon / 2, guaranteed)
-    p1 = _transform_chebyshev_poly_input(base, -1 / (1 + t), t)
-    p2 = _transform_chebyshev_poly_input(base, 1 / (1 + t), -t)
+    p1 = base(Chebyshev(-1 / (1 + t) * np.array([-t, 1])))
+    p2 = base(Chebyshev(1 / (1 + t) * np.array([t, 1])))
     return (p1 + p2) / 2
 
 
