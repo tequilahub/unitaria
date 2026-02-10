@@ -72,14 +72,13 @@ class QSVTCoefficients:
 
 
 class QSVT(Node):
-    def __init__(self, A: Node, coefficients: np.ndarray, format: str = "monomial", normalization: float = 1):
+    def __init__(self, A: Node, coefficients: np.ndarray, format: str = "monomial"):
         self.coefficients = QSVTCoefficients(coefficients, format, A.normalization)
         if self.coefficients.degree() % 2 == 0:
             super().__init__(A.dimension_in, A.dimension_in)
         else:
             super().__init__(A.dimension_in, A.dimension_out)
         self.A = A
-        self.normalization = normalization
 
     def children(self) -> list[Node]:
         return [self.A]
@@ -92,7 +91,7 @@ class QSVT(Node):
         }
 
     def _normalization(self) -> float:
-        return self.normalization * self.coefficients.output_normalization
+        return self.coefficients.output_normalization
 
     def _subspace_in(self) -> Subspace:
         return Subspace(self.A.subspace_in.registers, 1)
