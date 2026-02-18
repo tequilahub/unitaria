@@ -1,5 +1,4 @@
 import numpy as np
-import pytest
 
 from unitaria.nodes import ProxyNode, Node, ConstantIntegerAddition, ConstantIntegerMultiplication, Identity, Mul
 from unitaria.subspace import Subspace, ID, ZeroQubit
@@ -35,8 +34,8 @@ class LCG(ProxyNode):
                 skip_projection=True,
             )
             controlled = (
-                Identity(Subspace([ID] * self.bits + [ZeroQubit()] * 2 + [ID] * i)) | (step & Identity(i))
-            ) & Identity(self.bits - i - 1)
+                Identity(Subspace([ID] * self.bits + [ZeroQubit()] * 2 + [ID] * i)) | (step & Identity(bits=i))
+            ) & Identity(bits=self.bits - i - 1)
             if result is None:
                 result = controlled
             else:
@@ -68,7 +67,6 @@ class LCG(ProxyNode):
         return output.reshape(outer_shape + [-1])
 
 
-@pytest.mark.xfail
 def test_lcg():
     verify(LCG(2, 1, 1))
     verify(LCG(2, 1, 3))

@@ -47,8 +47,6 @@ from unitaria.nodes.basic.adjoint import Adjoint
 from unitaria.nodes.basic.scale import Scale
 from unitaria.nodes.basic.block_diagonal import BlockDiagonal
 
-from unitaria.nodes.permutation.permutation import Permutation
-
 from unitaria.nodes.basic.mul import Mul
 from unitaria.nodes.basic.add import Add
 from unitaria.nodes.basic.block_horizontal import BlockHorizontal
@@ -73,7 +71,6 @@ __all__ = [
     "Tensor",
     "Adjoint",
     "Scale",
-    "Permutation",
     "BlockDiagonal",
     "Mul",
     "Add",

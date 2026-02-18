@@ -39,9 +39,7 @@ class Subspace:
         elif registers is not None:
             self.registers = list(registers)
         else:
-            raise TypeError(
-                "Must specify registers=... or bits=... or dim=... as a keyword argument in Subspace constructor"
-            )
+            self.registers = []
 
         for register in self.registers:
             if not isinstance(register, Register):
