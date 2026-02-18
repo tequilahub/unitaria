@@ -45,7 +45,11 @@ class Subspace:
 
         for register in self.registers:
             if not isinstance(register, Register):
-                raise ValueError(f"{register} is not a valid register in a Subspace")
+                if register is ZeroQubit:
+                    raise ValueError(
+                        f"{register} is not a valid register in a Subspace. Use `ZeroQubit()` instead of `ZeroQubit`"
+                    )
+                raise ValueError(f"{register} is not a valid register in a Subspace.")
         simplified_registers = []
         for register in self.registers:
             if isinstance(register, ControlledSubspace):
@@ -302,7 +306,6 @@ class Subspace:
         trailing_zeros = self.trailing_zeros()
         if trailing_zeros == len(self.registers):
             return None
-        assert isinstance(self.registers[-(trailing_zeros + 1)], ControlledSubspace)
 
         return Subspace(
             self.registers[: -(trailing_zeros + 1)] + self.registers[-(trailing_zeros + 1)].case_zero.registers,
@@ -312,11 +315,16 @@ class Subspace:
         trailing_zeros = self.trailing_zeros()
         if trailing_zeros == len(self.registers):
             return None
-        assert isinstance(self.registers[-(trailing_zeros + 1)], ControlledSubspace)
 
         return Subspace(
             self.registers[: -(trailing_zeros + 1)] + self.registers[-(trailing_zeros + 1)].case_one.registers,
         )
+
+    def __and__(self, other: Subspace) -> Subspace:
+        return Subspace(self.registers + other.registers)
+
+    def __or__(self, other: Subspace) -> Subspace:
+        return Subspace([ControlledSubspace(self, other)])
 
 
 class Register(ABC):
