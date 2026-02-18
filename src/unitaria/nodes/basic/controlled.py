@@ -2,7 +2,7 @@ from typing import Sequence
 
 import numpy as np
 
-from unitaria.subspace import Subspace, ControlledSubspace
+from unitaria.subspace import Subspace
 from unitaria.nodes.node import Node
 from unitaria.circuit import Circuit
 
@@ -17,11 +17,11 @@ class Controlled(Node):
 
     def _subspace_in(self) -> Subspace:
         subspace_in_A = self.A.subspace_in
-        return Subspace([ControlledSubspace(Subspace(0, subspace_in_A.total_qubits), subspace_in_A)])
+        return Subspace(0, subspace_in_A.total_qubits) | subspace_in_A
 
     def _subspace_out(self) -> Subspace:
         subspace_out_A = self.A.subspace_out
-        return Subspace([ControlledSubspace(Subspace(0, subspace_out_A.total_qubits), subspace_out_A)])
+        return Subspace(0, subspace_out_A.total_qubits) | subspace_out_A
 
     def _normalization(self) -> float:
         return self.A.normalization
