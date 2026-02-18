@@ -7,7 +7,7 @@ from unitaria.nodes.basic.adjoint import Adjoint
 from unitaria.nodes.basic.unsafe_multiplication import UnsafeMul
 from unitaria.nodes.basic.tensor import Tensor
 from unitaria.nodes.basic.block_diagonal import BlockDiagonal
-from unitaria.nodes.permutation.permutation import Permutation
+from unitaria.nodes.permutation.permutation import permute
 from unitaria.nodes.constants.constant_vector import ConstantVector
 from unitaria.nodes.basic.identity import Identity
 
@@ -37,15 +37,15 @@ class BlockVertical(ProxyNode):
         return [self.A, self.B]
 
     def definition(self) -> Node:
-        permutation = Permutation(self.A.subspace_in, self.B.subspace_in)
+        permute_A, permute_B = permute(self.A.subspace_in, self.B.subspace_in)
 
-        A_permuted = Scale(UnsafeMul(Adjoint(permutation), self.A), absolute=True)
-        B_permuted = Scale(self.B, absolute=True)
+        A_permuted = Scale(UnsafeMul(Adjoint(permute_A), self.A), absolute=True)
+        B_permuted = Scale(UnsafeMul(Adjoint(permute_B), self.B), absolute=True)
 
         diag = BlockDiagonal(A_permuted, B_permuted)
 
         rotation_in = Tensor(
-            Identity(permutation.subspace_out),
+            Identity(diag.subspace_out.case_zero()),
             ConstantVector(np.array([self.A.normalization, self.B.normalization])),
         )
 
