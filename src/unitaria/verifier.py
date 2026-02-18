@@ -2,6 +2,8 @@
 Module for verifying the correctess of nodes.
 """
 
+from typing import Sequence
+
 import numpy as np
 
 from unitaria.nodes.node import Node
@@ -43,7 +45,11 @@ def verify(node: Node, reference: np.ndarray | None = None):
     if default_verifier is None:
         default_verifier = Verifier()
 
-    default_verifier.verify(node, reference)
+    nodes = [node]
+    if isinstance(node, Sequence):
+        nodes = node
+    for node in nodes:
+        default_verifier.verify(node, reference)
 
 
 class Verifier:
@@ -163,12 +169,19 @@ class VerificationError(Exception):
     def __init__(self, node: Node):
         super().__init__()
         self.node = node
+        try:
+            self._circuit = self.node.circuit().draw()
+            self._tree = self.node.tree()
+            self._normalization = self.node.normalization
+        except Exception:
+            self._circuit = None
 
     def __str__(self):
+        if self._circuit is None:
+            return "(Could not render circuit)"
         console = Console(width=60)
-        circuit = self.node.circuit.draw()
         with console.capture() as capture:
-            console.print(self.node.tree())
-            console.print(Syntax(circuit, "text", background_color="default"))
+            console.print(self._tree)
+            console.print(Syntax(self._circuit, "text", background_color="default"))
         output = capture.get()
-        return "\n" + output + f"\nnormalization = {self.node.normalization}"
+        return "\n" + output + f"\nnormalization = {self._normalization}"
