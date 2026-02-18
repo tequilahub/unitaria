@@ -5,6 +5,7 @@ import numpy as np
 from unitaria.nodes import Increment, Identity, Add, Scale, Adjoint, ConstantUnitary, BlockHorizontal, Projection
 from unitaria.subspace import Subspace
 from unitaria.verifier import verify
+from unitaria.util import logreduce
 
 
 def ref_Q(L, L_MAX):
@@ -171,7 +172,7 @@ def test_preconditioned_laplace_1d():
     L = 4
 
     T = None
-    C_F = None
+    C_F = []
 
     for i in range(L, 0, -1):
         I_l = Projection(Subspace.from_dim(2**i - 1, bits=i), Subspace(i))
@@ -189,11 +190,13 @@ def test_preconditioned_laplace_1d():
 
         if i == L:
             TC = 2 ** (-i / 2) * C_l
-            C_F = TC
+            C_F.append(TC)
             T = T_l
         else:
             TC = 2 ** (-i / 2) * T @ C_l
-            C_F = BlockHorizontal(TC, C_F)
+            C_F.append(TC)
             T = T @ T_l
+
+    C_F = logreduce(BlockHorizontal, list(reversed(C_F)))
 
     verify(C_F, ref_CP_1d(4, 1))
