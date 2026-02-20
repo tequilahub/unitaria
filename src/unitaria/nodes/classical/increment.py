@@ -42,6 +42,12 @@ class Increment(Classical):
     def compute_reverse_classical(self, input: np.ndarray) -> np.ndarray:
         return (input - 1) % 2**self.bits
 
+    def compute(self, input: np.ndarray) -> np.ndarray:
+        return np.roll(input, 1, axis=-1)
+
+    def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
+        return np.roll(input, -1, axis=-1)
+
     def _circuit(
         self, target: Sequence[int], clean_ancillae: Sequence[int], borrowed_ancillae: Sequence[int]
     ) -> Circuit:
