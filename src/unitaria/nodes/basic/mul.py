@@ -6,8 +6,9 @@ from unitaria.nodes.basic.tensor import Tensor
 from unitaria.nodes.basic.compute_projection import SubspaceCircuit
 
 from unitaria.nodes.proxy_node import ProxyNode
-from unitaria.nodes.permutation.permutation import Permutation
+from unitaria.nodes.permutation.permutation import permute
 from unitaria.nodes.basic.identity import Identity
+from unitaria.nodes.basic.adjoint import Adjoint
 from unitaria.subspace import Subspace
 
 
@@ -47,9 +48,9 @@ class Mul(ProxyNode):
         return params
 
     def definition(self) -> Node:
-        permutation = Permutation(self.A.subspace_out, self.B.subspace_in)
-        A_permuted = self.A
-        B_permuted = UnsafeMul(permutation, self.B)
+        permute_A, permute_B = permute(self.A.subspace_out, self.B.subspace_in)
+        A_permuted = UnsafeMul(self.A, permute_A)
+        B_permuted = UnsafeMul(Adjoint(permute_B), self.B)
         projection_subspace = A_permuted.subspace_out
         projection_required = not self.skip_projection
         if projection_subspace == Subspace(projection_subspace.total_qubits):

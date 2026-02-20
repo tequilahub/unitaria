@@ -98,16 +98,12 @@ class Tensor(Node):
     def _subspace_in(self) -> Subspace:
         subspace_A = self.A.subspace_in
         subspace_B = self.B.subspace_in
-        return Subspace(
-            subspace_A.registers + subspace_B.registers,
-        )
+        return subspace_A & subspace_B
 
     def _subspace_out(self) -> Subspace:
         subspace_A = self.A.subspace_out
         subspace_B = self.B.subspace_out
-        return Subspace(
-            subspace_A.registers + subspace_B.registers,
-        )
+        return subspace_A & subspace_B
 
     def _normalization(self) -> float:
         return self.A.normalization * self.B.normalization
