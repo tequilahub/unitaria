@@ -27,7 +27,11 @@ class ConstantIntegerMultiplication(ProxyNode):
     bits: int
     constant: int
 
-    def __init__(self, bits: int, constant: int):
+    def __init__(self, *args, bits: int = None, constant: int = None):
+        if len(args) > 0 or bits is None or constant is None:
+            raise TypeError(
+                "ConstantIntegerMultiplication constructor requires bits=... and constant=... as keyword arguments."
+            )
         super().__init__(2**bits, 2**bits)
         if constant < 0:
             raise ValueError(f"Constant factor {constant} is negative.")
@@ -47,13 +51,15 @@ class ConstantIntegerMultiplication(ProxyNode):
     def definition(self) -> Node:
         if self.bits == 1:
             assert self.constant == 1
-            return Identity(Subspace(1))
+            return Identity(Subspace(bits=1))
         result = None
         for i in reversed(range(self.bits - 1)):
             add_bits = self.bits - 1 - i
             c = (self.constant >> 1) & ((1 << add_bits) - 1)
-            const_add = BlockDiagonal(Identity(Subspace(add_bits)), ConstantIntegerAddition(add_bits, c))
-            permutation = PermuteRegisters(Subspace(add_bits + 1), [add_bits] + list(range(add_bits)))
+            const_add = BlockDiagonal(
+                Identity(Subspace(bits=add_bits)), ConstantIntegerAddition(bits=add_bits, constant=c)
+            )
+            permutation = PermuteRegisters(Subspace(bits=add_bits + 1), [add_bits] + list(range(add_bits)))
             # TODO: The skip_projection can be removed onces this is done automatically
             const_add = Mul(
                 Adjoint(permutation),

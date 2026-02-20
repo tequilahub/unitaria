@@ -27,14 +27,41 @@ class Subspace:
 
     registers: list[Register]
 
-    def __init__(self, registers: list[Register] | int, zero_qubits: int = 0):
+    def __init__(
+        self, *args, bits: int = None, dim: int = None, registers: list[Register] = None, zero_qubits: int = 0
+    ):
+        """
+        A subspace must specify exactly one of bits=, dim=, or registers= as a keyword argument.
+        Positional integer arguments are not allowed and will raise an error.
+        """
+        if len(args) > 0:
+            raise TypeError(
+                "Subspace constructor only accepts keyword arguments: bits=..., dim=..., or registers=... (not positional arguments)"
+            )
+        if sum(x is not None for x in [bits, dim, registers]) != 1:
+            raise TypeError("Specify exactly one of bits=..., dim=..., or registers=... as a keyword argument")
+        if bits is not None:
+            self.registers = [ID] * bits
+        elif dim is not None:
+            # Find minimum bits needed
+            min_bits = int(np.ceil(np.log2(dim)))
+            # Create the subspace structure (true dimension)
+            subspace = Subspace.from_dim(dim, bits=min_bits)
+            self.registers = subspace.registers
+        elif registers is not None:
+            self.registers = list(registers)
+        else:
+            raise TypeError(
+                "Must specify exactly one of the following: bits=..., dim=..., or registers=... in Subspace constructor"
+            )
         if isinstance(registers, (int, np.integer)):
             registers = [ID] * registers
-        for register in registers:
-            if not isinstance(register, Register):
-                raise ValueError(f"{register} is not a valid register in a Subspace")
+        if registers is not None:
+            for register in registers:
+                if not isinstance(register, Register):
+                    raise ValueError(f"{register} is not a valid register in a Subspace")
         simplified_registers = []
-        for register in registers:
+        for register in self.registers:
             if isinstance(register, ControlledSubspace):
                 simplified_registers += register.simplify()
             else:
@@ -236,11 +263,11 @@ class Subspace:
         if bits is None:
             bits = int(np.ceil(np.log2(dim)))
         if dim == 1:
-            return Subspace(0, bits)
+            return Subspace(registers=[ZeroQubit()] * bits)
         min_bits = int(np.ceil(np.log2(dim)))
-        case_zero = Subspace(min_bits - 1)
-        case_one = Subspace.from_dim(dim - 2 ** (min_bits - 1), min_bits - 1)
-        return Subspace([ControlledSubspace(case_zero, case_one)], bits - min_bits)
+        case_zero = Subspace(bits=min_bits - 1)
+        case_one = Subspace.from_dim(dim=dim - 2 ** (min_bits - 1), bits=min_bits - 1)
+        return Subspace(registers=[ControlledSubspace(case_zero, case_one)] + [ZeroQubit()] * (bits - min_bits))
 
 
 class Register(ABC):
@@ -315,14 +342,14 @@ class ControlledSubspace(Register):
             if self.case_zero.registers[i] != self.case_one.registers[i]:
                 return self.case_zero.registers[:i] + [
                     ControlledSubspace(
-                        Subspace(self.case_zero.registers[i:]),
-                        Subspace(self.case_one.registers[i:]),
+                        Subspace(registers=self.case_zero.registers[i:]),
+                        Subspace(registers=self.case_one.registers[i:]),
                     )
                 ]
         return self.case_zero.registers[:min_len] + [
             ControlledSubspace(
-                Subspace(self.case_zero.registers[min_len:]),
-                Subspace(self.case_one.registers[min_len:]),
+                Subspace(registers=self.case_zero.registers[min_len:]),
+                Subspace(registers=self.case_one.registers[min_len:]),
             )
         ]
 
@@ -348,4 +375,4 @@ class ControlledSubspace(Register):
         return max(self.case_zero.clean_ancilla_count(), self.case_one.clean_ancilla_count())
 
 
-ID = ControlledSubspace(Subspace([]), Subspace([]))
+ID = ControlledSubspace(Subspace(registers=[]), Subspace(registers=[]))
