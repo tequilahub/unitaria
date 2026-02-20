@@ -27,19 +27,11 @@ class Subspace:
 
     registers: list[Register]
 
-    def __init__(
-        self, *args, bits: int = None, dim: int = None, registers: list[Register] = None, zero_qubits: int = 0
-    ):
-        """
-        A subspace must specify exactly one of bits=, dim=, or registers= as a keyword argument.
-        Positional integer arguments are not allowed and will raise an error.
-        """
+    def __init__(self, registers: list[Register], *args, bits : int = None, dim : int = None,  int = None, zero_qubits: int = 0):
         if len(args) > 0:
             raise TypeError(
-                "Subspace constructor only accepts keyword arguments: bits=..., dim=..., or registers=... (not positional arguments)"
+                "Subspace constructor only accepts keyword arguments: registers=... (not positional arguments)"
             )
-        if sum(x is not None for x in [bits, dim, registers]) != 1:
-            raise TypeError("Specify exactly one of bits=..., dim=..., or registers=... as a keyword argument")
         if bits is not None:
             self.registers = [ID] * bits
         elif dim is not None:
@@ -50,10 +42,8 @@ class Subspace:
             self.registers = subspace.registers
         elif registers is not None:
             self.registers = list(registers)
-        else:
-            raise TypeError(
-                "Must specify exactly one of the following: bits=..., dim=..., or registers=... in Subspace constructor"
-            )
+        if registers is None and bits is None and dim is None:
+            raise TypeError("Must specify registers=... or bits=... or dim=... or combinations of those as a keyword arguments in Subspace constructor")
         if isinstance(registers, (int, np.integer)):
             registers = [ID] * registers
         if registers is not None:
@@ -61,14 +51,18 @@ class Subspace:
                 if not isinstance(register, Register):
                     raise ValueError(f"{register} is not a valid register in a Subspace")
         simplified_registers = []
-        for register in self.registers:
-            if isinstance(register, ControlledSubspace):
-                simplified_registers += register.simplify()
-            else:
-                simplified_registers.append(register)
+        if registers is not None:
+            for register in registers:
+                if isinstance(register, ControlledSubspace):
+                    simplified_registers += register.simplify()
+                else:
+                    simplified_registers.append(register)
+
         self.registers = simplified_registers + [ZeroQubit()] * zero_qubits
         self._dimension = None
         self._total_qubits = None
+
+        print(f"Created subspace with registers {self.registers} and dimension {self.dimension}")
 
     @property
     def dimension(self) -> int:
@@ -164,7 +158,9 @@ class Subspace:
         """
         Enumerates the basis states inside the subspace
         """
-        return np.fromiter(filter(self.test_basis, range(2**self.total_qubits)), dtype=np.int32)
+        return np.fromiter(
+            filter(self.test_basis, range(2**self.total_qubits)), dtype=np.int32
+        )
 
     def project(self, vector: np.ndarray) -> np.ndarray:
         """
@@ -172,7 +168,9 @@ class Subspace:
         """
         return vector[self.enumerate_basis()]
 
-    def circuit(self, target: Sequence[int], flag: int, ancillae: Sequence[int]) -> Circuit:
+    def circuit(
+        self, target: Sequence[int], flag: int, ancillae: Sequence[int]
+    ) -> Circuit:
         """
         A circuit which checks whether a state is inside the subspace.
 
@@ -220,20 +218,34 @@ class Subspace:
         # Apply the constructed circuit, add a multi-controlled NOT to determine
         # if the result flag is set, then uncompute the rest of the circuit
         circuit = (
-            circuit + tq.gates.X(target=flag, control=intermediate_flags) + tq.gates.X(target=flag) + circuit.adjoint()
+            circuit
+            + tq.gates.X(target=flag, control=intermediate_flags)
+            + tq.gates.X(target=flag)
+            + circuit.adjoint()
         )
 
         return circuit
 
     def clean_ancilla_count(self) -> int:
-        controlled_subspaces = filter(lambda r: isinstance(r, ControlledSubspace), self.registers)
-        return max([i + r.clean_ancilla_count() for (i, r) in enumerate(controlled_subspaces, start=1)], default=0)
+        controlled_subspaces = filter(
+            lambda r: isinstance(r, ControlledSubspace), self.registers
+        )
+        return max(
+            [
+                i + r.clean_ancilla_count()
+                for (i, r) in enumerate(controlled_subspaces, start=1)
+            ],
+            default=0,
+        )
 
     def verify_circuit(self):
         circuit = self.circuit(
             range(self.total_qubits),
             self.total_qubits,
-            range(self.total_qubits + 1, self.total_qubits + 1 + self.clean_ancilla_count()),
+            range(
+                self.total_qubits + 1,
+                self.total_qubits + 1 + self.clean_ancilla_count(),
+            ),
         )
         for i in range(2**self.total_qubits):
             result = circuit.simulate(i)
@@ -247,7 +259,8 @@ class Subspace:
         assert isinstance(self.registers[-(trailing_zeros + 1)], ControlledSubspace)
 
         return Subspace(
-            self.registers[: -(trailing_zeros + 1)] + self.registers[-(trailing_zeros + 1)].case_zero.registers,
+            self.registers[: -(trailing_zeros + 1)]
+            + self.registers[-(trailing_zeros + 1)].case_zero.registers,
         )
 
     def case_one(self) -> Subspace:
@@ -255,7 +268,8 @@ class Subspace:
         assert isinstance(self.registers[-(trailing_zeros + 1)], ControlledSubspace)
 
         return Subspace(
-            self.registers[: -(trailing_zeros + 1)] + self.registers[-(trailing_zeros + 1)].case_one.registers,
+            self.registers[: -(trailing_zeros + 1)]
+            + self.registers[-(trailing_zeros + 1)].case_one.registers,
         )
 
     @staticmethod
@@ -263,11 +277,11 @@ class Subspace:
         if bits is None:
             bits = int(np.ceil(np.log2(dim)))
         if dim == 1:
-            return Subspace(registers=[ZeroQubit()] * bits)
+            return Subspace(bits=bits)
         min_bits = int(np.ceil(np.log2(dim)))
         case_zero = Subspace(bits=min_bits - 1)
-        case_one = Subspace.from_dim(dim=dim - 2 ** (min_bits - 1), bits=min_bits - 1)
-        return Subspace(registers=[ControlledSubspace(case_zero, case_one)] + [ZeroQubit()] * (bits - min_bits))
+        case_one = Subspace.from_dim(dim - 2 ** (min_bits - 1), min_bits - 1)
+        return Subspace([ControlledSubspace(case_zero, case_one)], bits - min_bits)
 
 
 class Register(ABC):
@@ -318,7 +332,9 @@ class ControlledSubspace(Register):
     def __repr__(self) -> str:
         if self == ID:
             return "ID"
-        return f"ControlledSubspace(case_zero={self.case_zero}, case_one={self.case_one})"
+        return (
+            f"ControlledSubspace(case_zero={self.case_zero}, case_one={self.case_one})"
+        )
 
     def total_qubits(self) -> int:
         return 1 + self.case_zero.total_qubits
@@ -353,7 +369,9 @@ class ControlledSubspace(Register):
             )
         ]
 
-    def circuit(self, target: Sequence[int], flag: int, ancillae: Sequence[int]) -> Circuit:
+    def circuit(
+        self, target: Sequence[int], flag: int, ancillae: Sequence[int]
+    ) -> Circuit:
         """
         A circuit which checks whether a state is inside the subspace.
 
@@ -363,8 +381,12 @@ class ControlledSubspace(Register):
         """
         circuit = Circuit()
         control = target[-1]
-        circuit_zero = self.case_zero.circuit(target=target[:-1], flag=flag, ancillae=ancillae)
-        circuit_one = self.case_one.circuit(target=target[:-1], flag=flag, ancillae=ancillae)
+        circuit_zero = self.case_zero.circuit(
+            target=target[:-1], flag=flag, ancillae=ancillae
+        )
+        circuit_one = self.case_one.circuit(
+            target=target[:-1], flag=flag, ancillae=ancillae
+        )
         circuit += tq.gates.X(target=control)
         circuit += circuit_zero.add_controls(control)
         circuit += tq.gates.X(target=control)
@@ -372,7 +394,9 @@ class ControlledSubspace(Register):
         return circuit
 
     def clean_ancilla_count(self) -> int:
-        return max(self.case_zero.clean_ancilla_count(), self.case_one.clean_ancilla_count())
+        return max(
+            self.case_zero.clean_ancilla_count(), self.case_one.clean_ancilla_count()
+        )
 
 
 ID = ControlledSubspace(Subspace(registers=[]), Subspace(registers=[]))
