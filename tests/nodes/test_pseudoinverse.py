@@ -20,7 +20,7 @@ def test_pseudoinverse():
         @ A
         @ Projection(subspace_from=Subspace([ZeroQubit(), ID, ID]), subspace_to=Subspace(3))
     )
-    B_inv = Pseudoinverse(B, delta=0.1, epsilon=0.1)
+    B_inv = Pseudoinverse(B, condition=10.0, epsilon=0.1)
     C = B_inv @ B  # should be roughly a projector on all but the first basis states
     result = C.compute(np.eye(4))
     assert np.allclose(result, np.diag(np.array([0.0, 1.0, 1.0, 1.0])), atol=0.1)

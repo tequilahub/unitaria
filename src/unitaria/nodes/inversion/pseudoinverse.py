@@ -16,8 +16,11 @@ class Pseudoinverse(ProxyNode):
 
     :param A:
         The node to be inverted
-    :param delta:
-        A lower bound on nonzero singular values of A
+    :param condition:
+        An upper bound on the inverse of nonzero singular values of A.
+        This is the same as the usual definition of the condition of a matrix iff
+        the largest singular value is one, i.e. if the block-encoding has optimal
+        subnormalization.
     :param epsilon:
         The maximum absolute error
     :param guaranteed:
@@ -27,14 +30,16 @@ class Pseudoinverse(ProxyNode):
         lower degrees while usually still providing the requested precision.
     """
 
-    def __init__(self, A: Node, delta: float, epsilon: float, guaranteed: bool = False):
-        assert 0 < epsilon <= 2 * delta <= 0.5
+    # TODO: The condition should actually be the condition of the matrix,
+    #   the dependence on the subnormalization should be hidden from the user.
+    def __init__(self, A: Node, condition: float, epsilon: float, guaranteed: bool = False):
+        assert 0 < epsilon <= 2 / condition <= 0.5
 
         super().__init__(A.dimension_in, A.dimension_out)
 
         self.A = A
-        self.delta = delta
-        self.poly = inverse_poly(delta, epsilon, guaranteed)
+        self.condition = condition
+        self.poly = inverse_poly(1 / condition, epsilon, guaranteed)
 
     def definition(self):
-        return Scale(QSVT(A=Adjoint(self.A), coefficients=self.poly.coef, format="chebyshev"), 1 / self.delta)
+        return Scale(QSVT(A=Adjoint(self.A), coefficients=self.poly.coef, format="chebyshev"), self.condition)
