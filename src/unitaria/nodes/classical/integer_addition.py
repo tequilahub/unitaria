@@ -50,6 +50,24 @@ class IntegerAddition(Classical):
         input2 = (input2 - input1) % 2**self.target_bits
         return input1 + input2 * 2**self.source_bits
 
+    def compute(self, input: np.ndarray) -> np.ndarray:
+        old_shape = input.shape
+        N = 2**self.source_bits
+        M = 2**self.target_bits
+        input = input.reshape((-1, M, N))
+        shift = (np.arange(M)[:, None] - np.arange(N)) % M
+        result = input[:, shift, np.arange(N)]
+        return result.reshape(old_shape)
+
+    def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
+        old_shape = input.shape
+        N = 2**self.source_bits
+        M = 2**self.target_bits
+        input = input.reshape((-1, M, N))
+        shift = (np.arange(M)[:, None] + np.arange(N)) % M
+        result = input[:, shift, np.arange(N)]
+        return result.reshape(old_shape)
+
     def _circuit(
         self, target: Sequence[int], clean_ancillae: Sequence[int], borrowed_ancillae: Sequence[int]
     ) -> Circuit:
