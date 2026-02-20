@@ -67,7 +67,7 @@ class QSVTCoefficients:
     def angles_to_r_convention(self) -> np.ndarray:
         result = self.angles[:-1] - np.pi / 2
         result[0] += self.angles[-1] + self.degree() * np.pi / 2
-        print(result)
+        result[0] %= 2 * np.pi
         return result
 
 
