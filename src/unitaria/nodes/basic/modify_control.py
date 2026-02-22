@@ -34,33 +34,33 @@ class ModifyControl(Node):
         }
 
     def _subspace_in(self) -> Subspace:
-        subspace_one = Subspace(self.A.subspace_in.case_one().registers + self.expand_control.registers)
-        subspace_zero = Subspace(0, subspace_one.total_qubits)
+        subspace_one = Subspace(registers=self.A.subspace_in.case_one().registers + self.expand_control.registers)
+        subspace_zero = Subspace(registers=0, zero_qubits=subspace_one.total_qubits)
 
         if self.swap_control_state:
             return Subspace(
-                [ControlledSubspace(subspace_one, subspace_zero)],
-                self.A.subspace_in.trailing_zeros(),
+                registers=[ControlledSubspace(subspace_one, subspace_zero)],
+                zero_qubits=self.A.subspace_in.trailing_zeros(),
             )
         else:
             return Subspace(
-                [ControlledSubspace(subspace_zero, subspace_one)],
-                self.A.subspace_in.trailing_zeros(),
+                registers=[ControlledSubspace(subspace_zero, subspace_one)],
+                zero_qubits=self.A.subspace_in.trailing_zeros(),
             )
 
     def _subspace_out(self) -> Subspace:
-        subspace_one = Subspace(self.A.subspace_out.case_one().registers + self.expand_control.registers)
-        subspace_zero = Subspace(0, subspace_one.total_qubits)
+        subspace_one = Subspace(registers=self.A.subspace_out.case_one().registers + self.expand_control.registers)
+        subspace_zero = Subspace(registers=0, zero_qubits=subspace_one.total_qubits)
 
         if self.swap_control_state:
             return Subspace(
-                [ControlledSubspace(subspace_one, subspace_zero)],
-                self.A.subspace_out.trailing_zeros(),
+                registers=[ControlledSubspace(subspace_one, subspace_zero)],
+                zero_qubits=self.A.subspace_out.trailing_zeros(),
             )
         else:
             return Subspace(
-                [ControlledSubspace(subspace_zero, subspace_one)],
-                self.A.subspace_out.trailing_zeros(),
+                registers=[ControlledSubspace(subspace_zero, subspace_one)],
+                zero_qubits=self.A.subspace_out.trailing_zeros(),
             )
 
     def _normalization(self) -> float:

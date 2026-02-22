@@ -27,10 +27,10 @@ class Classical(Node):
         self.output_bits = output_bits
 
     def _subspace_in(self) -> Subspace:
-        return Subspace(self.input_bits, max(0, self.output_bits - self.input_bits))
+        return Subspace(registers=self.input_bits, zero_qubits=max(0, self.output_bits - self.input_bits))
 
     def _subspace_out(self) -> Subspace:
-        return Subspace(self.output_bits, max(0, self.input_bits - self.output_bits))
+        return Subspace(registers=self.output_bits, zero_qubits=max(0, self.input_bits - self.output_bits))
 
     def _normalization(self) -> float:
         return 1

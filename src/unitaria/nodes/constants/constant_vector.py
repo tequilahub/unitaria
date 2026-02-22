@@ -31,10 +31,10 @@ class ConstantVector(Node):
         return {"vec": self.vec}
 
     def _subspace_in(self) -> Subspace:
-        return Subspace(bits=0, zero_qubits=self.n_qubits)
+        return Subspace(registers=0, zero_qubits=self.n_qubits)
 
     def _subspace_out(self) -> Subspace:
-        return Subspace(bits=self.n_qubits)
+        return Subspace(registers=self.n_qubits)
 
     def _normalization(self) -> float:
         return np.linalg.norm(self.vec)

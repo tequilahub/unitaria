@@ -54,7 +54,7 @@ class ComponentwiseMulMultilinear(Node):
         return Subspace(self.subspace.registers * 2)
 
     def _subspace_out(self) -> Subspace:
-        return Subspace(self.subspace.registers, self.subspace.total_qubits)
+        return Subspace(registers=self.subspace.registers, zero_qubits=self.subspace.total_qubits)
 
     def _normalization(self) -> float:
         return 1

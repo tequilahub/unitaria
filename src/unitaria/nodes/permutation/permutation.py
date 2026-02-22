@@ -48,11 +48,13 @@ class Permutation(ProxyNode):
 
     def _subspace_in(self) -> Subspace:
         max_qubits = max(self.subspace_from.total_qubits, self.subspace_to.total_qubits)
-        return Subspace(self.subspace_from.registers, max_qubits - self.subspace_from.total_qubits)
+        return Subspace(
+            registers=self.subspace_from.registers, zero_qubits=max_qubits - self.subspace_from.total_qubits
+        )
 
     def _subspace_out(self) -> Subspace:
         max_qubits = max(self.subspace_from.total_qubits, self.subspace_to.total_qubits)
-        return Subspace(self.subspace_to.registers, max_qubits - self.subspace_to.total_qubits)
+        return Subspace(registers=self.subspace_to.registers, zero_qubits=max_qubits - self.subspace_to.total_qubits)
 
     def _normalization(self) -> float:
         return 1
@@ -100,7 +102,7 @@ class PermuteRegisters(Node):
         return self.subspace
 
     def _subspace_out(self) -> Subspace:
-        return Subspace([self.subspace.registers[i] for i in self.permutation_map])
+        return Subspace(registers=[self.subspace.registers[i] for i in self.permutation_map])
 
     def _normalization(self) -> float:
         return 1
@@ -180,8 +182,8 @@ def _find_matching_partitioning(a: Subspace, b: Subspace) -> list[tuple[Subspace
     last_breakpoint_b = 0
     i_a = 1
     i_b = 1
-    submap_a = Subspace(a.registers[last_breakpoint_a:i_a])
-    submap_b = Subspace(b.registers[last_breakpoint_b:i_b])
+    submap_a = Subspace(registers=a.registers[last_breakpoint_a:i_a])
+    submap_b = Subspace(registers=b.registers[last_breakpoint_b:i_b])
     while i_a < len(a.registers) and i_b < len(b.registers):
         if submap_a.dimension == submap_b.dimension:
             subdivisions.append((submap_a, submap_b))
@@ -189,17 +191,17 @@ def _find_matching_partitioning(a: Subspace, b: Subspace) -> list[tuple[Subspace
             last_breakpoint_b = i_b
             i_a += 1
             i_b += 1
-            submap_a = Subspace(a.registers[last_breakpoint_a:i_a])
-            submap_b = Subspace(b.registers[last_breakpoint_b:i_b])
+            submap_a = Subspace(registers=a.registers[last_breakpoint_a:i_a])
+            submap_b = Subspace(registers=b.registers[last_breakpoint_b:i_b])
         elif submap_a.dimension < submap_b.dimension:
             i_a += 1
-            submap_a = Subspace(a.registers[last_breakpoint_a:i_a])
+            submap_a = Subspace(registers=a.registers[last_breakpoint_a:i_a])
         else:
             i_b += 1
-            submap_b = Subspace(b.registers[last_breakpoint_b:i_b])
+            submap_b = Subspace(registers=b.registers[last_breakpoint_b:i_b])
 
-    submap_a = Subspace(a.registers[last_breakpoint_a:])
-    submap_b = Subspace(b.registers[last_breakpoint_b:])
+    submap_a = Subspace(registers=a.registers[last_breakpoint_a:])
+    submap_b = Subspace(registers=b.registers[last_breakpoint_b:])
     subdivisions.append((submap_a, submap_b))
 
     return subdivisions

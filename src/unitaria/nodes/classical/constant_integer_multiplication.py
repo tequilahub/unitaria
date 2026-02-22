@@ -59,7 +59,7 @@ class ConstantIntegerMultiplication(ProxyNode):
             const_add = BlockDiagonal(
                 Identity(subspace=Subspace(bits=add_bits)),
                 ConstantIntegerAddition(bits=add_bits, constant=c),
-)
+            )
             permutation = PermuteRegisters(Subspace(bits=add_bits + 1), [add_bits] + list(range(add_bits)))
             # TODO: The skip_projection can be removed onces this is done automatically
             const_add = Mul(

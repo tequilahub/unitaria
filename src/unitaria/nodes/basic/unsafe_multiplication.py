@@ -59,15 +59,15 @@ class UnsafeMul(Node):
     def _subspace_in(self) -> Subspace:
         max_qubits = max(self.A.subspace_in.total_qubits, self.B.subspace_out.total_qubits)
         return Subspace(
-            self.A.subspace_in.registers,
-            max_qubits - self.A.subspace_in.total_qubits,
+            registers=self.A.subspace_in.registers,
+            zero_qubits=max_qubits - self.A.subspace_in.total_qubits,
         )
 
     def _subspace_out(self) -> Subspace:
         max_qubits = max(self.A.subspace_in.total_qubits, self.B.subspace_out.total_qubits)
         return Subspace(
-            self.B.subspace_out.registers,
-            max_qubits - self.B.subspace_out.total_qubits,
+            registers=self.B.subspace_out.registers,
+            zero_qubits=max_qubits - self.B.subspace_out.total_qubits,
         )
 
     def _normalization(self) -> float:
