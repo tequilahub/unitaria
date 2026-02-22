@@ -5,68 +5,78 @@ from unitaria.subspace import Subspace, ControlledSubspace, ID
 
 
 def test_eq():
-    assert Subspace(0) == Subspace(0)
-    assert Subspace(1) == Subspace(1)
-    assert Subspace(0, 1) == Subspace(0, 1)
-    assert Subspace(1, 0) != Subspace(1, 1)
-    assert Subspace(1) == Subspace([ID])
-    c = ControlledSubspace(Subspace(0), Subspace(0))
-    assert Subspace(1) == Subspace([c])
-    c = ControlledSubspace(Subspace(1), Subspace(0, 1))
-    assert Subspace([c]) == Subspace([c])
-    assert Subspace([c]) != Subspace(1)
+    assert Subspace(registers=0) == Subspace(registers=0)
+    assert Subspace(registers=1) == Subspace(registers=1)
+    assert Subspace(registers=0, zero_qubits=1) == Subspace(registers=0, zero_qubits=1)
+    assert Subspace(registers=1, zero_qubits=0) != Subspace(registers=1, zero_qubits=1)
+    assert Subspace(registers=1) == Subspace(registers=[ID])
+    c = ControlledSubspace(Subspace(registers=0), Subspace(registers=0))
+    assert Subspace(registers=1) == Subspace(registers=[c])
+    c = ControlledSubspace(Subspace(registers=1), Subspace(registers=0, zero_qubits=1))
+    assert Subspace(registers=[c]) == Subspace(registers=[c])
+    assert Subspace(registers=[c]) != Subspace(registers=1)
 
 
 def test_is_trivial():
-    assert Subspace(0).is_trivial()
-    assert Subspace(0, 1).is_trivial()
-    assert not Subspace(1).is_trivial()
-    assert not Subspace([ControlledSubspace(Subspace(1), Subspace(0, 1))]).is_trivial()
+    assert Subspace(registers=0).is_trivial()
+    assert Subspace(registers=0, zero_qubits=1).is_trivial()
+    assert not Subspace(registers=1).is_trivial()
     assert not Subspace(
-        [
+        registers=[ControlledSubspace(Subspace(registers=1), Subspace(registers=0, zero_qubits=1))]
+    ).is_trivial()
+    assert not Subspace(
+        registers=[
             ID,
-            ControlledSubspace(Subspace(0, 1), Subspace(0, 1)),
+            ControlledSubspace(Subspace(registers=0, zero_qubits=1), Subspace(registers=0, zero_qubits=1)),
         ],
-        2,
+        zero_qubits=2,
     ).is_trivial()
 
 
 def test_basis():
-    assert Subspace(0, 1).test_basis(0)
-    assert not Subspace(0, 1).test_basis(1)
+    assert Subspace(registers=0, zero_qubits=1).test_basis(0)
+    assert not Subspace(registers=0, zero_qubits=1).test_basis(1)
 
-    np.testing.assert_allclose(Subspace(0).enumerate_basis(), np.array([0]))
-    np.testing.assert_allclose(Subspace(0, 1).enumerate_basis(), np.array([0]))
-    np.testing.assert_allclose(Subspace(1).enumerate_basis(), np.array([0, 1]))
+    np.testing.assert_allclose(Subspace(registers=0).enumerate_basis(), np.array([0]))
+    np.testing.assert_allclose(Subspace(registers=0, zero_qubits=1).enumerate_basis(), np.array([0]))
+    np.testing.assert_allclose(Subspace(registers=1).enumerate_basis(), np.array([0, 1]))
     np.testing.assert_allclose(
-        Subspace([ControlledSubspace(Subspace(1), Subspace(0, 1))]).enumerate_basis(), np.array([0, 1, 2])
+        Subspace(
+            registers=[ControlledSubspace(Subspace(registers=1), Subspace(registers=0, zero_qubits=1))]
+        ).enumerate_basis(),
+        np.array([0, 1, 2]),
     )
     # TODO
     # circuit = Circuit()
     np.testing.assert_allclose(
         Subspace(
-            [
+            registers=[
                 ID,
                 # Controlled(QubitMap(0, 1), QubitMap(0, 1)),
             ],
-            1,
+            zero_qubits=1,
         ).enumerate_basis(),
         np.array([0, 1]),
     )
 
 
 def test_total_qubits():
-    assert Subspace(0).total_qubits == 0
-    assert Subspace(0, 1).total_qubits == 1
-    assert Subspace(1).total_qubits == 1
-    assert Subspace([ControlledSubspace(Subspace(1), Subspace(0, 1))]).total_qubits == 2
+    assert Subspace(registers=0).total_qubits == 0
+    assert Subspace(registers=0, zero_qubits=1).total_qubits == 1
+    assert Subspace(registers=1).total_qubits == 1
     assert (
         Subspace(
-            [
+            registers=[ControlledSubspace(Subspace(registers=1), Subspace(registers=0, zero_qubits=1))]
+        ).total_qubits
+        == 2
+    )
+    assert (
+        Subspace(
+            registers=[
                 ID,
-                ControlledSubspace(Subspace(0, 1), Subspace(0, 1)),
+                ControlledSubspace(Subspace(registers=0, zero_qubits=1), Subspace(registers=0, zero_qubits=1)),
             ],
-            2,
+            zero_qubits=2,
         ).total_qubits
         == 5
     )
@@ -75,11 +85,19 @@ def test_total_qubits():
 @pytest.mark.parametrize(
     "subspace",
     [
-        Subspace(0),
-        Subspace(1, 1),
-        Subspace([ID, ControlledSubspace(Subspace(1), Subspace(0, 1))]),
+        Subspace(registers=0),
+        Subspace(registers=1, zero_qubits=1),
+        Subspace(registers=[ID, ControlledSubspace(Subspace(registers=1), Subspace(registers=0, zero_qubits=1))]),
         Subspace(
-            [ID, ControlledSubspace(Subspace([ControlledSubspace(Subspace(0, 1), Subspace(1)), ID]), Subspace(1, 2))]
+            registers=[
+                ID,
+                ControlledSubspace(
+                    Subspace(
+                        registers=[ControlledSubspace(Subspace(registers=0, zero_qubits=1), Subspace(registers=1)), ID]
+                    ),
+                    Subspace(registers=1, zero_qubits=2),
+                ),
+            ]
         ),
     ],
 )

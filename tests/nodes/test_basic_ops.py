@@ -6,8 +6,8 @@ from unitaria.nodes.basic.scale import Scale
 
 
 def test_tensor():
-    A = Increment(1)
-    B = Identity(Subspace(1))
+    A = Increment(bits=1)
+    B = Identity(subspace=Subspace(registers=1))
 
     verify((A & B))
     verify((A & A))
@@ -18,7 +18,7 @@ def test_tensor():
 
 
 def test_scale():
-    A = Increment(1)
+    A = Increment(bits=1)
 
     verify(1 * A)
     verify((-1) * A)

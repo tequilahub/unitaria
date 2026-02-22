@@ -13,8 +13,8 @@ from unitaria.verifier import verify
 
 @pytest.mark.parametrize("bits", [-2, 0])
 def test_increment_constructor(bits):
-    with pytest.raises(TypeError):
-        Increment(bits)
+    with pytest.raises(ValueError):
+        Increment(bits=bits)
     with pytest.raises(TypeError):
         Increment()
 

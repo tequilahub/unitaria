@@ -2,7 +2,16 @@ import pytest
 
 import numpy as np
 
-from unitaria.nodes import Increment, Identity, Add, Scale, Adjoint, ConstantUnitary, BlockHorizontal, Projection
+from unitaria.nodes import (
+    Increment,
+    Identity,
+    Add,
+    Scale,
+    Adjoint,
+    ConstantUnitary,
+    BlockHorizontal,
+    Projection,
+)
 from unitaria.subspace import Subspace
 from unitaria.verifier import verify
 
@@ -162,8 +171,11 @@ def ref_CP_1d(L, DIM):
 
 @pytest.mark.parametrize("n", range(1, 5))
 def test_laplace(n: int):
-    C = Increment(n)
-    A = Add(Scale(Identity(Subspace(n)), -2), Scale(Add(C, Adjoint(C)), 1))
+    C = Increment(bits=n)
+    A = Add(
+        Scale(Identity(subspace=Subspace(registers=n)), -2),
+        Scale(Add(C, Adjoint(C)), 1),
+    )
     verify(A)
 
 
@@ -174,18 +186,18 @@ def test_preconditioned_laplace_1d():
     C_F = None
 
     for i in range(L, 0, -1):
-        I_l = Projection(Subspace.from_dim(2**i - 1, bits=i), Subspace(i))
-        N_l = Increment(i) @ I_l
+        I_l = Projection(Subspace.from_dim(2**i - 1, bits=i), Subspace(registers=i))
+        N_l = Increment(bits=i) @ I_l
         C_l = 2 ** (i / 2) * (I_l - N_l)
 
-        T_l = ConstantUnitary(np.sqrt(1 / 2) * np.array([[1], [1]])) & Identity(Subspace(i - 1))
+        T_l = ConstantUnitary(np.sqrt(1 / 2) * np.array([[1], [1]])) & Identity(subspace=Subspace(registers=i - 1))
         # T_l = ConstantUnitary(
         #     np.sqrt(1 / 2) * np.array([
         #         [1, -np.sqrt(3) / 2],
         #         [0, 1 / 2],
         #         [1, np.sqrt(3) / 2],
         #         [0, 1 / 2],
-        #     ])) & Identity(Subspace(l - 1))
+        #     ])) & Identity(subspace=Subspace(registers=l - 1))
 
         if i == L:
             TC = 2 ** (-i / 2) * C_l

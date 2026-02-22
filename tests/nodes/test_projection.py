@@ -4,6 +4,6 @@ from unitaria.verifier import verify
 
 
 def test_projection():
-    verify(Projection(Subspace(1), Subspace(1)))
-    verify(Projection(Subspace(2), Subspace(1, 1)))
-    verify(Projection(Subspace(1, 1), Subspace(2)))
+    verify(Projection(Subspace(registers=1), Subspace(registers=1)))
+    verify(Projection(Subspace(registers=2), Subspace(registers=1, zero_qubits=1)))
+    verify(Projection(Subspace(registers=1, zero_qubits=1), Subspace(registers=2)))

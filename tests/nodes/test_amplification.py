@@ -13,7 +13,9 @@ from unitaria.subspace import ZeroQubit, ID
 
 def test_grover_amplification():
     node = ConstantVector(np.array([1 / 2, 1 / 2, 1 / 2, 1 / 2]))
-    proj = Projection(subspace_from=Subspace(2, 0), subspace_to=Subspace(0, 2))
+    proj = Projection(
+        subspace_from=Subspace(registers=2, zero_qubits=0), subspace_to=Subspace(registers=0, zero_qubits=2)
+    )
     node = Mul(node, proj)
 
     # Test amplifying to 1
@@ -27,7 +29,9 @@ def test_grover_amplification():
 
 def test_fixed_point_amplification():
     node = ConstantVector(np.array([1 / 2, 1 / 2, 1 / 2, 1 / 2]))
-    proj = Projection(subspace_from=Subspace(2, 0), subspace_to=Subspace(0, 2))
+    proj = Projection(
+        subspace_from=Subspace(registers=2, zero_qubits=0), subspace_to=Subspace(registers=0, zero_qubits=2)
+    )
     node = Mul(node, proj)
 
     # Test with known norm
@@ -48,9 +52,9 @@ def test_linear_amplification():
         ConstantUnitary(rot_matrix(np.arccos(0.2))) | ConstantUnitary(rot_matrix(np.arccos(0.3)))
     )
     node = (
-        Projection(subspace_from=Subspace(3), subspace_to=Subspace([ZeroQubit(), ID, ID]))
+        Projection(subspace_from=Subspace(registers=3), subspace_to=Subspace(registers=[ZeroQubit(), ID, ID]))
         @ A
-        @ Projection(subspace_from=Subspace([ZeroQubit(), ID, ID]), subspace_to=Subspace(3))
+        @ Projection(subspace_from=Subspace(registers=[ZeroQubit(), ID, ID]), subspace_to=Subspace(registers=3))
     )
     amplified = LinearAmplification(node, 2.0, 0.4, 0.1)
     result = amplified.compute(np.eye(4))
