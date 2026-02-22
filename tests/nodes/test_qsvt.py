@@ -1,3 +1,4 @@
+from unitaria.nodes.classical.increment import Increment
 from unitaria.nodes.qsvt.qsvt import QSVTCoefficients, QSVT
 from unitaria.nodes.constants.constant_unitary import ConstantUnitary
 from unitaria.nodes.basic.identity import Identity
@@ -55,9 +56,9 @@ def test_qsvt_coefficients():
 def test_qsvt_grover():
     # Define v so it has some subnormalization
     v = (
-        Projection(1, Subspace(0, 1))
+        Projection(1, Subspace(registers=0, zero_qubits=1))
         @ ConstantUnitary(2 ** (-1 / 2) * np.array([[1, 1], [1, -1]]))
-        @ Projection(Subspace(0, 1), Subspace(1))
+        @ Projection(Subspace(registers=0, zero_qubits=1), Subspace(registers=1))
     )
     A = QSVT(v, np.array(4 * [np.pi]), "angles")
     verify(A)
@@ -65,7 +66,17 @@ def test_qsvt_grover():
 
 def test_qsvt_with_ancillas():
     # Define v so it has some subnormalization
-    A = Identity(Subspace([ID, ControlledSubspace(Subspace(1), Subspace(0, 1))]))
+    A = Identity(
+        subspace=Subspace(
+            registers=[ID, ControlledSubspace(Subspace(registers=1), Subspace(registers=0, zero_qubits=1))]
+        )
+    )
     assert A.subspace.total_qubits + A.subspace.clean_ancilla_count() > 2
     B = QSVT(A, np.array(4 * [np.pi]), "angles")
+    verify(B)
+
+
+def test_qsvt_with_polynomial():
+    A = Increment(bits=2)
+    B = QSVT(A, np.array([1, 0, 1]), "chebyshev")
     verify(B)

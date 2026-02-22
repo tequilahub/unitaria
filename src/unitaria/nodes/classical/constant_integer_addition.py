@@ -49,6 +49,12 @@ class ConstantIntegerAddition(Classical):
     def compute_reverse_classical(self, input: np.ndarray) -> np.ndarray:
         return (input - self.constant) % 2**self.bits
 
+    def compute(self, input: np.ndarray) -> np.ndarray:
+        return np.roll(input, self.constant, axis=-1)
+
+    def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
+        return np.roll(input, -self.constant, axis=-1)
+
     def _circuit(
         self, target: Sequence[int], clean_ancillae: Sequence[int], borrowed_ancillae: Sequence[int]
     ) -> Circuit:

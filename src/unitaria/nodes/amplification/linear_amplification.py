@@ -1,6 +1,6 @@
 from unitaria import Node
 from unitaria.nodes import ProxyNode
-from unitaria.nodes.amplification.poly_approx import trunc_linear_poly
+from unitaria.poly_approx import trunc_linear_poly
 from unitaria.nodes.qsvt.qsvt import QSVT
 
 

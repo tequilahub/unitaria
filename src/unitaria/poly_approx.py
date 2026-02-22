@@ -113,3 +113,52 @@ def trunc_linear_poly(gamma: float, delta: float, epsilon: float, guaranteed: bo
         return gamma * x * (1 - epsilon / 2) * rect_poly(t, delta, epsilon / 2, guaranteed)
     else:
         return gamma * x * rect_poly(t, delta, epsilon, guaranteed)
+
+
+def _unscaled_inverse_poly(kappa: float, epsilon: float) -> Chebyshev:
+    """
+    For kappa > 1 and 0 < epsilon < 1, returns a polynomial in the Chebyshev basis
+    that approximates the function 1 / x on the interval [-1, 1] \ (-1 / kappa, 1 / kappa).
+
+    Implements Lemma 40 from https://arxiv.org/abs/1806.01838
+
+    :param kappa: The approximation is only valid for |x| >= 1 / kappa, requires kappa > 1.
+    :param epsilon: The maximum error of the approximation, requires 0 < epsilon < 1.
+    :return: The polynomial approximating 1 / x
+    """
+    assert kappa > 1
+    assert 0 < epsilon < 1
+
+    epsilon /= 2  # because we have two epsilon / 2 approximations
+    b = int(np.ceil(kappa**2 * np.log(kappa / epsilon)))
+    j = int(np.ceil(np.sqrt(b * np.log(4 * b / epsilon))))
+    coefficients = np.zeros(2 * j + 2)
+    for i in range(min(b, j) + 1):
+        coefficients[2 * i + 1] += (-1) ** i * 4 * scipy.special.bdtrc(b + i, 2 * b, 0.5)
+    return Chebyshev(coefficients)
+
+
+def inverse_poly(delta: float, epsilon: float, guaranteed: bool = False) -> Chebyshev:
+    """
+    For 0 < epsilon < 2 * delta <= 1 / 2, returns a polynomial P which epsilon-approximates
+    delta / x on the domain [-1, 1] \ (-delta, delta) and for which |P| <= 1.
+
+    Implements Theorem 41 from https://arxiv.org/abs/1806.01838, but with delta scaled by 1 / 2.
+
+    :param delta: The approximation is only valid for |x| >= delta, requires epsilon / 2 < delta <= 1 / 4.
+    :param epsilon: The maximum error of the approximation, requires 0 < epsilon < 2 * delta.
+    :param guaranteed: If the accuracy should be guaranteed using analytical bounds (ignoring numerical errors).
+        If this is set to false, the function will return polynomials of lower degrees.
+    :return: The polynomial approximating delta / x
+    """
+    assert 0 < epsilon < 2 * delta <= 1 / 2
+
+    poly = delta * _unscaled_inverse_poly(1 / delta, (epsilon / 3) / delta)
+
+    maxima = poly.deriv().roots()
+    maxima = maxima[np.abs((np.imag(maxima)) < 1e-6) & (np.abs(maxima) <= 1)]
+    pmax = np.max(np.abs(poly(np.concatenate((maxima, [-1, 1])))))
+
+    rect = rect_poly(delta / 2, delta / 2, min(epsilon / 3, 1 / pmax), guaranteed)
+
+    return poly * (1 - rect)

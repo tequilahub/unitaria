@@ -11,7 +11,7 @@ from unitaria.nodes.node import Node
 
 class SubspaceCircuit(Node):
     """
-    Node, which computes wether a vector is in a given subspace.
+    Node, which computes whether a vector is in a given subspace.
 
     This is mostly used internally, for example for the `unitaria.nodes.Mul`
     node. The result of the check is stored in an additional qubit, for which
@@ -32,10 +32,10 @@ class SubspaceCircuit(Node):
         return []
 
     def _subspace_in(self) -> Subspace:
-        return Subspace(self.subspace.registers, 1)
+        return Subspace(registers=self.subspace.registers, zero_qubits=1)
 
     def _subspace_out(self) -> Subspace:
-        return Subspace(self.subspace.registers, 1)
+        return Subspace(registers=self.subspace.registers, zero_qubits=1)
 
     def _normalization(self) -> float:
         return 1
