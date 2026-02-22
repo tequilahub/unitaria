@@ -21,6 +21,9 @@ class ConstantUnitary(Node):
     def __init__(self, unitary: np.ndarray):
         super().__init__(unitary.shape[1], unitary.shape[0])
         assert unitary.ndim == 2
+        if unitary.shape[0] == unitary.shape[1]:
+            if not self._is_unitary(unitary):
+                raise ValueError("The provided matrix is not unitary.")
         self.unitary = unitary
         n, m = unitary.shape
         extended_unitary = np.zeros((max(n, m), max(n, m)))
@@ -39,6 +42,11 @@ class ConstantUnitary(Node):
         self.extended_unitary = extended_unitary
         self.bits = int(np.ceil(np.log2(extended_unitary.shape[0])))
         assert 2**self.bits == extended_unitary.shape[0]
+
+    @staticmethod
+    def _is_unitary(U: np.ndarray, tol: float = 1e-8) -> bool:
+        identity = np.eye(U.shape[0])
+        return np.allclose(U @ np.conj(U.T), identity, atol=tol) and np.allclose(np.conj(U.T) @ U, identity, atol=tol)
 
     def parameters(self) -> dict:
         return {"unitary": self.unitary}
