@@ -32,7 +32,11 @@ class Subspace:
             registers = [ID] * registers
         for register in registers:
             if not isinstance(register, Register):
-                raise ValueError(f"{register} is not a valid register in a Subspace")
+                if register is ZeroQubit:
+                    raise ValueError(
+                        f"{register} is not a valid register in a Subspace. Use `ZeroQubit()` instead of `ZeroQubit`"
+                    )
+                raise ValueError(f"{register} is not a valid register in a Subspace.")
         simplified_registers = []
         for register in registers:
             if isinstance(register, ControlledSubspace):
@@ -80,11 +84,63 @@ class Subspace:
         str_registers = str(len(registers))
         for register in registers:
             if register != ID:
-                str_registers = str(registers)
+                str_registers = registers.__repr__()
                 break
         if trailing_zeros == 0:
             return f"Subspace({str_registers})"
         return f"Subspace({str_registers}, zero_qubits={trailing_zeros})"
+
+    def __str__(self) -> str:
+        if len(self.registers) == 0:
+            return "<zero qubit subspace>"
+        tree = self.draw_tree()
+        output = ""
+        lines = tree.splitlines()
+        max_depth = (len(lines) + 1) // 2 - 1
+        digits = int(np.ceil(np.log10(max(max_depth, 1) + 1)))
+        for i, line in enumerate(lines):
+            if i % 2 == 1:
+                output += ("{:0" + str(digits) + "} ").format(max_depth - i // 2)
+            else:
+                output += " " * (digits + 1)
+            output += line
+            if i != len(lines) - 1:
+                output += "\n"
+        return output
+
+    def draw_tree(self) -> str:
+        output = ""
+        for i, register in enumerate(reversed(self.registers)):
+            if i == 0:
+                output += "│\n"
+            str_register = str(register)
+            output += str_register
+            output += "\n"
+            if i != len(self.registers) - 1:
+                last_line = str_register.rsplit("\n", 1)
+                if len(last_line) > 1:
+                    last_line = last_line[-1]
+                    for i, c in enumerate(last_line):
+                        if i == 0:
+                            output += "╔"
+                        elif i == len(last_line) - 1:
+                            if c == "0":
+                                output += "╛"
+                            else:
+                                output += "╝"
+                        elif c == " ":
+                            output += "═"
+                        elif c == "0":
+                            output += "╧"
+                        else:
+                            output += "╩"
+                    output += "\n"
+                else:
+                    if str_register == "0":
+                        output += "│\n"
+                    else:
+                        output += "║\n"
+        return output
 
     def is_trivial(self) -> bool:
         """
@@ -217,7 +273,8 @@ class Subspace:
 
     def case_zero(self) -> Subspace:
         trailing_zeros = self.trailing_zeros()
-        assert isinstance(self.registers[-(trailing_zeros + 1)], ControlledSubspace)
+        if trailing_zeros == len(self.registers):
+            return None
 
         return Subspace(
             self.registers[: -(trailing_zeros + 1)] + self.registers[-(trailing_zeros + 1)].case_zero.registers,
@@ -225,7 +282,8 @@ class Subspace:
 
     def case_one(self) -> Subspace:
         trailing_zeros = self.trailing_zeros()
-        assert isinstance(self.registers[-(trailing_zeros + 1)], ControlledSubspace)
+        if trailing_zeros == len(self.registers):
+            return None
 
         return Subspace(
             self.registers[: -(trailing_zeros + 1)] + self.registers[-(trailing_zeros + 1)].case_one.registers,
@@ -241,6 +299,12 @@ class Subspace:
         case_zero = Subspace(min_bits - 1)
         case_one = Subspace.from_dim(dim - 2 ** (min_bits - 1), min_bits - 1)
         return Subspace([ControlledSubspace(case_zero, case_one)], bits - min_bits)
+
+    def __and__(self, other: Subspace) -> Subspace:
+        return Subspace(self.registers + other.registers)
+
+    def __or__(self, other: Subspace) -> Subspace:
+        return Subspace([ControlledSubspace(self, other)])
 
 
 class Register(ABC):
@@ -269,6 +333,9 @@ class ZeroQubit(Register):
     def dimension(self) -> int:
         return 1
 
+    def __str__(self) -> str:
+        return "0"
+
 
 @dataclass(frozen=True, repr=False)
 class ControlledSubspace(Register):
@@ -291,13 +358,39 @@ class ControlledSubspace(Register):
     def __repr__(self) -> str:
         if self == ID:
             return "ID"
-        return f"ControlledSubspace(case_zero={self.case_zero}, case_one={self.case_one})"
+        return f"ControlledSubspace(case_zero={self.case_zero.__repr__()}, case_one={self.case_one.__repr__()})"
 
     def total_qubits(self) -> int:
         return 1 + self.case_zero.total_qubits
 
     def dimension(self) -> int:
         return self.case_zero.dimension + self.case_one.dimension
+
+    def __str__(self) -> str:
+        tree0 = self.case_zero.draw_tree()
+        tree1 = self.case_one.draw_tree()
+        lines0 = tree0.splitlines()
+        lines1 = tree1.splitlines()
+
+        assert len(lines0) == len(lines1), str(lines0) + "," + str(lines1)
+
+        if len(lines0) == 0:
+            return "#"
+
+        w0 = max(map(len, lines0))
+        w1 = max(map(len, lines1))
+
+        output = "?─┬" + "─" * w0 + "┐\n"
+        for i in range(len(lines0)):
+            output += "  "
+            output += lines0[i]
+            output += " " * (w0 - len(lines0[i]) + 1)
+            output += lines1[i]
+            output += " " * (w1 - len(lines1[i]))
+            if i != len(lines0) - 1:
+                output += "\n"
+
+        return output
 
     def simplify(self) -> list[Register]:
         """
