@@ -80,7 +80,7 @@ class Subspace:
         str_registers = str(len(registers))
         for register in registers:
             if register != ID:
-                str_registers = registers.__repr__()
+                str_registers = repr(registers)
                 break
         if trailing_zeros == 0:
             return f"Subspace({str_registers})"
@@ -350,7 +350,7 @@ class ControlledSubspace(Register):
     def __repr__(self) -> str:
         if self == ID:
             return "ID"
-        return f"ControlledSubspace(case_zero={self.case_zero.__repr__()}, case_one={self.case_one.__repr__()})"
+        return f"ControlledSubspace(case_zero={repr(self.case_zero)}, case_one={repr(self.case_one)})"
 
     def total_qubits(self) -> int:
         return 1 + self.case_zero.total_qubits
