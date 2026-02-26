@@ -18,15 +18,13 @@ class Controlled(Node):
     def _subspace_in(self) -> Subspace:
         subspace_in_A = self.A.subspace_in
         return Subspace(
-            registers=[ControlledSubspace(Subspace(registers=0, zero_qubits=subspace_in_A.total_qubits), subspace_in_A)]
+            registers=[ControlledSubspace(Subspace(bits=0, zero_qubits=subspace_in_A.total_qubits), subspace_in_A)]
         )
 
     def _subspace_out(self) -> Subspace:
         subspace_out_A = self.A.subspace_out
         return Subspace(
-            registers=[
-                ControlledSubspace(Subspace(registers=0, zero_qubits=subspace_out_A.total_qubits), subspace_out_A)
-            ]
+            registers=[ControlledSubspace(Subspace(bits=0, zero_qubits=subspace_out_A.total_qubits), subspace_out_A)]
         )
 
     def _normalization(self) -> float:

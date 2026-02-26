@@ -7,14 +7,14 @@ from unitaria.verifier import verify
 
 
 def test_block_horizontal():
-    A = Identity(subspace=Subspace(registers=1))
+    A = Identity(subspace=Subspace(bits=1))
     B = Increment(bits=1)
     verify(BlockHorizontal(A, B))
     verify(BlockHorizontal(B, A))
 
 
 def test_block_vertical():
-    A = Identity(subspace=Subspace(registers=1))
+    A = Identity(subspace=Subspace(bits=1))
     B = Increment(bits=1)
     verify(BlockVertical(A, B))
     verify(BlockVertical(B, A))

@@ -5,7 +5,7 @@ from unitaria.verifier import verify
 
 
 def test_block_diagonal():
-    A = Identity(subspace=Subspace(registers=2, zero_qubits=1))
+    A = Identity(subspace=Subspace(bits=2, zero_qubits=1))
     B = Increment(bits=2)
 
     D = A | B
@@ -15,7 +15,7 @@ def test_block_diagonal():
 
 
 def test_block_diagonal_with_permutation():
-    A = Identity(subspace=Subspace(registers=2))
+    A = Identity(subspace=Subspace(bits=2))
     B = Increment(bits=2)
 
     D = A | B

@@ -16,9 +16,9 @@ def test_pseudoinverse():
         ConstantUnitary(rot_matrix(np.pi / 4)) | ConstantUnitary(rot_matrix(0.0))
     )
     B = (
-        Projection(subspace_from=Subspace(3), subspace_to=Subspace([ZeroQubit(), ID, ID]))
+        Projection(subspace_from=Subspace(bits=3), subspace_to=Subspace([ZeroQubit(), ID, ID]))
         @ A
-        @ Projection(subspace_from=Subspace([ZeroQubit(), ID, ID]), subspace_to=Subspace(3))
+        @ Projection(subspace_from=Subspace([ZeroQubit(), ID, ID]), subspace_to=Subspace(bits=3))
     )
     B_inv = Pseudoinverse(B, condition=10.0, epsilon=0.1)
     C = B_inv @ B  # should be roughly a projector on all but the first basis states

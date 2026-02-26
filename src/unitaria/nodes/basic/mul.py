@@ -52,15 +52,15 @@ class Mul(ProxyNode):
         B_permuted = UnsafeMul(permutation, self.B)
         projection_subspace = A_permuted.subspace_out
         projection_required = not self.skip_projection
-        if projection_subspace == Subspace(projection_subspace.total_qubits):
+        if projection_subspace == Subspace(bits=projection_subspace.total_qubits):
             projection_required = False
         if projection_required:
             # TODO: This can be probably be done more correctly
             # once match_nonzero is improved
             if A_permuted.subspace_out.total_qubits < B_permuted.subspace_in.total_qubits:
                 projection_subspace = B_permuted.subspace_in
-            A_permuted = Tensor(A_permuted, Identity(subspace=Subspace(registers=0, zero_qubits=1)))
-            B_permuted = Tensor(B_permuted, Identity(subspace=Subspace(registers=0, zero_qubits=1)))
+            A_permuted = Tensor(A_permuted, Identity(subspace=Subspace(bits=0, zero_qubits=1)))
+            B_permuted = Tensor(B_permuted, Identity(subspace=Subspace(bits=0, zero_qubits=1)))
             return UnsafeMul(UnsafeMul(A_permuted, SubspaceCircuit(projection_subspace)), B_permuted)
         else:
             return UnsafeMul(A_permuted, B_permuted)

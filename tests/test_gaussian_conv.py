@@ -19,12 +19,12 @@ def test_1d_gaussian_conv():
     gaussian = np.exp(-(x**2))
     prep = ConstantVector(np.append([0], np.sqrt(gaussian)))
     conv = (
-        Projection(subspace_from=Subspace(registers=4), subspace_to=Subspace(registers=3, zero_qubits=1))
-        @ (Adjoint(prep) & Identity(subspace=Subspace(registers=4)))
-        @ (Identity(subspace=Subspace(registers=3, zero_qubits=1)) & ConstantIntegerAddition(bits=4, constant=-4))
+        Projection(subspace_from=Subspace(bits=4), subspace_to=Subspace(bits=3, zero_qubits=1))
+        @ (Adjoint(prep) & Identity(subspace=Subspace(bits=4)))
+        @ (Identity(subspace=Subspace(bits=3, zero_qubits=1)) & ConstantIntegerAddition(bits=4, constant=-4))
         @ IntegerAddition(source_bits=3, target_bits=4)
-        @ (prep & Identity(subspace=Subspace(registers=4)))
-        @ Projection(subspace_from=Subspace(registers=3, zero_qubits=1), subspace_to=Subspace(registers=4))
+        @ (prep & Identity(subspace=Subspace(bits=4)))
+        @ Projection(subspace_from=Subspace(bits=3, zero_qubits=1), subspace_to=Subspace(bits=4))
     )
     verify(conv)
 
@@ -45,7 +45,7 @@ def test_2d_gaussian_conv():
     one_dim_conv = Mul(
         Mul(
             Mul(
-                Projection(subspace_from=Subspace(registers=2, zero_qubits=1), subspace_to=Subspace(registers=3)),
+                Projection(subspace_from=Subspace(bits=2, zero_qubits=1), subspace_to=Subspace(bits=3)),
                 prep & Identity(bits=3),
                 skip_projection=True,
             ),
@@ -54,11 +54,11 @@ def test_2d_gaussian_conv():
         ),
         Mul(
             Mul(
-                Identity(subspace=Subspace(registers=2)) & ConstantIntegerAddition(bits=3, constant=-2),
-                Adjoint(prep) & Identity(subspace=Subspace(registers=3)),
+                Identity(subspace=Subspace(bits=2)) & ConstantIntegerAddition(bits=3, constant=-2),
+                Adjoint(prep) & Identity(subspace=Subspace(bits=3)),
                 skip_projection=True,
             ),
-            Projection(subspace_from=Subspace(registers=3), subspace_to=Subspace(registers=2, zero_qubits=1)),
+            Projection(subspace_from=Subspace(bits=3), subspace_to=Subspace(bits=2, zero_qubits=1)),
             skip_projection=True,
         ),
         skip_projection=True,
