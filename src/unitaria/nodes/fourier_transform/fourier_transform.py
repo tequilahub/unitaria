@@ -33,10 +33,10 @@ class FourierTransform(Node):
         return {"bits": self.bits}
 
     def _subspace_in(self) -> Subspace:
-        return Subspace(self.bits)
+        return Subspace(bits=self.bits)
 
     def _subspace_out(self) -> Subspace:
-        return Subspace(self.bits)
+        return Subspace(bits=self.bits)
 
     def _normalization(self) -> float:
         return 1

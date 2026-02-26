@@ -5,7 +5,7 @@ from unitaria.verifier import verify
 
 
 def test_add():
-    A = Identity(subspace=Subspace(registers=1, zero_qubits=1))
+    A = Identity(subspace=Subspace(bits=1, zero_qubits=1))
     B = Increment(bits=1)
 
     D = A + B
