@@ -1,4 +1,5 @@
 import numpy as np
+from unitaria.verifier import verify
 
 from unitaria import Subspace
 from unitaria.nodes.amplification.fixed_point_amplification import FixedPointAmplification
@@ -18,13 +19,16 @@ def test_grover_amplification():
     )
     node = Mul(node, proj)
 
+    amplified = GroverAmplification(node, 0)
+    verify(amplified, np.array([0.5]))
+
     # Test amplifying to 1
     amplified = GroverAmplification(node, 1)
-    assert np.isclose(amplified.compute_norm(np.array([1])), 1)
+    verify(amplified, np.array([1]))
 
     # Test "overshooting" back down to 0.5
     amplified = GroverAmplification(node, 2)
-    assert np.isclose(amplified.compute_norm(np.array([1])), 0.5)
+    verify(amplified, np.array([0.5]))
 
 
 def test_fixed_point_amplification():
@@ -36,10 +40,12 @@ def test_fixed_point_amplification():
 
     # Test with known norm
     amplified = FixedPointAmplification(node, 0.5, 0.1)
+    verify(amplified)
     assert amplified.compute_norm(np.array([1])) > 1 - 0.1
 
     # Test with unknown (but lower-bounded) norm
     amplified = FixedPointAmplification(node, 0.1, 0.1)
+    verify(amplified)
     assert amplified.compute_norm(np.array([1])) > 1 - 0.1
 
 
@@ -57,5 +63,4 @@ def test_linear_amplification():
         @ Projection(subspace_from=Subspace(registers=[ZeroQubit(), ID, ID]), subspace_to=Subspace(registers=3))
     )
     amplified = LinearAmplification(node, 2.0, 0.4, 0.1)
-    result = amplified.compute(np.eye(4))
-    assert np.allclose(result, np.diag(np.array([0.0, 0.2, 0.4, 0.6])), atol=0.1)
+    verify(amplified, np.diag(np.array([0.0, 0.2, 0.4, 0.6])), atol=0.1, check_adjoint=False)
