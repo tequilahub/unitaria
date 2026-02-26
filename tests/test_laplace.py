@@ -173,7 +173,7 @@ def ref_CP_1d(L, DIM):
 def test_laplace(n: int):
     C = Increment(bits=n)
     A = Add(
-        Scale(Identity(subspace=Subspace(registers=n)), -2),
+        Scale(Identity(subspace=Subspace(bits=n)), -2),
         Scale(Add(C, Adjoint(C)), 1),
     )
     verify(A)
@@ -186,11 +186,11 @@ def test_preconditioned_laplace_1d():
     C_F = None
 
     for i in range(L, 0, -1):
-        I_l = Projection(Subspace.from_dim(2**i - 1, bits=i), Subspace(registers=i))
+        I_l = Projection(Subspace(dim=2**i - 1, bits=i), Subspace(bits=i))
         N_l = Increment(bits=i) @ I_l
         C_l = 2 ** (i / 2) * (I_l - N_l)
 
-        T_l = ConstantUnitary(np.sqrt(1 / 2) * np.array([[1], [1]])) & Identity(subspace=Subspace(registers=i - 1))
+        T_l = ConstantUnitary(np.sqrt(1 / 2) * np.array([[1], [1]])) & Identity(subspace=Subspace(bits=i - 1))
         # T_l = ConstantUnitary(
         #     np.sqrt(1 / 2) * np.array([
         #         [1, -np.sqrt(3) / 2],

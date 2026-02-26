@@ -5,11 +5,11 @@ import numpy as np
 
 
 def test_componentwise_mul():
-    verify(ComponentwiseMul(Subspace(registers=1)))
-    verify(ComponentwiseMul(Subspace(registers=1, zero_qubits=1)))
+    verify(ComponentwiseMul(Subspace(bits=1)))
+    verify(ComponentwiseMul(Subspace(bits=1, zero_qubits=1)))
     verify(
         ComponentwiseMul(
-            Subspace(registers=[ID, ControlledSubspace(Subspace(registers=1), Subspace(registers=0, zero_qubits=1))])
+            Subspace(registers=[ID, ControlledSubspace(Subspace(bits=1), Subspace(bits=0, zero_qubits=1))])
         )
     )
 

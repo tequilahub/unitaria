@@ -52,7 +52,7 @@ class MultilinearNode(ProxyNode):
                 if i < len(self.apply) and self.apply[i] is not None:
                     node = self.apply[i]
                 else:
-                    node = Identity(subspace=Subspace.from_dim(dim))
+                    node = Identity(subspace=Subspace(dim=dim))
                 if apply_product is None:
                     apply_product = node
                 else:

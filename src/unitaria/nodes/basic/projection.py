@@ -21,11 +21,7 @@ class Projection(Node):
     subspace_from: Subspace
     subspace_to: Subspace
 
-    def __init__(self, subspace_from: Subspace | int, subspace_to: Subspace | int):
-        if not isinstance(subspace_from, Subspace):
-            subspace_from = Subspace(subspace_from)
-        if not isinstance(subspace_to, Subspace):
-            subspace_to = Subspace(subspace_to)
+    def __init__(self, subspace_from: Subspace, subspace_to: Subspace):
         super().__init__(subspace_from.dimension, subspace_to.dimension)
         self.subspace_from = subspace_from
         self.subspace_to = subspace_to

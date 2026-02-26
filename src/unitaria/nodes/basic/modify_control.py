@@ -12,12 +12,11 @@ class ModifyControl(Node):
     def __init__(
         self,
         A: Node,
-        expand_control: Subspace | int = 0,
+        expand_control_bits: int = 0,
         swap_control_state: bool = False,
     ):
         self.A = A
-        if not isinstance(expand_control, Subspace):
-            expand_control = Subspace(expand_control)
+        expand_control = Subspace(bits=expand_control_bits)
         super().__init__(
             (A.dimension_in - 1) * expand_control.dimension + 1, (A.dimension_out - 1) * expand_control.dimension + 1
         )
@@ -35,7 +34,7 @@ class ModifyControl(Node):
 
     def _subspace_in(self) -> Subspace:
         subspace_one = Subspace(registers=self.A.subspace_in.case_one().registers + self.expand_control.registers)
-        subspace_zero = Subspace(registers=0, zero_qubits=subspace_one.total_qubits)
+        subspace_zero = Subspace(bits=0, zero_qubits=subspace_one.total_qubits)
 
         if self.swap_control_state:
             return Subspace(
@@ -50,7 +49,7 @@ class ModifyControl(Node):
 
     def _subspace_out(self) -> Subspace:
         subspace_one = Subspace(registers=self.A.subspace_out.case_one().registers + self.expand_control.registers)
-        subspace_zero = Subspace(registers=0, zero_qubits=subspace_one.total_qubits)
+        subspace_zero = Subspace(bits=0, zero_qubits=subspace_one.total_qubits)
 
         if self.swap_control_state:
             return Subspace(

@@ -56,9 +56,9 @@ def test_qsvt_coefficients():
 def test_qsvt_grover():
     # Define v so it has some subnormalization
     v = (
-        Projection(1, Subspace(registers=0, zero_qubits=1))
+        Projection(Subspace(bits=1), Subspace(bits=0, zero_qubits=1))
         @ ConstantUnitary(2 ** (-1 / 2) * np.array([[1, 1], [1, -1]]))
-        @ Projection(Subspace(registers=0, zero_qubits=1), Subspace(registers=1))
+        @ Projection(Subspace(bits=0, zero_qubits=1), Subspace(bits=1))
     )
     A = QSVT(v, np.array(4 * [np.pi]), "angles")
     verify(A)
@@ -67,9 +67,7 @@ def test_qsvt_grover():
 def test_qsvt_with_ancillas():
     # Define v so it has some subnormalization
     A = Identity(
-        subspace=Subspace(
-            registers=[ID, ControlledSubspace(Subspace(registers=1), Subspace(registers=0, zero_qubits=1))]
-        )
+        subspace=Subspace(registers=[ID, ControlledSubspace(Subspace(bits=1), Subspace(bits=0, zero_qubits=1))])
     )
     assert A.subspace.total_qubits + A.subspace.clean_ancilla_count() > 2
     B = QSVT(A, np.array(4 * [np.pi]), "angles")

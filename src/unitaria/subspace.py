@@ -27,19 +27,16 @@ class Subspace:
 
     registers: list[Register]
 
-    def __init__(
-        self, registers: list[Register] | int = None, *, bits: int = None, dim: int = None, zero_qubits: int = 0
-    ):
-        if bits is not None:
-            self.registers = [ID] * bits
-        elif dim is not None:
-            min_bits = int(np.ceil(np.log2(dim)))
-            subspace = Subspace.from_dim(dim, bits=min_bits)
+    def __init__(self, registers: list[Register] = None, *, bits: int = None, dim: int = None, zero_qubits: int = 0):
+        if dim is not None:
+            assert registers is None
+            assert zero_qubits == 0
+            subspace = Subspace._from_dim(dim, bits=bits)
             self.registers = subspace.registers
+        elif bits is not None:
+            assert registers is None
+            self.registers = [ID] * bits
         elif registers is not None:
-            # Convert integer to list of IDs before any use
-            if isinstance(registers, (int, np.integer)):
-                registers = [ID] * registers
             self.registers = list(registers)
         else:
             raise TypeError(
@@ -59,6 +56,17 @@ class Subspace:
         self.registers = simplified_registers + [ZeroQubit()] * zero_qubits
         self._dimension = None
         self._total_qubits = None
+
+    @staticmethod
+    def _from_dim(dim: int, bits: int | None = None) -> Subspace:
+        if bits is None:
+            bits = int(np.ceil(np.log2(dim)))
+        if dim == 1:
+            return Subspace(bits=0, zero_qubits=bits)
+        min_bits = int(np.ceil(np.log2(dim)))
+        case_zero = Subspace(bits=min_bits - 1)
+        case_one = Subspace(dim=dim - 2 ** (min_bits - 1), bits=min_bits - 1)
+        return Subspace(registers=[ControlledSubspace(case_zero, case_one)], zero_qubits=bits - min_bits)
 
     @property
     def dimension(self) -> int:
@@ -253,17 +261,6 @@ class Subspace:
         return Subspace(
             self.registers[: -(trailing_zeros + 1)] + self.registers[-(trailing_zeros + 1)].case_one.registers,
         )
-
-    @staticmethod
-    def from_dim(dim: int, bits: int | None = None) -> Subspace:
-        if bits is None:
-            bits = int(np.ceil(np.log2(dim)))
-        if dim == 1:
-            return Subspace(registers=0, zero_qubits=bits)
-        min_bits = int(np.ceil(np.log2(dim)))
-        case_zero = Subspace(registers=min_bits - 1)
-        case_one = Subspace.from_dim(dim - 2 ** (min_bits - 1), min_bits - 1)
-        return Subspace(registers=[ControlledSubspace(case_zero, case_one)], zero_qubits=bits - min_bits)
 
 
 class Register(ABC):
