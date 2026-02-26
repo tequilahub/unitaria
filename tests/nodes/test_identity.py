@@ -4,7 +4,7 @@ from unitaria.verifier import verify
 
 
 def test_identity():
-    Id = Identity(Subspace(1))
+    Id = Identity(subspace=Subspace(bits=1))
     verify(Id)
-    Id = Identity(Subspace(0))
+    Id = Identity(subspace=Subspace(bits=0))
     verify(Id)

@@ -22,7 +22,11 @@ class ConstantIntegerAddition(Classical):
     bits: int
     constant: int
 
-    def __init__(self, bits: int, constant: int):
+    def __init__(self, *, bits: int = None, constant: int = None):
+        if bits is None or constant is None:
+            raise TypeError(
+                "ConstantIntegerAddition constructor requires bits=... and constant=... as keyword arguments"
+            )
         super().__init__(bits, bits)
         self.bits = bits
         self.constant = constant
@@ -34,10 +38,10 @@ class ConstantIntegerAddition(Classical):
         return {"bits": self.bits, "constant": self.constant}
 
     def _subspace_in(self) -> Subspace:
-        return Subspace(self.bits)
+        return Subspace(bits=self.bits)
 
     def _subspace_out(self) -> Subspace:
-        return Subspace(self.bits)
+        return Subspace(bits=self.bits)
 
     def compute_classical(self, input: np.ndarray) -> np.ndarray:
         return (input + self.constant) % 2**self.bits

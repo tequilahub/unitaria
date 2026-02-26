@@ -94,13 +94,13 @@ class QSVT(Node):
         return self.coefficients.output_normalization
 
     def _subspace_in(self) -> Subspace:
-        return Subspace(self.A.subspace_in.registers, 1)
+        return Subspace(registers=self.A.subspace_in.registers, zero_qubits=1)
 
     def _subspace_out(self) -> Subspace:
         if self.coefficients.degree() % 2 == 0:
-            return Subspace(self.A.subspace_in.registers, 1)
+            return Subspace(registers=self.A.subspace_in.registers, zero_qubits=1)
         else:
-            return Subspace(self.A.subspace_out.registers, 1)
+            return Subspace(registers=self.A.subspace_out.registers, zero_qubits=1)
 
     def _compute_internal(self, input: np.ndarray, compute, compute_adjoint) -> np.ndarray:
         # TODO: For now, the polynomial should either be odd or even

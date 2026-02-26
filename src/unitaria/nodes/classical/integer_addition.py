@@ -23,7 +23,11 @@ class IntegerAddition(Classical):
     source_bits: int
     target_bits: int
 
-    def __init__(self, source_bits: int, target_bits: int):
+    def __init__(self, *, source_bits: int = None, target_bits: int = None):
+        if source_bits is None or target_bits is None:
+            raise TypeError(
+                "IntegerAddition constructor requires source_bits=... and target_bits=... as keyword arguments"
+            )
         super().__init__(source_bits + target_bits, source_bits + target_bits)
         # TODO: Restriction is because the ancilla free construction needs two source bits.
         #  I know how to fix this but haven't implemented it yet.

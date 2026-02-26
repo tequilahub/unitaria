@@ -27,18 +27,35 @@ class Subspace:
 
     registers: list[Register]
 
-    def __init__(self, registers: list[Register] | int, zero_qubits: int = 0):
-        if isinstance(registers, (int, np.integer)):
-            registers = [ID] * registers
-        for register in registers:
+    def __init__(
+        self, registers: list[Register] | int = None, *, bits: int = None, dim: int = None, zero_qubits: int = 0
+    ):
+        if bits is not None:
+            self.registers = [ID] * bits
+        elif dim is not None:
+            min_bits = int(np.ceil(np.log2(dim)))
+            subspace = Subspace.from_dim(dim, bits=min_bits)
+            self.registers = subspace.registers
+        elif registers is not None:
+            # Convert integer to list of IDs before any use
+            if isinstance(registers, (int, np.integer)):
+                registers = [ID] * registers
+            self.registers = list(registers)
+        else:
+            raise TypeError(
+                "Must specify registers=... or bits=... or dim=... as a keyword argument in Subspace constructor"
+            )
+
+        for register in self.registers:
             if not isinstance(register, Register):
                 raise ValueError(f"{register} is not a valid register in a Subspace")
         simplified_registers = []
-        for register in registers:
+        for register in self.registers:
             if isinstance(register, ControlledSubspace):
                 simplified_registers += register.simplify()
             else:
                 simplified_registers.append(register)
+
         self.registers = simplified_registers + [ZeroQubit()] * zero_qubits
         self._dimension = None
         self._total_qubits = None
@@ -200,13 +217,19 @@ class Subspace:
 
     def clean_ancilla_count(self) -> int:
         controlled_subspaces = filter(lambda r: isinstance(r, ControlledSubspace), self.registers)
-        return max([i + r.clean_ancilla_count() for (i, r) in enumerate(controlled_subspaces, start=1)], default=0)
+        return max(
+            [i + r.clean_ancilla_count() for (i, r) in enumerate(controlled_subspaces, start=1)],
+            default=0,
+        )
 
     def verify_circuit(self):
         circuit = self.circuit(
             range(self.total_qubits),
             self.total_qubits,
-            range(self.total_qubits + 1, self.total_qubits + 1 + self.clean_ancilla_count()),
+            range(
+                self.total_qubits + 1,
+                self.total_qubits + 1 + self.clean_ancilla_count(),
+            ),
         )
         for i in range(2**self.total_qubits):
             result = circuit.simulate(i)
@@ -236,11 +259,11 @@ class Subspace:
         if bits is None:
             bits = int(np.ceil(np.log2(dim)))
         if dim == 1:
-            return Subspace(0, bits)
+            return Subspace(registers=0, zero_qubits=bits)
         min_bits = int(np.ceil(np.log2(dim)))
-        case_zero = Subspace(min_bits - 1)
+        case_zero = Subspace(registers=min_bits - 1)
         case_one = Subspace.from_dim(dim - 2 ** (min_bits - 1), min_bits - 1)
-        return Subspace([ControlledSubspace(case_zero, case_one)], bits - min_bits)
+        return Subspace(registers=[ControlledSubspace(case_zero, case_one)], zero_qubits=bits - min_bits)
 
 
 class Register(ABC):
@@ -315,14 +338,14 @@ class ControlledSubspace(Register):
             if self.case_zero.registers[i] != self.case_one.registers[i]:
                 return self.case_zero.registers[:i] + [
                     ControlledSubspace(
-                        Subspace(self.case_zero.registers[i:]),
-                        Subspace(self.case_one.registers[i:]),
+                        Subspace(registers=self.case_zero.registers[i:]),
+                        Subspace(registers=self.case_one.registers[i:]),
                     )
                 ]
         return self.case_zero.registers[:min_len] + [
             ControlledSubspace(
-                Subspace(self.case_zero.registers[min_len:]),
-                Subspace(self.case_one.registers[min_len:]),
+                Subspace(registers=self.case_zero.registers[min_len:]),
+                Subspace(registers=self.case_one.registers[min_len:]),
             )
         ]
 
@@ -348,4 +371,4 @@ class ControlledSubspace(Register):
         return max(self.case_zero.clean_ancilla_count(), self.case_one.clean_ancilla_count())
 
 
-ID = ControlledSubspace(Subspace([]), Subspace([]))
+ID = ControlledSubspace(Subspace(registers=[]), Subspace(registers=[]))
