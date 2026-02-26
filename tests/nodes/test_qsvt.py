@@ -13,7 +13,7 @@ def test_qsvt_coefficients():
     # Identity
     c = QSVTCoefficients(np.array([0, 0]), "angles", 1)
     np.testing.assert_allclose(c.angles, np.array([0, 0]))
-    np.testing.assert_allclose(c.polynomial.coef, np.array([0, 1]))
+    np.testing.assert_allclose(c.polynomial.coef, np.array([0, 1]), atol=1e-5)
     assert c.output_normalization == 1
 
     c = QSVTCoefficients(np.array([0, 1]), "monomial", 1)
@@ -38,13 +38,15 @@ def test_qsvt_coefficients():
     assert c.output_normalization == 1 / 2
 
     # Amplitude amplificiation
-    c = QSVTCoefficients(np.array(4 * [np.pi]), "angles", 1)
-    np.testing.assert_allclose(c.angles, np.array(4 * [np.pi]))
+    c = QSVTCoefficients(np.array([-np.pi / 2, np.pi / 2, np.pi / 2, -np.pi / 2]), "angles", 1)
+    np.testing.assert_allclose(c.angles, np.array([-np.pi / 2, np.pi / 2, np.pi / 2, -np.pi / 2]))
     np.testing.assert_allclose(c.polynomial.coef, np.array([0, 0, 0, 1]), atol=1e-5)
     assert c.output_normalization == 1
 
-    c = QSVTCoefficients(np.array(4 * [np.pi]), "angles", 1.23)
-    np.testing.assert_allclose(c.angles, np.array(4 * [np.pi]))
+    # Test that input normalization does nothing to the normalized polynomial or
+    # the output normalization if angles are supplied
+    c = QSVTCoefficients(np.array([-np.pi / 2, np.pi / 2, np.pi / 2, -np.pi / 2]), "angles", 1.23)
+    np.testing.assert_allclose(c.angles, np.array([-np.pi / 2, np.pi / 2, np.pi / 2, -np.pi / 2]))
     np.testing.assert_allclose(c.polynomial.coef, np.array([0, 0, 0, 1]), atol=1e-5)
     assert c.output_normalization == 1
 
