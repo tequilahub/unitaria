@@ -1,12 +1,140 @@
 from typing import Sequence
 
 import numpy as np
+import scipy as sp
 import tequila as tq
-from pyqsp.angle_sequence import QuantumSignalProcessingPhases
 
 from unitaria.nodes import Node
 from unitaria.subspace import Subspace
 from unitaria.circuit import Circuit
+from unitaria.util import poly_sup_norm
+
+
+def interpolation_points(reduced_degree):
+    return np.cos(np.pi * np.arange(reduced_degree) / (2 * reduced_degree))
+
+
+def DF(reduced_phases, parity, xs):
+    state = np.zeros((3, len(xs)))
+    xs_sqrt = np.sqrt(1 - xs**2)
+    xs_main_diagonal = 2 * xs**2 - 1
+    xs_off_diagonal = 2 * xs * xs_sqrt
+    xs_operator = np.array([[xs_main_diagonal, -xs_off_diagonal], [xs_off_diagonal, xs_main_diagonal]])
+    xs_operator = np.moveaxis(xs_operator, -1, 0)
+    if parity == 0:
+        state[0] = 1
+    else:
+        state[0] = xs
+        state[2] = xs_sqrt
+    cos_phase = np.cos(2 * reduced_phases[0])
+    sin_phase = np.sin(2 * reduced_phases[0])
+    op = np.array([[cos_phase, -sin_phase], [sin_phase, cos_phase]])
+    state[[0, 1]] = op @ state[[0, 1]]
+    for i in range(1, len(reduced_phases)):
+        cos_phase = np.cos(2 * reduced_phases[i])
+        sin_phase = np.sin(2 * reduced_phases[i])
+        op = np.array([[cos_phase, -sin_phase], [sin_phase, cos_phase]])
+        state[[0, 2]] = np.matvec(xs_operator, state[[0, 2]].T).T
+        state[[0, 1]] = op @ state[[0, 1]]
+
+    value = state[1].copy()
+
+    dual_state = np.zeros((3, len(xs)))
+    dual_state[1] = 2
+
+    derivative = np.zeros((len(xs), len(reduced_phases)))
+
+    xs_operator = np.swapaxes(xs_operator, -1, -2)
+    for i in range(len(reduced_phases) - 1, 0, -1):
+        derivative[:, i] = dual_state[1] * state[0] - dual_state[0] * state[1]
+        phase = reduced_phases[i]
+        cos_phase = np.cos(2 * phase)
+        sin_phase = np.sin(2 * phase)
+        op = np.array([[cos_phase, sin_phase], [-sin_phase, cos_phase]])
+        state[[0, 1]] = op @ state[[0, 1]]
+        dual_state[[0, 1]] = op @ dual_state[[0, 1]]
+        state[[0, 2]] = np.matvec(xs_operator, state[[0, 2]].T).T
+        dual_state[[0, 2]] = np.matvec(xs_operator, dual_state[[0, 2]].T).T
+
+    derivative[:, 0] = dual_state[1] * state[0] - dual_state[0] * state[1]
+
+    return value, derivative
+
+
+def compute_angles_internal(poly):
+    degree = poly.degree()
+    reduced_degree = degree // 2 + 1
+    parity = degree % 2
+
+    xs = interpolation_points(reduced_degree)
+    samples = poly(xs)
+    reduced_phases = poly.coef[parity::2] / 2
+    assert len(reduced_phases) == reduced_degree
+
+    def fun(x):
+        value, derivative = DF(x, parity, xs)
+        return value - samples, derivative
+
+    res = sp.optimize.root(fun, reduced_phases, jac=True)
+    if not res.success:
+        return None
+    reduced_phases = res.x
+
+    # Turn angles to encode polynomial in real part
+    reduced_phases[-1] -= np.pi / 4
+    full_phases = np.zeros(poly.degree() + 1)
+    full_phases[reduced_degree - 1 :: -1] = reduced_phases
+    full_phases[-reduced_degree::] += reduced_phases
+
+    return full_phases
+
+
+def compute_angles(poly):
+    """
+    Computes angles for given polynomial
+
+    This takes into account the parity and normalization of the polynomial.
+    It returns a list of one (if the polynomial has definite partiy) or two
+    tuples. The first element of the tuples is an angle sequence for QSVT
+    and the second element is the corresponding weight, such that the sum of
+    QSVT polynomials equals the input to this function.
+    """
+    poly = poly.convert(kind=np.polynomial.Chebyshev)
+
+    parity = poly.degree() % 2
+    is_parity = np.allclose(poly.coef[(1 - parity) :: 2], 0, atol=1e-8)
+
+    coefs_parity = poly.coef.copy()
+    coefs_parity[1 - parity :: 2] = 0
+    poly_parity = np.polynomial.Chebyshev(coefs_parity)
+    polys = [poly_parity]
+    if not is_parity:
+        coefs_non_parity = poly.coef[:-1].copy()
+        coefs_non_parity[parity::2] = 0
+        poly_non_parity = np.polynomial.Chebyshev(coefs_non_parity)
+        polys.append(poly_non_parity)
+
+    result = []
+    for subpoly in polys:
+        normalization = poly_sup_norm(subpoly)
+        angles = None
+        max_tries = 100
+        for i in range(max_tries):
+            angles = compute_angles_internal(subpoly / normalization)
+            if angles is not None:
+                break
+            normalization += 1e-5 * normalization
+        if angles is None:
+            raise RuntimeError(f"Could not compute angles for {subpoly}")
+
+        # Convert angles to Rx convention
+        angles[:] -= np.pi / 2
+        angles[0] += len(angles) * np.pi / 4
+        angles[-1] += len(angles) * np.pi / 4
+
+        result.append((subpoly / normalization, angles, normalization))
+
+    return result
 
 
 def poly_conj(p: np.polynomial.Chebyshev) -> np.polynomial.Chebyshev:
@@ -14,28 +142,59 @@ def poly_conj(p: np.polynomial.Chebyshev) -> np.polynomial.Chebyshev:
 
 
 class QSVTCoefficients:
+    """
+    Class for computing between different formats of polynomials and QSVT angles
+
+    :param data:
+        Coefficients of a polynomial in a basis determined by ``format`` or angles
+        in R convention
+    :param format:
+        One of ``"angles"``, ``"chebyshev``, or ``"monomial"``
+    :param input_normalization":
+        See below
+
+    :ivar polynomial:
+        The normalized polynomial
+    :ivar input_normalization:
+        Factor by which the x-axis of the polynomial is normalized, i.e. the
+        normalization of the block encoding that is transformed
+    :ivar output_normalization:
+        Factor by which the y-axis of the polynomial is normalized, i.e. the
+        normalization of the resulting block encoding
+    :ivar angles:
+        The angles in R-convention. Will be symmetric if ``data`` are polynomial
+        coefficients
+    """
+
+    polynomial: np.polynomial.Chebyshev
+    input_normalization: float
+    output_normalization: float
+    angles: np.ndarray
+
     def __init__(self, data: np.ndarray, format: str, input_normalization: float):
-        self.data = data
+        self.data = data.astype(np.float64)
         self.format = format
         self.input_normalization = input_normalization
 
         if format == "angles":
+            # TODO: Symmetricise angles
             self.angles = self.data
-            X = np.polynomial.Chebyshev(np.array([0, 1], dtype=np.complex128))
-            state = [
-                np.polynomial.Chebyshev(np.array([1], dtype=np.complex128)),
-                np.polynomial.Chebyshev(np.array([0], dtype=np.complex128)),
-            ]
-            for angle in self.angles[:-1]:
-                state[0] *= np.exp(angle * 1j)
-                state[1] *= np.exp(angle * 1j)
-                state = [
-                    X * state[0] + (X**2 - 1) * poly_conj(state[1]),
-                    X * state[1] + poly_conj(state[0]),
-                ]
-            state[0] *= np.exp(self.angles[-1] * 1j)
-            state[1] *= np.exp(self.angles[-1] * 1j)
-            self.polynomial = np.polynomial.Chebyshev(state[0].coef.real)
+
+            angles_Wx = self.angles + np.pi / 2
+            angles_Wx[0] -= len(self.angles) * np.pi / 4
+            angles_Wx[-1] -= len(self.angles) * np.pi / 4
+
+            parity = 1 - len(angles_Wx) % 2
+            reduced_phases = angles_Wx[(-len(angles_Wx) + 1) // 2 :].copy()
+            if parity == 0:
+                reduced_phases[0] /= 2
+
+            reduced_phases[-1] += np.pi / 4
+
+            xs = np.cos(np.pi * (np.arange(len(angles_Wx)) + 0.5) / len(angles_Wx))
+            value, _derivative = DF(reduced_phases, parity, xs)
+
+            self.polynomial = np.polynomial.Chebyshev.fit(xs, value, len(angles_Wx) - 1, domain=[-1, 1])
 
             self.output_normalization = 1
         else:
@@ -45,30 +204,24 @@ class QSVTCoefficients:
                 self.polynomial = np.polynomial.Chebyshev(self.data)
             else:
                 raise ValueError(
-                    f"format may only be one of 'angles', 'monomial', or 'chebyshev' (passed format={format})"
+                    f'format may only be one of "angles", "monomial", or "chebyshev" (passed format={format})'
                 )
 
             self.polynomial = self.polynomial(np.polynomial.Chebyshev([0, 1 / input_normalization]))
-            maxima = self.polynomial.deriv().roots()
-            maxima = maxima[np.abs(np.imag(maxima)) < 1e-6]
-            maxima = maxima[np.abs(maxima) <= 1]
-            self.output_normalization = np.max(np.abs(self.polynomial(np.concatenate((maxima, [-1, 1])))))
-            self.polynomial /= self.output_normalization
 
-            # TODO: Reimplement, because this generates a lot of print output
-            self.angles, _, _ = QuantumSignalProcessingPhases(self.polynomial, method="sym_qsp", chebyshev_basis=True)
-            # "sym_qsp" method approximates polynomial in imaginary part.
-            # By this extra rotation, we turn it into the real part.
-            self.angles[0] -= np.pi / 2
+            parity = self.polynomial.degree() % 2
+            np.testing.assert_allclose(
+                self.polynomial.coef[1 - parity :: 2], 0, atol=1e-8, err_msg="Polynomial does not have definite parity"
+            )
+            self.polynomial.coef[1 - parity :: 2] = 0.0
+
+            subpolys = compute_angles(self.polynomial)
+            assert len(subpolys) == 1, "Polynomial does not have definite parity"
+
+            self.polynomial, self.angles, self.output_normalization = subpolys[0]
 
     def degree(self) -> int:
         return self.polynomial.degree()
-
-    def angles_to_r_convention(self) -> np.ndarray:
-        result = self.angles[:-1] - np.pi / 2
-        result[0] += self.angles[-1] + self.degree() * np.pi / 2
-        result[0] %= 2 * np.pi
-        return result
 
 
 class QSVT(Node):
@@ -144,7 +297,7 @@ class QSVT(Node):
         subspace_in_circuit = self.A.subspace_in.circuit(target, flag=target[-1], ancillae=clean_ancillae)
         subspace_out_circuit = self.A.subspace_out.circuit(target, flag=target[-1], ancillae=clean_ancillae)
 
-        for i, angle in enumerate(reversed(self.coefficients.angles_to_r_convention())):
+        for i, angle in enumerate(self.coefficients.angles[1:]):
             if i % 2 == 0:
                 circuit += node_circuit
                 circuit += subspace_out_circuit
@@ -153,12 +306,16 @@ class QSVT(Node):
                 circuit += subspace_in_circuit
 
             # TODO: Do not use projection circuits for last rotation
-            circuit += tq.gates.Rz(-2 * np.real(angle), rotation_bit)
+            # Combine last and first angle into one rotation
+            if i == len(self.coefficients.angles) - 2:
+                circuit += tq.gates.Rz(2 * np.real(angle + self.coefficients.angles[0]), rotation_bit)
+            else:
+                circuit += tq.gates.Rz(2 * np.real(angle), rotation_bit)
 
             if i % 2 == 0:
-                circuit += subspace_out_circuit
+                circuit += subspace_out_circuit.adjoint()
             else:
-                circuit += subspace_in_circuit
+                circuit += subspace_in_circuit.adjoint()
 
         circuit += tq.gates.H(rotation_bit)
 

@@ -12,7 +12,7 @@ from rich.syntax import Syntax
 default_verifier = None
 
 
-def verify(node: Node, reference: np.ndarray | None = None):
+def verify(node: Node, reference: np.ndarray | None = None, atol: float = 1e-8, **kwargs):
     """
     Verify a node using the default `Verifier`.
 
@@ -38,12 +38,20 @@ def verify(node: Node, reference: np.ndarray | None = None):
         An optional reference, to which the circuit and matrix arithmetic
         implementations should be compared. For example for ``Identity(1)`` one
         could pass ``np.eye(2)``.
+    :param atol:
+        Absolute tolerance when comparing to ``reference``
+    :param kwargs:
+        See `Verifier`
     """
-    global default_verifier
-    if default_verifier is None:
-        default_verifier = Verifier()
+    if len(kwargs) == 0:
+        global default_verifier
+        if default_verifier is None:
+            default_verifier = Verifier()
+        verifier = default_verifier
+    else:
+        verifier = Verifier(**kwargs)
 
-    default_verifier.verify(node, reference)
+    verifier.verify(node, reference, atol)
 
 
 class Verifier:
@@ -66,9 +74,10 @@ class Verifier:
     drill: bool
     up_to_phase: bool
 
-    def __init__(self, drill: bool = True, up_to_phase: bool = False):
+    def __init__(self, drill: bool = True, up_to_phase: bool = False, check_adjoint: bool = True):
         self.drill = drill
         self.up_to_phase = up_to_phase
+        self.check_adjoint = check_adjoint
 
     def _verify_circuit_subspaces(self, node: Node):
         assert node.dimension_in == node.subspace_in.dimension
@@ -79,7 +88,7 @@ class Verifier:
             expected_qubits = 1
         assert node.circuit().n_qubits == expected_qubits
 
-    def _compare_batch_compute(self, node: Node, reference: np.ndarray | None = None):
+    def _compare_batch_compute(self, node: Node, reference: np.ndarray | None = None, atol: float = 1e-8):
         batch_computed = node.toarray(force_matrix=True)
         computed = np.zeros_like(batch_computed.T)
         for i in range(node.dimension_in):
@@ -90,7 +99,7 @@ class Verifier:
         if reference is not None:
             if reference.ndim == 1:
                 reference = np.expand_dims(reference, 1)
-            np.testing.assert_allclose(batch_computed, reference)
+            np.testing.assert_allclose(batch_computed, reference, atol=atol)
 
     def _compare_compute_simulate(self, node: Node):
         basis_in = node.subspace_in.enumerate_basis()
@@ -105,17 +114,19 @@ class Verifier:
                 simulated = _bring_to_same_phase(computed, simulated)
             np.testing.assert_allclose(simulated, computed, atol=1e-8, err_msg=f"On input {i}:")
 
-    def _verify(self, node: Node, reference: np.ndarray | None = None):
+    def _verify(self, node: Node, reference: np.ndarray | None = None, atol: float = 1e-8):
         try:
             self._verify_circuit_subspaces(node)
             self._compare_compute_simulate(node)
-            self._compare_compute_simulate(Adjoint(node))
-            self._compare_batch_compute(node, reference)
-            self._compare_batch_compute(Adjoint(node))
+            if self.check_adjoint:
+                self._compare_compute_simulate(Adjoint(node))
+            self._compare_batch_compute(node, reference, atol)
+            if self.check_adjoint:
+                self._compare_batch_compute(Adjoint(node))
         except AssertionError as err:
             raise VerificationError(node) from err
 
-    def verify(self, node: Node, reference: np.ndarray | None = None):
+    def verify(self, node: Node, reference: np.ndarray | None = None, atol: float = 1e-8):
         """
         Verify the correctness of this node.
 
@@ -128,7 +139,7 @@ class Verifier:
         """
 
         try:
-            self._verify(node, reference)
+            self._verify(node, reference, atol)
         except VerificationError as err:
             if self.drill:
                 self.find_error(node)
