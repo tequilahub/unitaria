@@ -36,6 +36,7 @@ from unitaria.nodes.node import Node
 from unitaria.nodes.proxy_node import ProxyNode
 from unitaria.nodes.multilinear_node import MultilinearNode
 from unitaria.nodes.abstract_node import AbstractNode
+from unitaria.nodes.block_encoding import BlockEncoding
 
 from unitaria.nodes.constants.constant_vector import ConstantVector
 from unitaria.nodes.constants.constant_unitary import ConstantUnitary
@@ -62,12 +63,14 @@ from unitaria.nodes.classical.increment import Increment
 from unitaria.nodes.classical.integer_addition import IntegerAddition
 
 from unitaria.nodes.qsvt.qsvt import QSVT
+from unitaria.nodes.inversion.pseudoinverse import Pseudoinverse
 
 __all__ = [
     "Node",
     "ProxyNode",
     "MultilinearNode",
     "AbstractNode",
+    "BlockEncoding",
     "ConstantVector",
     "ConstantUnitary",
     "Tensor",
@@ -87,4 +90,5 @@ __all__ = [
     "Increment",
     "IntegerAddition",
     "QSVT",
+    "Pseudoinverse",
 ]

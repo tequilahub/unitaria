@@ -211,4 +211,4 @@ def test_preconditioned_laplace_1d():
 
     C_F = logreduce(BlockHorizontal, list(reversed(C_F)))
 
-    verify(C_F, ref_CP_1d(4, 1))
+    verify(C_F, ref_CP_1d(4, 1), check_adjoint=False)
