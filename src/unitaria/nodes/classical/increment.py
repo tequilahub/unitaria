@@ -20,8 +20,8 @@ class Increment(Classical):
 
     bits: int
 
-    def __init__(self, *args, bits: int = None):
-        if len(args) > 0 or bits is None:
+    def __init__(self, *, bits: int = None):
+        if bits is None:
             raise TypeError("Increment constructor requires bits=... as a keyword argument.")
         super().__init__(bits, bits)
         self.bits = bits

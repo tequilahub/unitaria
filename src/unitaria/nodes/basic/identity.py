@@ -17,9 +17,7 @@ class Identity(Node):
 
     subspace: Subspace
 
-    def __init__(self, *args, subspace: Subspace = None, bits: int = None):
-        if len(args) > 0:
-            raise TypeError("Identity constructor requires subspace=... or bits=... as keyword arguments")
+    def __init__(self, *, subspace: Subspace = None, bits: int = None):
         if subspace is not None:
             subspace = subspace
         elif bits is not None:

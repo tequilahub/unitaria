@@ -27,8 +27,8 @@ class ConstantIntegerMultiplication(ProxyNode):
     bits: int
     constant: int
 
-    def __init__(self, *args, bits: int = None, constant: int = None):
-        if len(args) > 0 or bits is None or constant is None:
+    def __init__(self, *, bits: int = None, constant: int = None):
+        if bits is None or constant is None:
             raise TypeError(
                 "ConstantIntegerMultiplication constructor requires bits=... and constant=... as keyword arguments."
             )

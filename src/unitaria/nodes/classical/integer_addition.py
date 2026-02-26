@@ -23,8 +23,8 @@ class IntegerAddition(Classical):
     source_bits: int
     target_bits: int
 
-    def __init__(self, *args, source_bits: int = None, target_bits: int = None):
-        if len(args) > 0 or source_bits is None or target_bits is None:
+    def __init__(self, *, source_bits: int = None, target_bits: int = None):
+        if source_bits is None or target_bits is None:
             raise TypeError(
                 "IntegerAddition constructor requires source_bits=... and target_bits=... as keyword arguments"
             )

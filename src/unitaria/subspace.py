@@ -28,12 +28,8 @@ class Subspace:
     registers: list[Register]
 
     def __init__(
-        self, registers: list[Register] | int = None, *args, bits: int = None, dim: int = None, zero_qubits: int = 0
+        self, registers: list[Register] | int = None, *, bits: int = None, dim: int = None, zero_qubits: int = 0
     ):
-        if len(args) > 0:
-            raise TypeError(
-                "Subspace constructor only accepts keyword arguments: registers=... or zero_qubits=... or bits=...(not positional arguments)"
-            )
         if bits is not None:
             self.registers = [ID] * bits
         elif dim is not None:
