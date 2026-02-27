@@ -147,14 +147,15 @@ class QSVTCoefficients:
 
     :param data:
         Coefficients of a polynomial in a basis determined by ``format`` or angles
-        in R convention
+        in R convention. If a polynomial is given, it should be non-normalized, i.e.
+        the actual polynomial that should be applied to the matrix.
     :param format:
-        One of ``"angles"``, ``"chebyshev``, or ``"monomial"``
+        One of ``"angles"``, ``"chebyshev``, or ``"monomial"``.
     :param input_normalization":
         See below
 
     :ivar polynomial:
-        The normalized polynomial
+        The non-normalized polynomial
     :ivar input_normalization:
         Factor by which the x-axis of the polynomial is normalized, i.e. the
         normalization of the block encoding that is transformed
@@ -207,18 +208,18 @@ class QSVTCoefficients:
                     f'format may only be one of "angles", "monomial", or "chebyshev" (passed format={format})'
                 )
 
-            self.polynomial = self.polynomial(np.polynomial.Chebyshev([0, 1 / input_normalization]))
-
             parity = self.polynomial.degree() % 2
             np.testing.assert_allclose(
                 self.polynomial.coef[1 - parity :: 2], 0, atol=1e-8, err_msg="Polynomial does not have definite parity"
             )
-            self.polynomial.coef[1 - parity :: 2] = 0.0
 
-            subpolys = compute_angles(self.polynomial)
+            poly_input_normalized = self.polynomial(np.polynomial.Chebyshev([0, input_normalization]))
+            poly_input_normalized.coef[1 - parity :: 2] = 0.0
+
+            subpolys = compute_angles(poly_input_normalized)
             assert len(subpolys) == 1, "Polynomial does not have definite parity"
 
-            self.polynomial, self.angles, self.output_normalization = subpolys[0]
+            _poly_normalized, self.angles, self.output_normalization = subpolys[0]
 
     def degree(self) -> int:
         return self.polynomial.degree()
@@ -256,6 +257,10 @@ class QSVT(Node):
             return Subspace(registers=self.A.subspace_out.registers, zero_qubits=1)
 
     def _compute_internal(self, input: np.ndarray, compute, compute_adjoint) -> np.ndarray:
+        # This code uses self.coefficients.polynomial, which is already
+        # non-normalized. This means no normalization constants should appear
+        # here.
+
         # TODO: For now, the polynomial should either be odd or even
         # Probably this should be tested somewhere else
         Tnp = input
@@ -265,7 +270,7 @@ class QSVT(Node):
             assert np.isclose(self.coefficients.polynomial.coef[0], 0)
             output = np.zeros_like(compute(input))
         if self.coefficients.degree() >= 0:
-            Tn = compute(Tnp) / self.A.normalization
+            Tn = compute(Tnp)
         for n in range(1, self.coefficients.degree() + 1):
             if (self.coefficients.degree() + n) % 2 == 0:
                 output += Tn * self.coefficients.polynomial.coef[n]
@@ -273,11 +278,9 @@ class QSVT(Node):
                 assert np.isclose(self.coefficients.polynomial.coef[n], 0)
             if n < self.coefficients.degree():
                 if n % 2 == 0:
-                    Tnp, Tn = Tn, 2 * (compute(Tn) / self.A.normalization) - Tnp
+                    Tnp, Tn = Tn, 2 * compute(Tn) - Tnp
                 else:
-                    Tnp, Tn = Tn, 2 * (compute_adjoint(Tn) / self.A.normalization) - Tnp
-
-        output *= self.coefficients.output_normalization
+                    Tnp, Tn = Tn, 2 * compute_adjoint(Tn) - Tnp
         return output
 
     def compute(self, input: np.ndarray) -> np.ndarray:

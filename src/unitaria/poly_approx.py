@@ -2,6 +2,8 @@ import numpy as np
 import scipy.special
 from numpy.polynomial.chebyshev import Chebyshev
 
+from unitaria.util import poly_sup_norm
+
 
 def erf_poly(k: float, epsilon: float, guaranteed: bool = False) -> Chebyshev:
     """
@@ -118,7 +120,7 @@ def trunc_linear_poly(gamma: float, delta: float, epsilon: float, guaranteed: bo
 def _unscaled_inverse_poly(kappa: float, epsilon: float) -> Chebyshev:
     """
     For kappa > 1 and 0 < epsilon < 1, returns a polynomial in the Chebyshev basis
-    that approximates the function 1 / x on the interval [-1, 1] \ (-1 / kappa, 1 / kappa).
+    that approximates the function 1 / x on the interval [-1, 1] \\ (-1 / kappa, 1 / kappa).
 
     Implements Lemma 40 from https://arxiv.org/abs/1806.01838
 
@@ -141,7 +143,7 @@ def _unscaled_inverse_poly(kappa: float, epsilon: float) -> Chebyshev:
 def inverse_poly(delta: float, epsilon: float, guaranteed: bool = False) -> Chebyshev:
     """
     For 0 < epsilon < 2 * delta <= 1 / 2, returns a polynomial P which epsilon-approximates
-    delta / x on the domain [-1, 1] \ (-delta, delta) and for which |P| <= 1.
+    delta / x on the domain [-1, 1] \\ (-delta, delta) and for which |P| <= 1.
 
     Implements Theorem 41 from https://arxiv.org/abs/1806.01838, but with delta scaled by 1 / 2.
 
@@ -155,10 +157,11 @@ def inverse_poly(delta: float, epsilon: float, guaranteed: bool = False) -> Cheb
 
     poly = delta * _unscaled_inverse_poly(1 / delta, (epsilon / 3) / delta)
 
-    maxima = poly.deriv().roots()
-    maxima = maxima[np.abs((np.imag(maxima)) < 1e-6) & (np.abs(maxima) <= 1)]
-    pmax = np.max(np.abs(poly(np.concatenate((maxima, [-1, 1])))))
+    pmax = poly_sup_norm(poly)
 
-    rect = rect_poly(delta / 2, delta / 2, min(epsilon / 3, 1 / pmax), guaranteed)
+    if pmax > 1.5 * (1 / delta):
+        rect = rect_poly(delta / 2, delta / 2, min(epsilon / 3, 1 / pmax), guaranteed)
 
-    return poly * (1 - rect)
+        return poly * (1 - rect)
+    else:
+        return poly

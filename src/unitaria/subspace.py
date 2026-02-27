@@ -8,9 +8,10 @@ from abc import ABC, abstractmethod
 from typing import Sequence
 
 import numpy as np
+import tequila as tq
 
 from unitaria.circuit import Circuit
-import tequila as tq
+from unitaria.util import cached_property
 
 
 class Subspace:
@@ -54,8 +55,6 @@ class Subspace:
                 simplified_registers.append(register)
 
         self.registers = simplified_registers + [ZeroQubit()] * zero_qubits
-        self._dimension = None
-        self._total_qubits = None
 
     @staticmethod
     def _from_dim(dim: int, bits: int | None = None) -> Subspace:
@@ -68,30 +67,28 @@ class Subspace:
         case_one = Subspace(dim=dim - 2 ** (min_bits - 1), bits=min_bits - 1)
         return Subspace(registers=[ControlledSubspace(case_zero, case_one)], zero_qubits=bits - min_bits)
 
-    @property
+    @cached_property
     def dimension(self) -> int:
         """
         The dimension of the subspace
         """
-        if self._dimension is None:
-            self._dimension = 1
-            for register in self.registers:
-                self._dimension *= register.dimension()
+        dimension = 1
+        for register in self.registers:
+            dimension *= register.dimension()
 
-        return self._dimension
+        return dimension
 
-    @property
+    @cached_property
     def total_qubits(self) -> int:
         """
         The number of qubits of the state space in which the subspace lives
 
         The dimension of the state space is ``2 ** total_qubits``
         """
-        if self._total_qubits is None:
-            self._total_qubits = 0
-            for register in self.registers:
-                self._total_qubits += register.total_qubits()
-        return self._total_qubits
+        total_qubits = 0
+        for register in self.registers:
+            total_qubits += register.total_qubits()
+        return total_qubits
 
     def __eq__(self, other) -> bool:
         return self.registers == other.registers
