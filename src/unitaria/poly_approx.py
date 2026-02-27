@@ -2,6 +2,8 @@ import numpy as np
 import scipy.special
 from numpy.polynomial.chebyshev import Chebyshev
 
+from unitaria.util import poly_sup_norm
+
 
 def erf_poly(k: float, epsilon: float, guaranteed: bool = False) -> Chebyshev:
     """
@@ -155,10 +157,11 @@ def inverse_poly(delta: float, epsilon: float, guaranteed: bool = False) -> Cheb
 
     poly = delta * _unscaled_inverse_poly(1 / delta, (epsilon / 3) / delta)
 
-    maxima = poly.deriv().roots()
-    maxima = maxima[np.abs((np.imag(maxima)) < 1e-6) & (np.abs(maxima) <= 1)]
-    pmax = np.max(np.abs(poly(np.concatenate((maxima, [-1, 1])))))
+    pmax = poly_sup_norm(poly)
 
-    rect = rect_poly(delta / 2, delta / 2, min(epsilon / 3, 1 / pmax), guaranteed)
+    if pmax > 1.5 * (1 / delta):
+        rect = rect_poly(delta / 2, delta / 2, min(epsilon / 3, 1 / pmax), guaranteed)
 
-    return poly * (1 - rect)
+        return poly * (1 - rect)
+    else:
+        return poly
