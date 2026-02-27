@@ -14,7 +14,6 @@ dependencies = [
   "tequila-basic@git+https://github.com/tequilahub/tequila.git@devel",
   "rich==14.0.*",
   "qulacs==0.6.*",
-  "pyqsp==0.2.0"
 ]
 
 [dependency-groups]
