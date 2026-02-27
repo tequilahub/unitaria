@@ -38,6 +38,7 @@ class ProxyNode(Node):
         """
         :no-index:
         """
+        __tracebackhide__ = True
         if self._definition is None:
             self._definition = self.definition()
         return self._definition

@@ -51,3 +51,6 @@ class Adjoint(Node):
 
     def borrowed_ancilla_count(self) -> int:
         return self.A.borrowed_ancilla_count()
+
+
+Node.adjoint = lambda x: Adjoint(x)
