@@ -97,41 +97,47 @@ def test_circuit(subspace: Subspace):
 @pytest.mark.parametrize(
     "subspace",
     [
-        Subspace(0),
-        Subspace(1, 1),
-        Subspace([ID, ControlledSubspace(Subspace(1), Subspace(0, 1))]),
+        Subspace(bits=0),
+        Subspace(bits=1, zero_qubits=1),
+        Subspace([ID, ControlledSubspace(Subspace(bits=1), Subspace(bits=0, zero_qubits=1))]),
         Subspace(
-            [ID, ControlledSubspace(Subspace([ControlledSubspace(Subspace(0, 1), Subspace(1)), ID]), Subspace(1, 2))]
+            [
+                ID,
+                ControlledSubspace(
+                    Subspace([ControlledSubspace(Subspace(bits=0, zero_qubits=1), Subspace(bits=1)), ID]),
+                    Subspace(bits=1, zero_qubits=2),
+                ),
+            ]
         ),
     ],
 )
-def trailing_zeros(subspace):
+def test_trailing_zeros(subspace):
     trailing_zeros = subspace.trailing_zeros()
-    assert len(subspace.registers) > trailing_zeros
+    assert len(subspace.registers) >= trailing_zeros
     assert trailing_zeros == len(subspace.registers) or isinstance(
         subspace.registers[-(trailing_zeros + 1)], ControlledSubspace
     )
 
 
 def test_case_zero():
-    assert Subspace(0).case_zero() is None
-    assert Subspace(1, 1).case_zero() == Subspace(0)
-    assert Subspace([ID, ControlledSubspace(Subspace(1), Subspace(0, 1))]).case_zero() == Subspace(2)
+    assert Subspace(bits=0).case_zero() is None
+    assert Subspace(bits=1, zero_qubits=1).case_zero() == Subspace(bits=0)
+    assert Subspace(
+        [ID, ControlledSubspace(Subspace(bits=1), Subspace(bits=0, zero_qubits=1))]
+    ).case_zero() == Subspace(bits=2)
 
     subspace = Subspace(
         [
             ID,
             ControlledSubspace(
-                Subspace(0, 2),
-                Subspace([ControlledSubspace(Subspace(0, 1), Subspace(1))]),
+                Subspace(bits=0, zero_qubits=2),
+                Subspace([ControlledSubspace(Subspace(bits=0, zero_qubits=1), Subspace(bits=1))]),
             ),
         ]
     )
     case_zero = Subspace(
-        [
-            ID,
-        ],
-        2,
+        bits=1,
+        zero_qubits=2,
     )
     assert subspace.case_zero() == case_zero
 
@@ -139,14 +145,14 @@ def test_case_zero():
 @pytest.mark.parametrize(
     ("subspace", "expected"),
     [
-        (Subspace(0), "<zero qubit subspace>"),
-        (Subspace(1, 1),
+        (Subspace(bits=0), "<zero qubit subspace>"),
+        (Subspace(bits=1, zero_qubits=1),
             "  │\n"
             "1 0\n"
             "  │\n"
             "0 #"
         ),
-        (Subspace([ID, ControlledSubspace(Subspace(1), Subspace(0, 1))]),
+        (Subspace([ID, ControlledSubspace(Subspace(bits=1), Subspace(bits=0, zero_qubits=1))]),
             "  │\n"
             "2 ?─┬─┐\n"
             "    │ │\n"
@@ -157,7 +163,7 @@ def test_case_zero():
             Subspace(
                 [
                     ID,
-                    ControlledSubspace(Subspace([ControlledSubspace(Subspace(0, 1), Subspace(1)), ID]), Subspace(1, 2)),
+                    ControlledSubspace(Subspace([ControlledSubspace(Subspace(bits=0, zero_qubits=1), Subspace(bits=1)), ID]), Subspace(bits=1, zero_qubits=2)),
                 ]
             ),
             "  │\n"
