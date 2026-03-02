@@ -33,7 +33,7 @@ class ModifyControl(Node):
         }
 
     def _subspace_in(self) -> Subspace:
-        subspace_one = Subspace(registers=self.A.subspace_in.case_one().registers + self.expand_control.registers)
+        subspace_one = self.A.subspace_in.case_one() & self.expand_control
         subspace_zero = Subspace(bits=0, zero_qubits=subspace_one.total_qubits)
 
         if self.swap_control_state:
@@ -48,7 +48,7 @@ class ModifyControl(Node):
             )
 
     def _subspace_out(self) -> Subspace:
-        subspace_one = Subspace(registers=self.A.subspace_out.case_one().registers + self.expand_control.registers)
+        subspace_one = self.A.subspace_out.case_one() & self.expand_control
         subspace_zero = Subspace(bits=0, zero_qubits=subspace_one.total_qubits)
 
         if self.swap_control_state:

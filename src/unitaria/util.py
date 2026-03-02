@@ -3,5 +3,5 @@ def logreduce(f, values):
         return None
     if len(values) == 1:
         return values[0]
-    half = len(values) // 2
+    half = (len(values) + 1) // 2
     return f(logreduce(f, values[:half]), logreduce(f, values[half:]))

@@ -17,7 +17,7 @@ class Identity(Node):
 
     subspace: Subspace
 
-    def __init__(self, *, subspace: Subspace = None, bits: int = None):
+    def __init__(self, subspace: Subspace = None, *, bits: int = None):
         if subspace is not None:
             subspace = subspace
         elif bits is not None:

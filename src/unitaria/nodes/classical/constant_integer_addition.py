@@ -22,11 +22,7 @@ class ConstantIntegerAddition(Classical):
     bits: int
     constant: int
 
-    def __init__(self, *, bits: int = None, constant: int = None):
-        if bits is None or constant is None:
-            raise TypeError(
-                "ConstantIntegerAddition constructor requires bits=... and constant=... as keyword arguments"
-            )
+    def __init__(self, bits: int, constant: int):
         super().__init__(bits, bits)
         self.bits = bits
         self.constant = constant
