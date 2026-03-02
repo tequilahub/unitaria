@@ -149,8 +149,8 @@ class QSVTCoefficients:
         Coefficients of a polynomial in a basis determined by ``format`` or angles
         in R convention
     :param format:
-        One of ``"angles"``, ``"chebyshev``, or ``"monomial"``
-    :param input_normalization":
+        One of ``"angles"``, ``"chebyshev"``, or ``"monomial"``
+    :param input_normalization:
         See below
 
     :ivar polynomial:
