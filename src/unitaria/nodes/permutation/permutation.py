@@ -372,7 +372,7 @@ def _indices_from_root_to(a: Subspace, index: int) -> int:
 
 
 def _find_good_pivot_index(a: Subspace, b: Subspace) -> int:
-    half = a.dimension // 2
+    half = (a.dimension + 1) // 2
 
     indices_a = _indices_from_root_to(a, half)
     assert len(indices_a) > 0
