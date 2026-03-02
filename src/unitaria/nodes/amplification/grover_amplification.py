@@ -8,7 +8,7 @@ from unitaria.nodes.qsvt.qsvt import QSVT
 class GroverAmplification(ProxyNode):
     def __init__(self, A: Node, iterations: int):
         assert A.is_vector()
-        assert iterations > 0
+        assert iterations >= 0
 
         super().__init__(A.dimension_in, A.dimension_out)
 
@@ -16,5 +16,15 @@ class GroverAmplification(ProxyNode):
         self.iterations = iterations
 
     def definition(self) -> Node:
-        coefficients = np.array((2 * self.iterations + 2) * [np.pi])
-        return QSVT(A=self.A, coefficients=coefficients, format="angles")
+        # Angles for the Chebyshev polynomial
+        angles = np.pi / 2 * np.ones(2 * self.iterations + 2)
+        angles[0] = -self.iterations * np.pi / 2
+        angles[-1] = -self.iterations * np.pi / 2
+
+        # The Chebyshev polynomial has negative derivative at zero if
+        # `self.iterations` is odd
+        if self.iterations % 2 == 1:
+            angles[0] += np.pi / 2
+            angles[-1] += np.pi / 2
+
+        return QSVT(A=self.A, coefficients=angles, format="angles")
