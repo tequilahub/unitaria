@@ -66,16 +66,16 @@ def sign_poly(delta: float, epsilon: float, guaranteed: bool = False) -> Chebysh
     return erf_poly(k, epsilon / 2, guaranteed)
 
 
-def rect_poly(t: float, delta: float, epsilon: float, guaranteed: bool = False) -> Chebyshev:
+def rect_poly(width: float, delta: float, epsilon: float, guaranteed: bool = False) -> Chebyshev:
     """
-    For t >= 0, delta > 0 and 0 < epsilon <= 2 / 5, returns a polynomial P in the
+    For width >= 0, delta > 0 and 0 < epsilon <= 2 / 5, returns a polynomial P in the
     Chebyshev basis that approximates the rectangle function such that |P(x)| <= epsilon
     for x in [-1, -width - delta] and x in [width + delta, 1] and |P(x) - 1| <= epsilon
     for x in [-width + delta, width - delta].
 
     Implements Lemma 29 from https://arxiv.org/abs/1806.01838.
 
-    :param t: The scaling of the rectangle function, requires t >= 0
+    :param width: The scaling of the rectangle function, requires width >= 0
     :param delta: The size of the regions [+-width - delta, +-width + delta] in which the approximation
         need not hold, requires delta > 0
     :param epsilon: The maximum absolute error of the approximation, requires 0 < epsilon <= 2 / 5
@@ -84,9 +84,9 @@ def rect_poly(t: float, delta: float, epsilon: float, guaranteed: bool = False) 
     :return: The polynomial approximating rect(x / w)
     """
     k = 1 / (np.sqrt(2) * delta) * np.sqrt(np.log(2 / (np.pi * (epsilon / 2) ** 2)))
-    base = erf_poly(k * (1 + t), epsilon / 2, guaranteed)
-    p1 = base(Chebyshev(-1 / (1 + t) * np.array([-t, 1])))
-    p2 = base(Chebyshev(1 / (1 + t) * np.array([t, 1])))
+    base = erf_poly(k * (1 + width), epsilon / 2, guaranteed)
+    p1 = base(Chebyshev(-1 / (1 + width) * np.array([-width, 1])))
+    p2 = base(Chebyshev(1 / (1 + width) * np.array([width, 1])))
     return (p1 + p2) / 2
 
 
@@ -129,9 +129,8 @@ def _unscaled_inverse_poly(kappa: float, epsilon: float) -> Chebyshev:
     :return: The polynomial approximating 1 / x
     """
     assert kappa > 1
-    assert 0 < epsilon < 1
+    assert 0 < epsilon <= 1
 
-    epsilon /= 2  # because we have two epsilon / 2 approximations
     b = int(np.ceil(kappa**2 * np.log(kappa / epsilon)))
     j = int(np.ceil(np.sqrt(b * np.log(4 * b / epsilon))))
     coefficients = np.zeros(2 * j + 2)
@@ -142,26 +141,40 @@ def _unscaled_inverse_poly(kappa: float, epsilon: float) -> Chebyshev:
 
 def inverse_poly(delta: float, epsilon: float, guaranteed: bool = False) -> Chebyshev:
     """
-    For 0 < epsilon < 2 * delta <= 1 / 2, returns a polynomial P which epsilon-approximates
-    delta / x on the domain [-1, 1] \\ (-delta, delta) and for which |P| <= 1.
+    For 0 < epsilon, delta <= 1, returns a polynomial P which epsilon-approximates
+    1 / x on the domain [-1, 1] \\ (-delta, delta)
 
     Implements Theorem 41 from https://arxiv.org/abs/1806.01838, but with delta scaled by 1 / 2.
 
-    :param delta: The approximation is only valid for |x| >= delta, requires epsilon / 2 < delta <= 1 / 4.
-    :param epsilon: The maximum error of the approximation, requires 0 < epsilon < 2 * delta.
+    :param delta: The approximation is only valid for |x| >= delta
+    :param epsilon: The maximum error of the approximation
     :param guaranteed: If the accuracy should be guaranteed using analytical bounds (ignoring numerical errors).
         If this is set to false, the function will return polynomials of lower degrees.
-    :return: The polynomial approximating delta / x
+    :return: The polynomial approximating 1 / x
     """
-    assert 0 < epsilon < 2 * delta <= 1 / 2
 
-    poly = delta * _unscaled_inverse_poly(1 / delta, (epsilon / 3) / delta)
+    delta = min(delta, 1 / 2)
+    epsilon = min(epsilon, 2 * delta)
 
+    poly = _unscaled_inverse_poly(1 / delta, epsilon)
     pmax = poly_sup_norm(poly)
 
-    if pmax > 1.5 * (1 / delta):
-        rect = rect_poly(delta / 2, delta / 2, min(epsilon / 3, 1 / pmax), guaranteed)
+    # This is to make certain assumptions fit.
+    # It is ok to make the condition larger and the error tolerance smaller
+    # than what the user supplied
+    delta = min(delta, 1 / 4)
+    epsilon = min(epsilon, 2 * delta)
 
-        return poly * (1 - rect)
+    assert 0 < epsilon <= 2 * delta <= 1 / 2
+
+    poly_r = _unscaled_inverse_poly(1 / delta, epsilon / 2)
+    rmax = poly_sup_norm(poly_r)
+    rect = rect_poly(delta / 2, delta / 2, epsilon / 2 / rmax, guaranteed)
+    poly_r *= 1 - rect
+    rmax = poly_sup_norm(poly_r)
+
+    # Test if the rect is actually useful
+    if pmax / rmax > poly_r.degree() / poly.degree():
+        return poly_r
     else:
         return poly
