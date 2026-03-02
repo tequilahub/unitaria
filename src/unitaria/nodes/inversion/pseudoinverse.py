@@ -42,15 +42,7 @@ class Pseudoinverse(ProxyNode):
         self.tolerance = tolerance
         self.guaranteed = guaranteed
 
-        # This is to make certain assumptions fit.
-        # It is ok to make the condition larger and the error tolerance smaller
-        # than what the user supplied
-        condition = max(condition, 4)
-        tolerance = min(tolerance, 2 / condition)
-
-        assert 0 < tolerance <= 2 / condition <= 0.5
-
-        self.poly = inverse_poly(1 / condition, tolerance, False) * condition
+        self.poly = inverse_poly(1 / condition, tolerance, False)
 
         # Rescale the polynomial, so that it fits the input normalization
         X = np.polynomial.Chebyshev([0, 1])

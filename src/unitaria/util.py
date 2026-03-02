@@ -75,4 +75,3 @@ def poly_sup_norm(poly, range=(-1.0, 1.0)):
     extrema = np.concatenate((extrema, [range[0], range[1]]))
 
     return np.max(np.abs(poly(extrema)))
->>>>>>> 315b387 (Fix normalization of QSVT)
