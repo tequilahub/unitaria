@@ -11,6 +11,10 @@ from unitaria.nodes.classical.constant_integer_multiplication import (
 from unitaria.verifier import verify
 
 
+# TODO: We should check that, if the generic compute and compute_adjoint
+#   implementations are overriden for performance, they match the generic ones
+
+
 @pytest.mark.parametrize("bits", [-2, 0])
 def test_increment_constructor(bits):
     with pytest.raises(ValueError):
