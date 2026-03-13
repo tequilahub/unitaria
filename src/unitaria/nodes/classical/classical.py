@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import Union, Sequence
+from typing import Sequence
 
 import numpy as np
 
@@ -19,10 +19,10 @@ class Classical(Node):
         or a Sequence of the number of bits if there are multiple outputs
     """
 
-    input_bits: Union[int, Sequence[int]]
-    output_bits: Union[int, Sequence[int]]
+    input_bits: int | Sequence[int]
+    output_bits: int | Sequence[int]
 
-    def __init__(self, input_bits: Union[int, Sequence[int]], output_bits: Union[int, Sequence[int]]):
+    def __init__(self, input_bits: int | Sequence[int], output_bits: int | Sequence[int]):
         self.input_bits = input_bits if isinstance(input_bits, Sequence) else [input_bits]
         self.output_bits = output_bits if isinstance(output_bits, Sequence) else [output_bits]
         if any(b < 1 for b in self.input_bits) or any(b < 1 for b in self.output_bits):
@@ -39,18 +39,14 @@ class Classical(Node):
         return 1
 
     @abstractmethod
-    def compute_classical(
-        self, input: Union[np.ndarray, Sequence[np.ndarray]]
-    ) -> Union[np.ndarray, Sequence[np.ndarray]]:
+    def compute_classical(self, input: np.ndarray | Sequence[np.ndarray]) -> np.ndarray | Sequence[np.ndarray]:
         raise NotImplementedError
 
     @abstractmethod
-    def compute_reverse_classical(
-        self, input: Union[np.ndarray, Sequence[np.ndarray]]
-    ) -> Union[np.ndarray, Sequence[np.ndarray]]:
+    def compute_reverse_classical(self, input: np.ndarray | Sequence[np.ndarray]) -> np.ndarray | Sequence[np.ndarray]:
         raise NotImplementedError
 
-    def compute(self, input: np.ndarray) -> Union[np.ndarray, Sequence[np.ndarray]]:
+    def compute(self, input: np.ndarray) -> np.ndarray:
         outer_shape = list(input.shape[:-1])
         output = np.zeros(outer_shape + [2 ** sum(self.output_bits)], dtype=np.complex128)
         output = output.reshape([-1, 2 ** sum(self.output_bits)])
