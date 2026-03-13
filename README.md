@@ -26,6 +26,9 @@ GlobalPhase(target=(), control=(), parameter=0.0)
 
 ## Installation
 
+`unitaria` requires at least Python version 3.12, and follows [Numpy's deprecation policy](https://numpy.org/neps/nep-0029-deprecation_policy.html),
+i.e. at least Python 3.13 will be required starting April 2027.
+
 The best way to install this library is using `pip`:
 
 ```sh
