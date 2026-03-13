@@ -28,7 +28,7 @@ class IntegerAddition(Classical):
             raise TypeError(
                 "IntegerAddition constructor requires source_bits=... and target_bits=... as keyword arguments"
             )
-        super().__init__(source_bits + target_bits, source_bits + target_bits)
+        super().__init__([source_bits, target_bits], [source_bits, target_bits])
         # TODO: Restriction is because the ancilla free construction needs two source bits.
         #  I know how to fix this but haven't implemented it yet.
         if source_bits < 2 or target_bits < source_bits:
@@ -42,17 +42,13 @@ class IntegerAddition(Classical):
     def parameters(self) -> dict:
         return {"source_bits": self.source_bits, "target_bits": self.target_bits}
 
-    def compute_classical(self, input: np.ndarray) -> np.ndarray:
-        input1 = input % 2**self.source_bits
-        input2 = input // 2**self.source_bits
-        input2 = (input2 + input1) % 2**self.target_bits
-        return input1 + input2 * 2**self.source_bits
+    def compute_classical(self, input: Sequence[np.ndarray]) -> Sequence[np.ndarray]:
+        result = (input[1] + input[0]) % 2**self.target_bits
+        return input[0], result
 
-    def compute_reverse_classical(self, input: np.ndarray) -> np.ndarray:
-        input1 = input % 2**self.source_bits
-        input2 = input // 2**self.source_bits
-        input2 = (input2 - input1) % 2**self.target_bits
-        return input1 + input2 * 2**self.source_bits
+    def compute_reverse_classical(self, input: Sequence[np.ndarray]) -> Sequence[np.ndarray]:
+        result = (input[1] - input[0]) % 2**self.target_bits
+        return input[0], result
 
     def compute(self, input: np.ndarray) -> np.ndarray:
         old_shape = input.shape
