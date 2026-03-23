@@ -12,8 +12,24 @@ from unitaria.nodes.basic.identity import Identity
 from unitaria.circuit import Circuit
 from unitaria.util import logreduce
 
+"""
+Permutation operations for subspaces.
+
+This module provides classes and functions to permute, rotate, and manipulate
+subspaces and their register mappings, including controlled and zero qubits.
+"""
+
 
 def _move_zeros_to_end(subspace: Subspace) -> PermuteRegisters:
+    """
+    Moves all ZeroQubit registers in the subspace to the end of the subspace.
+
+    Args:
+        subspace (Subspace): The input subspace.
+
+    Returns:
+        PermuteRegisters: Node representing the permutation.
+    """
     nonzero_registers = []
     zero_registers = []
     for i, register in enumerate(subspace.registers):
