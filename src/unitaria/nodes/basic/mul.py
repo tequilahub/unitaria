@@ -55,6 +55,8 @@ class Mul(ProxyNode):
         projection_required = not self.skip_projection
         if projection_subspace == Subspace(bits=projection_subspace.total_qubits):
             projection_required = False
+        if self.A.is_guaranteed_unitary() or self.B.is_guaranteed_unitary():
+            projection_required = False
         if projection_required:
             # TODO: This can be probably be done more correctly
             # once match_nonzero is improved
@@ -78,6 +80,9 @@ class Mul(ProxyNode):
 
     def _normalization(self) -> float:
         return self.A.normalization * self.B.normalization
+
+    def is_guaranteed_unitary(self) -> bool:
+        return self.A.is_guaranteed_unitary() and self.B.is_guaranteed_unitary()
 
 
 Node.__matmul__ = lambda A, B: Mul(B, A)

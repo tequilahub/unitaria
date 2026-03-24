@@ -41,6 +41,9 @@ class FourierTransform(Node):
     def _normalization(self) -> float:
         return 1
 
+    def is_guaranteed_unitary(self) -> bool:
+        return True
+
     def compute(self, input: np.ndarray) -> np.ndarray:
         return np.fft.fft(input) / np.sqrt(2**self.bits)
 

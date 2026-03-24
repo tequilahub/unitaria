@@ -75,3 +75,8 @@ def poly_sup_norm(poly, range=(-1.0, 1.0)):
     extrema = np.concatenate((extrema, [range[0], range[1]]))
 
     return np.max(np.abs(poly(extrema)))
+
+
+def is_unitary(U: np.ndarray, tol: float = 1e-8) -> bool:
+    identity = np.eye(U.shape[0])
+    return np.allclose(U @ np.conj(U.T), identity, atol=tol) and np.allclose(np.conj(U.T) @ U, identity, atol=tol)

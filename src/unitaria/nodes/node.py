@@ -143,6 +143,16 @@ class Node(ABC):
         """
         raise NotImplementedError
 
+    def is_guaranteed_unitary(self) -> bool:
+        """
+        If this returns true, the matrix the node represents divided by its
+        normalization must be unitary.
+
+        This must be ensured by the implementor of this method. A unitary node
+        is useful, since it avoids having to use projections in multiplications.
+        """
+        return False
+
     def is_vector(self) -> bool:
         """
         Tests whether this node encodes a vector or a matrix.
