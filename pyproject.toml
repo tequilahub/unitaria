@@ -15,8 +15,7 @@ dependencies = [
   "rich==14.0.*",
   "qulacs==0.6.*",
   "numpy==2.4.*",
-  "scipy==1.17.*",
-  "pyqsp==0.2.0"
+  "scipy==1.17.*"
 ]
 
 [dependency-groups]

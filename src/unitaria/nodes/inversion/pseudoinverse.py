@@ -1,4 +1,4 @@
-from unitaria import Node
+from unitaria.nodes import Node
 from unitaria.nodes import ProxyNode
 from unitaria.nodes.basic.adjoint import Adjoint
 from unitaria.nodes.basic.scale import Scale
