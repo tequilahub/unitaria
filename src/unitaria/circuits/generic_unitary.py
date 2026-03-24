@@ -43,9 +43,8 @@ def generic_unitary(U: npt.NDArray[complex], target: Sequence[int]) -> tq.QCircu
 def _multiplexed_unitary(
     U1: npt.NDArray[complex], U2: npt.NDArray[complex], target: Sequence[int], control: int
 ) -> tq.QCircuit():
-    eigenvalues, eigenvectors = np.linalg.eig(U1 @ U2.T.conjugate())
-    V = eigenvectors
-    D = np.diag(np.sqrt(eigenvalues))
+    T, V = scipy.linalg.schur(U1 @ U2.T.conjugate(), output="complex")
+    D = np.diag(np.sqrt(np.diag(T)))
     W = D @ V.T.conjugate() @ U2
 
     circuit = tq.QCircuit()

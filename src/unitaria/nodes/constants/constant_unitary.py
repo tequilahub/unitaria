@@ -26,7 +26,7 @@ class ConstantUnitary(Node):
                 raise ValueError("The provided matrix is not unitary.")
         self.unitary = unitary
         n, m = unitary.shape
-        extended_unitary = np.zeros((max(n, m), max(n, m)))
+        extended_unitary = np.zeros((max(n, m), max(n, m)), dtype=complex)
         extended_unitary[:n, :m] = unitary
         if n != m:
             swap = n < m
