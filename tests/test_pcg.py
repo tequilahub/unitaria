@@ -1,11 +1,8 @@
 import numpy as np
-
-from unitaria.nodes import ProxyNode, Node, ConstantIntegerAddition, ConstantIntegerMultiplication, Identity, Mul
-from unitaria.subspace import Subspace, ID, ZeroQubit
-from unitaria.verifier import verify
+import unitaria as ut
 
 
-class LCG(ProxyNode):
+class LCG(ut.ProxyNode):
     bits: int
     constant_add: int
     constant_mul: int
@@ -22,25 +19,26 @@ class LCG(ProxyNode):
         else:
             self.constant_mul = constant_mul
 
-    def definition(self) -> Node:
+    def definition(self) -> ut.Node:
         acc_mul = self.constant_mul
         acc_add = self.constant_add
         result = None
         for i in range(self.bits):
             # TODO: skip_projection should be done automatically here
-            step = Mul(
-                ConstantIntegerMultiplication(self.bits, acc_mul),
-                ConstantIntegerAddition(self.bits, acc_add),
+            step = ut.Mul(
+                ut.ConstantIntegerMultiplication(self.bits, acc_mul),
+                ut.ConstantIntegerAddition(self.bits, acc_add),
                 skip_projection=True,
             )
             controlled = (
-                Identity(Subspace([ID] * self.bits + [ZeroQubit()] * 2 + [ID] * i)) | (step & Identity(bits=i))
-            ) & Identity(bits=self.bits - i - 1)
+                ut.Identity(ut.Subspace([ut.ID] * self.bits + [ut.ZeroQubit()] * 2 + [ut.ID] * i))
+                | (step & ut.Identity(bits=i))
+            ) & ut.Identity(bits=self.bits - i - 1)
             if result is None:
                 result = controlled
             else:
                 # TODO: skip_projection should be done automatically here
-                result = Mul(result, controlled, skip_projection=True)
+                result = ut.Mul(result, controlled, skip_projection=True)
             acc_add = (acc_add + acc_mul * acc_add) % (2**self.bits)
             acc_mul = (acc_mul**2) % (2**self.bits)
 
@@ -68,5 +66,5 @@ class LCG(ProxyNode):
 
 
 def test_lcg():
-    verify(LCG(2, 1, 1))
-    verify(LCG(2, 1, 3))
+    ut.verify(LCG(2, 1, 1))
+    ut.verify(LCG(2, 1, 3))

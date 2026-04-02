@@ -6,54 +6,59 @@ and vectors. These are format for performing linear algebra calculations on
 quantum computers; see also this :doc:`introduction <block_encodings>` and the
 :doc:`references`, which contains a list of paper references.
 
-The basic object of this library is a `~unitaria.nodes.Node`, which may refer to a
+The basic object of this library is a `~unitaria.Node`, which may refer to a
 matrix or a vector.
 
->>> from unitaria.nodes import ConstantVector, Identity
->>> Identity(1)
+>>> import unitaria as ut
+>>> ut.Identity(1)
 Identity('subspace': Subspace(1))
 >>> import numpy as np
->>> ConstantVector(np.array([1, 2]))
+>>> ut.ConstantVector(np.array([1, 2]))
 ConstantVector('vec': array([1, 2]))
 
 As you can see, nodes are not executed immediately. After all, the operations
 should be executed on a quantum computer. Instead, you can combine nodes to form
 more complex expressions, stored as a computational graph.
 
->>> from unitaria.nodes import ConstantVector, Identity
+>>> import unitaria as ut
 >>> import numpy as np
->>> print(Identity(1) @ ConstantVector(np.array([1, 2])))
+>>> print(ut.Identity(1) @ ut.ConstantVector(np.array([1, 2])))
 Mul
 ├── ConstantVector{'vec': array([1, 2])}
 └── Identity{'subspace': Subspace(1)}
 
-For a complete list of all available nodes, see `~unitaria.nodes`.
-
 There are now two ways in which you can obtain the encoded vector of the above
 example. Each node contains a classical implementation of the operation it
-performs, available through the methods `~unitaria.nodes.Node.compute` and
-`~unitaria.nodes.Node.toarray`.
+performs, available through the methods `~unitaria.Node.compute` and
+`~unitaria.Node.toarray`.
 
->>> from unitaria.nodes import ConstantVector, Identity
+>>> import unitaria as ut
 >>> import numpy as np
->>> (Identity(1) @ ConstantVector(np.array([1, 2]))).toarray().real
+>>> (ut.Identity(1) @ ut.ConstantVector(np.array([1, 2]))).toarray().real
 array([1., 2.])
 
 On the other hand, each node can give you a quantum circuit, a normalization
 factor, and subspaces for its input and output, which together make up a block
-encoding of the vector. The convenience method `~unitaria.nodes.Node.simulate`
+encoding of the vector. The convenience method `~unitaria.Node.simulate`
 combines this data, which should produce the same result as
-`~unitaria.nodes.Node.toarray`.
+`~unitaria.Node.toarray`.
 
->>> from unitaria.nodes import ConstantVector, Identity
+>>> unitaria as ut
 >>> import numpy as np
->>> (Identity(1) @ ConstantVector(np.array([1, 2]))).simulate().real
+>>> (ut.Identity(1) @ ut.ConstantVector(np.array([1, 2]))).simulate().real
 array([1., 2.])
 
-It can be checked wether the results of `~unitaria.nodes.Node.toarray` and
-`~unitaria.nodes.Node.simulate` actually match by using `~unitaria.verifier.verify`.
+It can be checked wether the results of `~unitaria.Node.toarray` and
+`~unitaria.Node.simulate` actually match by using `~unitaria.verifier.verify`.
 This also checks other useful things, such as the number of qubits in the
 circuit being correct.
+
+Custom nodes
+------------
+
+Most basic operations are implemented already in this library. See `~unitaria.Node` for
+implementing custom nodes directly, or `~unitaria_node.ProxyNode` for implementing custom nodes
+by decomposing them into other operations.
 
 .. rubric:: Modules
 
@@ -61,10 +66,7 @@ circuit being correct.
    :toctree: generated
    :recursive:
 
-   unitaria.nodes
-   unitaria.subspace
-   unitaria.circuit
-   unitaria.verifier
+   unitaria
 
 .. toctree::
    :hidden:

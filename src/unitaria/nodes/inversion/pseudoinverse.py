@@ -1,7 +1,7 @@
 import numpy as np
 
-from unitaria.nodes import Node
-from unitaria.nodes import ProxyNode
+from unitaria.nodes.node import Node
+from unitaria.nodes.proxy_node import ProxyNode
 from unitaria.nodes.basic.adjoint import Adjoint
 from unitaria.nodes.qsvt.qsvt import QSVT
 from unitaria.poly_approx import inverse_poly

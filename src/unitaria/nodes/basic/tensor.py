@@ -14,20 +14,20 @@ class Tensor(Node):
     The order of operations is such that ``A`` corresponds to the lower
     significant digits of the index, i.e.
 
-    >>> from unitaria.nodes import Tensor, Identity, Increment
+    >>> import unitaria as ut
     >>> import numpy as np
-    >>> Tensor(Increment(1), Identity(1)).toarray().real
+    >>> ut.Tensor(ut.Increment(1), ut.Identity(1)).toarray().real
     array([[0., 1., 0., 0.],
            [1., 0., 0., 0.],
            [0., 0., 0., 1.],
            [0., 0., 1., 0.]])
 
-    The and operator for ``Node`` is overloaded to be the tensor product,
+    The and operator for `ut.Node` is overloaded to be the tensor product,
     i.e. you can equivalently write
 
-    >>> from unitaria.nodes import Tensor, Identity, Increment
+    >>> import unitaria as ut
     >>> import numpy as np
-    >>> (Increment(1) & Identity(1)).toarray().real
+    >>> (ut.Increment(1) & ut.Identity(1)).toarray().real
     array([[0., 1., 0., 0.],
            [1., 0., 0., 0.],
            [0., 0., 0., 1.],
