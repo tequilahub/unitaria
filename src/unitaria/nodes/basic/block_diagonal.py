@@ -66,6 +66,9 @@ class BlockDiagonal(ProxyNode):
     def _normalization(self) -> float:
         return self.A.normalization
 
+    def is_guaranteed_unitary(self) -> bool:
+        return self.A.is_guaranteed_unitary() and self.B.is_guaranteed_unitary()
+
     def compute(self, input: np.ndarray) -> np.ndarray:
         dim_A = self.A.dimension_in
         input_A, input_B = np.split(input, [dim_A], axis=-1)

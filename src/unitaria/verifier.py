@@ -8,6 +8,7 @@ import numpy as np
 
 from unitaria.nodes.node import Node
 from unitaria.nodes.basic.adjoint import Adjoint
+from unitaria.util import is_unitary
 from rich.console import Console
 from rich.syntax import Syntax
 
@@ -94,7 +95,7 @@ class Verifier:
             expected_qubits = 1
         assert node.circuit().n_qubits == expected_qubits
 
-    def _compare_batch_compute(self, node: Node, reference: np.ndarray | None = None, atol: float = 1e-8):
+    def _compare_batch_compute(self, node: Node) -> np.ndarray:
         batch_computed = node.toarray(force_matrix=True)
         computed = np.zeros_like(batch_computed.T)
         for i in range(node.dimension_in):
@@ -102,10 +103,7 @@ class Verifier:
             input[i] = 1
             computed[i, :] = node.compute(input)
         np.testing.assert_allclose(batch_computed, computed.T, atol=1e-8)
-        if reference is not None:
-            if reference.ndim == 1:
-                reference = np.expand_dims(reference, 1)
-            np.testing.assert_allclose(batch_computed, reference, atol=atol)
+        return batch_computed
 
     def _compare_compute_simulate(self, node: Node):
         basis_in = node.subspace_in.enumerate_basis()
@@ -120,15 +118,24 @@ class Verifier:
                 simulated = _bring_to_same_phase(computed, simulated)
             np.testing.assert_allclose(simulated, computed, atol=1e-8, err_msg=f"On input {i}:")
 
+    def _verify_is_guaranteed_unitary(self, node: Node, matrix: np.ndarray):
+        if not node.is_guaranteed_unitary():
+            return
+
+        assert is_unitary(matrix / node.normalization)
+
     def _verify(self, node: Node, reference: np.ndarray | None = None, atol: float = 1e-8):
         try:
             self._verify_circuit_subspaces(node)
             self._compare_compute_simulate(node)
-            if self.check_adjoint:
-                self._compare_compute_simulate(Adjoint(node))
-            self._compare_batch_compute(node, reference, atol)
-            if self.check_adjoint:
-                self._compare_batch_compute(Adjoint(node))
+            self._compare_compute_simulate(Adjoint(node))
+            matrix = self._compare_batch_compute(node)
+            if reference is not None:
+                if reference.ndim == 1:
+                    reference = np.expand_dims(reference, 1)
+                np.testing.assert_allclose(matrix, reference, atol=atol)
+            self._verify_is_guaranteed_unitary(node, matrix)
+            self._compare_batch_compute(Adjoint(node))
         except AssertionError as err:
             raise VerificationError(node) from err
 

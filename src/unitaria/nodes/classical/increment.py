@@ -38,6 +38,9 @@ class Increment(Classical):
     def _subspace_out(self) -> Subspace:
         return Subspace(bits=self.bits)
 
+    def is_guaranteed_unitary(self) -> bool:
+        return True
+
     def compute_classical(self, input: np.ndarray) -> np.ndarray:
         return (input + 1) % 2**self.bits
 

@@ -108,6 +108,9 @@ class Tensor(Node):
     def _normalization(self) -> float:
         return self.A.normalization * self.B.normalization
 
+    def is_guaranteed_unitary(self) -> bool:
+        return self.A.is_guaranteed_unitary() and self.B.is_guaranteed_unitary()
+
     def clean_ancilla_count(self) -> int:
         return self.A.clean_ancilla_count() + self.B.clean_ancilla_count()
 
