@@ -1,5 +1,7 @@
 # unitaria :rainbow:
 
+:warning: The main functionality of this project is still being developed. All interfaces and features may still change, and no compatibility is guaranteed.
+
 `unitaria` is a library for working with so called "block encodings" of matrices
 and vectors. These are format for performing linear algebra calculations on
 quantum computers. It allows constructing quantum algorithms using a simple,
