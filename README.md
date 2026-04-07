@@ -8,10 +8,10 @@ quantum computers. It allows constructing quantum algorithms using a simple,
 `numpy`-like syntax.
 
 ```python
->>> from unitaria.nodes import ConstantVector, Identity
+>>> import unitaria as ut
 >>> import numpy as np
->>> result = Identity(1) @ ConstantVector(np.array([3, 4]))
->>> result.draw()
+>>> result = ut.Identity(bits=1) @ ut.ConstantVector(np.array([3, 4]))
+>>> print(result.draw())
 Mul
 ├── ConstantVector{'vec': array([3, 4])}
 └── Identity{'subspace': Subspace(1)}
@@ -19,11 +19,15 @@ Mul
 array([3., 4.])
 >>> result.normalization
 np.float64(5.0)
->>> result.circuit
-Circuit(tq_circuit=circuit: 
-Ry(target=(0,), parameter=1.8545904360032246)
+>>> result.circuit()
+Circuit(_tq_circuit=circuit: 
 GlobalPhase(target=(), control=(), parameter=0.0)
+Ry(target=(0,), parameter=1.8545904360032246)
+Rx(target=(0,), parameter=0.0)
+Rx(target=(0,), parameter=-0.0)
+Rx(target=(0,), parameter=0.0)
 )
+
 ```
 
 [**Documentation**](https://tequilahub.github.io/unitaria/index.html)
