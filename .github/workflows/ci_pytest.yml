@@ -17,11 +17,13 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install uv
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@v7
         with:
-          version: "0.10.9"
+          version: "0.11.3"
           enable-cache: true
       - name: Install dependencies
         run: uv sync --dev
       - name: Run tests
         run: uv run pytest tests
+      - name: Run doctest
+        run: uv run pytest --doctest-glob="README.md" README.md
