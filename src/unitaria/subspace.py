@@ -414,8 +414,8 @@ class ControlledSubspace(Register):
         Specifically, if `case_one` and `case_zero` agree in a number of lowest
         qubits, this common part can be factored out. E.g.
 
-            >>> from unitaria.subspace import Subspace, ControlledSubspace
-            >>> ControlledSubspace(Subspace(2), Subspace(1, 1)).simplify()
+            >>> import unitaria as ut
+            >>> ut.ControlledSubspace(ut.Subspace(bits=2), ut.Subspace(bits=1, zero_qubits=1)).simplify()
             [ID, ControlledSubspace(case_zero=Subspace(1), case_one=Subspace(0, zero_qubits=1))]
         """
         min_len = min(len(self.case_zero.registers), len(self.case_one.registers))
