@@ -7,7 +7,7 @@ from unitaria.nodes.classical.constant_integer_addition import ConstantIntegerAd
 from unitaria.nodes.proxy_node import ProxyNode
 from unitaria.nodes.basic.identity import Identity
 from unitaria.nodes.basic.block_diagonal import BlockDiagonal
-from unitaria.nodes.permutation.permutation import PermuteRegisters
+from unitaria.nodes.permutation.permutation import PermuteFactors
 from unitaria.nodes.basic.adjoint import Adjoint
 from unitaria.nodes.basic.mul import Mul
 
@@ -56,7 +56,7 @@ class ConstantIntegerMultiplication(ProxyNode):
                 Identity(subspace=Subspace(bits=add_bits)),
                 ConstantIntegerAddition(bits=add_bits, constant=c),
             )
-            permutation = PermuteRegisters(Subspace(bits=add_bits + 1), [add_bits] + list(range(add_bits)))
+            permutation = PermuteFactors(Subspace(bits=add_bits + 1), [add_bits] + list(range(add_bits)))
             # TODO: The skip_projection can be removed onces this is done automatically
             const_add = Mul(
                 Adjoint(permutation),

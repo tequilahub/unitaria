@@ -13,25 +13,25 @@ from unitaria.circuit import Circuit
 from unitaria.util import logreduce
 
 
-def _move_zeros_to_end(subspace: Subspace) -> PermuteRegisters:
-    nonzero_registers = []
-    zero_registers = []
-    for i, register in enumerate(subspace.registers):
-        if isinstance(register, ZeroQubit):
-            zero_registers.append(i)
+def _move_zeros_to_end(subspace: Subspace) -> PermuteFactors:
+    nonzero_factors = []
+    zero_factors = []
+    for i, factor in enumerate(subspace.tensor_factors):
+        if isinstance(factor, ZeroQubit):
+            zero_factors.append(i)
         else:
-            nonzero_registers.append(i)
+            nonzero_factors.append(i)
 
-    return PermuteRegisters(subspace, nonzero_registers + zero_registers)
+    return PermuteFactors(subspace, nonzero_factors + zero_factors)
 
 
-class PermuteRegisters(Node):
+class PermuteFactors(Node):
     """
-    Operation permuting the registers of a state
+    Operation permuting the factors of a state
 
     Permutes a vector in the space defined by ``qubits``
-    such that the i-th register after the operation will be
-    ``qubits.registers[permutation_map[i]]``.
+    such that the i-th factor after the operation will be
+    ``subspace.tensor_factors[permutation_map[i]]``.
     """
 
     subspace: Subspace
@@ -49,15 +49,15 @@ class PermuteRegisters(Node):
         return self.subspace
 
     def _subspace_out(self) -> Subspace:
-        return Subspace(registers=[self.subspace.registers[i] for i in self.permutation_map])
+        return Subspace([self.subspace.tensor_factors[i] for i in self.permutation_map])
 
     def _normalization(self) -> float:
         return 1
 
     def compute(self, input: np.ndarray) -> np.ndarray:
         outer_shape = list(input.shape[:-1])
-        register_shape = [r.dimension() for r in reversed(self.subspace.registers)]
-        total_shape = outer_shape + register_shape
+        factor_shape = [r.dimension() for r in reversed(self.subspace.tensor_factors)]
+        total_shape = outer_shape + factor_shape
         input = input.reshape(total_shape)
         perm = list(range(len(outer_shape))) + [len(total_shape) - i - 1 for i in reversed(self.permutation_map)]
         input = np.transpose(input, perm)
@@ -65,8 +65,8 @@ class PermuteRegisters(Node):
 
     def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
         outer_shape = list(input.shape[:-1])
-        register_shape = [r.dimension() for r in reversed(self.subspace_out.registers)]
-        total_shape = outer_shape + register_shape
+        factor_shape = [r.dimension() for r in reversed(self.subspace_out.tensor_factors)]
+        total_shape = outer_shape + factor_shape
         input = input.reshape(total_shape)
         perm = list(range(len(outer_shape))) + [
             len(total_shape) - i - 1 for i in reversed(np.argsort(self.permutation_map))
@@ -80,13 +80,13 @@ class PermuteRegisters(Node):
         if self.subspace.total_qubits == 0:
             return Circuit()
 
-        register_qubits = []
+        factor_qubits = []
         qubit_index = 0
-        for register in self.subspace.registers:
-            register_qubits.append(list(range(qubit_index, qubit_index + register.total_qubits())))
-            qubit_index += register.total_qubits()
+        for factor in self.subspace.tensor_factors:
+            factor_qubits.append(list(range(qubit_index, qubit_index + factor.total_qubits())))
+            qubit_index += factor.total_qubits()
 
-        permutation_map_qubits = sum([register_qubits[i] for i in self.permutation_map], [])
+        permutation_map_qubits = sum([factor_qubits[i] for i in self.permutation_map], [])
 
         circuit = Circuit()
 
@@ -131,7 +131,7 @@ class AddZerosToControl(Node):
     subspace: Subspace
 
     def __init__(self, subspace: Subspace, num_zeros: int):
-        assert len(subspace.registers) > 0 and isinstance(subspace.registers[-1], ControlledSubspace)
+        assert len(subspace.tensor_factors) > 0 and isinstance(subspace.tensor_factors[-1], ControlledSubspace)
         super().__init__(subspace.dimension, subspace.dimension)
         self.subspace = subspace
         self.num_zeros = num_zeros
@@ -140,8 +140,8 @@ class AddZerosToControl(Node):
         assert num_zeros > 0
         return Adjoint(
             AddZerosToControl(
-                Subspace(subspace.case_zero().registers[:-num_zeros])
-                | Subspace(subspace.case_one().registers[:-num_zeros]),
+                Subspace(subspace.case_zero().tensor_factors[:-num_zeros])
+                | Subspace(subspace.case_one().tensor_factors[:-num_zeros]),
                 num_zeros,
             )
         )
@@ -190,11 +190,11 @@ class SubspaceRightRotation(Node):
     """
 
     def __init__(self, subspace: Subspace):
-        assert len(subspace.registers) > 0 and isinstance(subspace.registers[-1], ControlledSubspace)
+        assert len(subspace.tensor_factors) > 0 and isinstance(subspace.tensor_factors[-1], ControlledSubspace)
         super().__init__(subspace.dimension, subspace.dimension)
 
         pivot = subspace.case_zero()
-        assert len(pivot.registers) > 0 and isinstance(pivot.registers[-1], ControlledSubspace)
+        assert len(pivot.tensor_factors) > 0 and isinstance(pivot.tensor_factors[-1], ControlledSubspace)
         L = pivot.case_zero()
         M = pivot.case_one()
         R = subspace.case_one()
@@ -202,7 +202,8 @@ class SubspaceRightRotation(Node):
         self.subspace_out = Subspace(
             [
                 ControlledSubspace(
-                    Subspace(L.registers, zero_qubits=1), Subspace([ControlledSubspace(M, Subspace(R.registers[:-1]))])
+                    Subspace(L.tensor_factors, zero_qubits=1),
+                    Subspace([ControlledSubspace(M, Subspace(R.tensor_factors[:-1]))]),
                 )
             ],
         )
@@ -211,7 +212,7 @@ class SubspaceRightRotation(Node):
 
     def left_rotate(subspace: Subspace) -> Node:
         pivot = subspace.case_one()
-        assert len(pivot.registers) > 0 and isinstance(pivot.registers[-1], ControlledSubspace)
+        assert len(pivot.tensor_factors) > 0 and isinstance(pivot.tensor_factors[-1], ControlledSubspace)
         L = subspace.case_zero()
         M = pivot.case_zero()
         R = pivot.case_one()
@@ -219,8 +220,8 @@ class SubspaceRightRotation(Node):
         subspace_in = Subspace(
             [
                 ControlledSubspace(
-                    Subspace([ControlledSubspace(Subspace(L.registers[:-1]), M)]),
-                    Subspace(R.registers, zero_qubits=1),
+                    Subspace([ControlledSubspace(Subspace(L.tensor_factors[:-1]), M)]),
+                    Subspace(R.tensor_factors, zero_qubits=1),
                 )
             ],
         )
@@ -281,11 +282,11 @@ def _rotate(subspace: Subspace, right: bool) -> Node:
     other_zeros = other.trailing_zeros()
     if other_zeros > 1 and trailing_zeros > 0:
         permutation.append(
-            AddZerosToControl.remove_zeros(Subspace(subspace.nonzero_registers()), min(trailing_zeros, other_zeros - 1))
+            AddZerosToControl.remove_zeros(Subspace(subspace.nonzero_factors()), min(trailing_zeros, other_zeros - 1))
         )
         subspace = permutation[-1].subspace_out
     elif other_zeros == 0:
-        permutation.append(AddZerosToControl(Subspace(subspace.nonzero_registers()), 1))
+        permutation.append(AddZerosToControl(Subspace(subspace.nonzero_factors()), 1))
         subspace = permutation[-1].subspace_out
 
     if right:
@@ -295,7 +296,7 @@ def _rotate(subspace: Subspace, right: bool) -> Node:
 
     pivot_zeros = pivot.trailing_zeros()
     if pivot_zeros != 0:
-        move = AddZerosToControl(Subspace(pivot.nonzero_registers()), pivot_zeros)
+        move = AddZerosToControl(Subspace(pivot.nonzero_factors()), pivot_zeros)
         if right:
             permutation.append(move | Identity(subspace.case_one()))
         else:
@@ -303,9 +304,9 @@ def _rotate(subspace: Subspace, right: bool) -> Node:
         subspace = permutation[-1].subspace_out
 
     if right:
-        permutation.append(SubspaceRightRotation(Subspace(subspace.nonzero_registers())))
+        permutation.append(SubspaceRightRotation(Subspace(subspace.nonzero_factors())))
     else:
-        permutation.append(SubspaceRightRotation.left_rotate(Subspace(subspace.nonzero_registers())))
+        permutation.append(SubspaceRightRotation.left_rotate(Subspace(subspace.nonzero_factors())))
     return logreduce(UnsafeMul, permutation)
 
 
@@ -493,9 +494,9 @@ def _find_matching_partitioning(a: Subspace, b: Subspace) -> list[tuple[Subspace
     Finds a partitoning of a and b, such that the ith subdivision of either
     partitioning has the same dimension.
 
-    Neither Subspace should contian ZeroQubits in its register.
+    Neither Subspace should contian ZeroQubits in its factors.
     """
-    if a.registers == [] and b.registers == []:
+    if a.tensor_factors == [] and b.tensor_factors == []:
         return []
 
     assert a.dimension == b.dimension
@@ -504,26 +505,26 @@ def _find_matching_partitioning(a: Subspace, b: Subspace) -> list[tuple[Subspace
     last_breakpoint_b = 0
     i_a = 1
     i_b = 1
-    submap_a = Subspace(registers=a.registers[last_breakpoint_a:i_a])
-    submap_b = Subspace(registers=b.registers[last_breakpoint_b:i_b])
-    while i_a < len(a.registers) and i_b < len(b.registers):
+    submap_a = Subspace(a.tensor_factors[last_breakpoint_a:i_a])
+    submap_b = Subspace(b.tensor_factors[last_breakpoint_b:i_b])
+    while i_a < len(a.tensor_factors) and i_b < len(b.tensor_factors):
         if submap_a.dimension == submap_b.dimension:
             subdivisions.append((submap_a, submap_b))
             last_breakpoint_a = i_a
             last_breakpoint_b = i_b
             i_a += 1
             i_b += 1
-            submap_a = Subspace(registers=a.registers[last_breakpoint_a:i_a])
-            submap_b = Subspace(registers=b.registers[last_breakpoint_b:i_b])
+            submap_a = Subspace(a.tensor_factors[last_breakpoint_a:i_a])
+            submap_b = Subspace(b.tensor_factors[last_breakpoint_b:i_b])
         elif submap_a.dimension < submap_b.dimension:
             i_a += 1
-            submap_a = Subspace(registers=a.registers[last_breakpoint_a:i_a])
+            submap_a = Subspace(a.tensor_factors[last_breakpoint_a:i_a])
         else:
             i_b += 1
-            submap_b = Subspace(registers=b.registers[last_breakpoint_b:i_b])
+            submap_b = Subspace(b.tensor_factors[last_breakpoint_b:i_b])
 
-    submap_a = Subspace(registers=a.registers[last_breakpoint_a:])
-    submap_b = Subspace(registers=b.registers[last_breakpoint_b:])
+    submap_a = Subspace(a.tensor_factors[last_breakpoint_a:])
+    submap_b = Subspace(b.tensor_factors[last_breakpoint_b:])
     subdivisions.append((submap_a, submap_b))
 
     return subdivisions

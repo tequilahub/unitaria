@@ -4,7 +4,7 @@ import unitaria as ut
 from unitaria.nodes.permutation.permutation import (
     _find_matching_partitioning,
     permute,
-    PermuteRegisters,
+    PermuteFactors,
     _rotate_to,
     _rotate,
     AddZerosToControl,
@@ -153,15 +153,15 @@ def test_double_rotation_right_left():
 
 
 def test_permute_registers():
-    ut.verify(PermuteRegisters(ut.Subspace(bits=1), [0]))
-    ut.verify(PermuteRegisters(ut.Subspace(bits=2), [0, 1]))
-    ut.verify(PermuteRegisters(ut.Subspace(bits=2), [1, 0]))
-    ut.verify(PermuteRegisters(ut.Subspace(bits=3), [0, 1, 2]))
-    ut.verify(PermuteRegisters(ut.Subspace(bits=3), [0, 2, 1]))
-    ut.verify(PermuteRegisters(ut.Subspace(bits=3), [1, 0, 2]))
-    ut.verify(PermuteRegisters(ut.Subspace(bits=3), [1, 2, 0]))
-    ut.verify(PermuteRegisters(ut.Subspace(bits=3), [2, 0, 1]))
-    ut.verify(PermuteRegisters(ut.Subspace(bits=3), [2, 1, 0]))
+    ut.verify(PermuteFactors(ut.Subspace(bits=1), [0]))
+    ut.verify(PermuteFactors(ut.Subspace(bits=2), [0, 1]))
+    ut.verify(PermuteFactors(ut.Subspace(bits=2), [1, 0]))
+    ut.verify(PermuteFactors(ut.Subspace(bits=3), [0, 1, 2]))
+    ut.verify(PermuteFactors(ut.Subspace(bits=3), [0, 2, 1]))
+    ut.verify(PermuteFactors(ut.Subspace(bits=3), [1, 0, 2]))
+    ut.verify(PermuteFactors(ut.Subspace(bits=3), [1, 2, 0]))
+    ut.verify(PermuteFactors(ut.Subspace(bits=3), [2, 0, 1]))
+    ut.verify(PermuteFactors(ut.Subspace(bits=3), [2, 1, 0]))
 
 
 def test_find_matching_partitioning():
@@ -179,18 +179,16 @@ def test_find_matching_partitioning():
         (ut.Subspace(bits=1), ut.Subspace(bits=1)),
         (ut.Subspace(bits=1), ut.Subspace(bits=1)),
     ]
-    assert _find_matching_partitioning(ut.Subspace(bits=2), ut.Subspace(registers=[c])) == [
+    assert _find_matching_partitioning(ut.Subspace(bits=2), ut.Subspace([c])) == [
         (ut.Subspace(bits=1), ut.Subspace(bits=1)),
         (ut.Subspace(bits=1), ut.Subspace(bits=1)),
     ]
     c = ut.ControlledSubspace(ut.Subspace(bits=1), ut.Subspace(bits=0, zero_qubits=1))
-    assert _find_matching_partitioning(ut.Subspace(registers=[c]), ut.Subspace(registers=[c])) == [
-        (ut.Subspace(registers=[c]), ut.Subspace(registers=[c]))
+    assert _find_matching_partitioning(ut.Subspace([c]), ut.Subspace([c])) == [(ut.Subspace([c]), ut.Subspace([c]))]
+    assert _find_matching_partitioning(ut.Subspace([ut.ID, c]), ut.Subspace([c, ut.ID])) == [
+        (ut.Subspace([ut.ID, c]), ut.Subspace([c, ut.ID]))
     ]
-    assert _find_matching_partitioning(ut.Subspace(registers=[ut.ID, c]), ut.Subspace(registers=[c, ut.ID])) == [
-        (ut.Subspace(registers=[ut.ID, c]), ut.Subspace(registers=[c, ut.ID]))
-    ]
-    assert _find_matching_partitioning(ut.Subspace(registers=[ut.ID, c]), ut.Subspace(registers=[ut.ID, c])) == [
+    assert _find_matching_partitioning(ut.Subspace([ut.ID, c]), ut.Subspace([ut.ID, c])) == [
         (ut.Subspace(bits=1), ut.Subspace(bits=1)),
-        (ut.Subspace(registers=[c]), ut.Subspace(registers=[c])),
+        (ut.Subspace([c]), ut.Subspace([c])),
     ]

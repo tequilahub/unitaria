@@ -7,9 +7,7 @@ def test_componentwise_mul():
     ut.verify(ut.ComponentwiseMul(ut.Subspace(bits=1, zero_qubits=1)))
     ut.verify(
         ut.ComponentwiseMul(
-            ut.Subspace(
-                registers=[ut.ID, ut.ControlledSubspace(ut.Subspace(bits=1), ut.Subspace(bits=0, zero_qubits=1))]
-            )
+            ut.Subspace([ut.ID, ut.ControlledSubspace(ut.Subspace(bits=1), ut.Subspace(bits=0, zero_qubits=1))])
         )
     )
 
