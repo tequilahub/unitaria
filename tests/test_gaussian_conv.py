@@ -1,32 +1,21 @@
 import numpy as np
 import scipy
-
-from unitaria.nodes import (
-    ConstantVector,
-    IntegerAddition,
-    Identity,
-    Adjoint,
-    ConstantIntegerAddition,
-    Mul,
-)
-from unitaria.verifier import verify
-from unitaria import Subspace
-from unitaria.nodes.basic.projection import Projection
+import unitaria as ut
 
 
 def test_1d_gaussian_conv():
     x = np.arange(-3, 4) / 2
     gaussian = np.exp(-(x**2))
-    prep = ConstantVector(np.append([0], np.sqrt(gaussian)))
+    prep = ut.ConstantVector(np.append([0], np.sqrt(gaussian)))
     conv = (
-        Projection(subspace_from=Subspace(bits=4), subspace_to=Subspace(bits=3, zero_qubits=1))
-        @ (Adjoint(prep) & Identity(subspace=Subspace(bits=4)))
-        @ (Identity(subspace=Subspace(bits=3, zero_qubits=1)) & ConstantIntegerAddition(bits=4, constant=-4))
-        @ IntegerAddition(source_bits=3, target_bits=4)
-        @ (prep & Identity(subspace=Subspace(bits=4)))
-        @ Projection(subspace_from=Subspace(bits=3, zero_qubits=1), subspace_to=Subspace(bits=4))
+        ut.Projection(subspace_from=ut.Subspace(bits=4), subspace_to=ut.Subspace(bits=3, zero_qubits=1))
+        @ (ut.Adjoint(prep) & ut.Identity(subspace=ut.Subspace(bits=4)))
+        @ (ut.Identity(subspace=ut.Subspace(bits=3, zero_qubits=1)) & ut.ConstantIntegerAddition(bits=4, constant=-4))
+        @ ut.IntegerAddition(source_bits=3, target_bits=4)
+        @ (prep & ut.Identity(subspace=ut.Subspace(bits=4)))
+        @ ut.Projection(subspace_from=ut.Subspace(bits=3, zero_qubits=1), subspace_to=ut.Subspace(bits=4))
     )
-    verify(conv)
+    ut.verify(conv)
 
     input = np.linspace(0.0, 1.0, 8)
     input /= np.linalg.norm(input)
@@ -38,33 +27,33 @@ def test_1d_gaussian_conv():
 def test_2d_gaussian_conv():
     x = np.arange(-1, 2)
     gaussian = np.exp(-(x**2))
-    prep = ConstantVector(np.append([0], np.sqrt(gaussian)))
+    prep = ut.ConstantVector(np.append([0], np.sqrt(gaussian)))
 
     # TODO: It should be possible to write this more neatly using the @ operator in the future,
     # but currently this increases the number of qubits and significantly slows down the test
-    one_dim_conv = Mul(
-        Mul(
-            Mul(
-                Projection(subspace_from=Subspace(bits=2, zero_qubits=1), subspace_to=Subspace(bits=3)),
-                prep & Identity(bits=3),
+    one_dim_conv = ut.Mul(
+        ut.Mul(
+            ut.Mul(
+                ut.Projection(subspace_from=ut.Subspace(bits=2, zero_qubits=1), subspace_to=ut.Subspace(bits=3)),
+                prep & ut.Identity(bits=3),
                 skip_projection=True,
             ),
-            IntegerAddition(source_bits=2, target_bits=3),
+            ut.IntegerAddition(source_bits=2, target_bits=3),
             skip_projection=True,
         ),
-        Mul(
-            Mul(
-                Identity(subspace=Subspace(bits=2)) & ConstantIntegerAddition(bits=3, constant=-2),
-                Adjoint(prep) & Identity(subspace=Subspace(bits=3)),
+        ut.Mul(
+            ut.Mul(
+                ut.Identity(subspace=ut.Subspace(bits=2)) & ut.ConstantIntegerAddition(bits=3, constant=-2),
+                ut.Adjoint(prep) & ut.Identity(subspace=ut.Subspace(bits=3)),
                 skip_projection=True,
             ),
-            Projection(subspace_from=Subspace(bits=3), subspace_to=Subspace(bits=2, zero_qubits=1)),
+            ut.Projection(subspace_from=ut.Subspace(bits=3), subspace_to=ut.Subspace(bits=2, zero_qubits=1)),
             skip_projection=True,
         ),
         skip_projection=True,
     )
     two_dim_conv = one_dim_conv & one_dim_conv
-    verify(two_dim_conv)
+    ut.verify(two_dim_conv)
 
     input = np.outer(np.linspace(0.0, 1.0, 4), np.linspace(0.0, 1.0, 4))
     input /= np.linalg.norm(input)

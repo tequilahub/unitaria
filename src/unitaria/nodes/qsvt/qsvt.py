@@ -4,7 +4,7 @@ import numpy as np
 import scipy as sp
 import tequila as tq
 
-from unitaria.nodes import Node
+from unitaria.nodes.node import Node
 from unitaria.subspace import Subspace
 from unitaria.circuit import Circuit
 from unitaria.util import poly_sup_norm

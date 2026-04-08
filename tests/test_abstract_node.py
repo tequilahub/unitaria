@@ -1,9 +1,8 @@
 import numpy as np
-
-from unitaria.nodes import AbstractNode
+import unitaria as ut
 
 
 def test_abstract_node():
     np.testing.assert_allclose(
-        AbstractNode(2, 2, lambda x: x[::-1], lambda x: x[::-1]).toarray(), np.array([[0, 1], [1, 0]])
+        ut.AbstractNode(2, 2, lambda x: x[::-1], lambda x: x[::-1]).toarray(), np.array([[0, 1], [1, 0]])
     )
