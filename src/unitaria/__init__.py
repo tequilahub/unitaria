@@ -4,9 +4,12 @@ from unitaria.subspace import Subspace, ControlledSubspace, ID, ZeroQubit
 from unitaria.circuit import Circuit
 from unitaria.verifier import verify
 
+# Documentation is generated differently for these classes, see
+# docs/_templates/autosummary/class.rst
 from unitaria.nodes.node import Node
 from unitaria.nodes.proxy_node import ProxyNode
 from unitaria.nodes.multilinear_node import MultilinearNode
+
 from unitaria.nodes.abstract_node import AbstractNode
 from unitaria.nodes.block_encoding import BlockEncoding
 

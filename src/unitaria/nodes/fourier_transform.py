@@ -2,7 +2,9 @@ from typing import Sequence
 
 import numpy as np
 
-from unitaria import Node, Subspace, Circuit
+from unitaria.nodes.node import Node
+from unitaria.subspace import Subspace
+from unitaria.circuit import Circuit
 from unitaria.circuits.qft import qft_circuit
 
 

@@ -2,8 +2,8 @@ from typing import Sequence
 
 import numpy as np
 
-from ..node import Node
-from .classical import Classical
+from unitaria.nodes.node import Node
+from unitaria.nodes.classical.classical import Classical
 from unitaria.subspace import Subspace
 from unitaria.circuit import Circuit
 from unitaria.circuits.arithmetic import const_addition_circuit

@@ -1,4 +1,4 @@
-API Reference
+Documentation
 =============
 
 `unitaria` is a library for working with so called "block encodings" of matrices
@@ -57,16 +57,22 @@ Custom nodes
 ------------
 
 Most basic operations are implemented already in this library. See `~unitaria.Node` for
-implementing custom nodes directly, or `~unitaria_node.ProxyNode` for implementing custom nodes
+implementing custom nodes directly, or `~unitaria.ProxyNode` for implementing custom nodes
 by decomposing them into other operations.
 
-.. rubric:: Modules
+.. only:: comment
 
-.. autosummary::
-   :toctree: generated
-   :recursive:
+   .. autosummary::
+      :toctree: generated
+      :recursive:
 
-   unitaria
+      unitaria
+
+
+API documentation
+-----------------
+
+See the documentation of the top-level module :doc:`generated/unitaria`.
 
 .. toctree::
    :hidden:
