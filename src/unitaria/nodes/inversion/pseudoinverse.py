@@ -11,7 +11,7 @@ class Pseudoinverse(ProxyNode):
     """
     This node implements the Moore-Penrose pseudoinverse of ``A`` with the
     given tolerance, if `condition` is the ratio between ``A.normalization`` and
-    ``A``s smallest singular value.
+    ``A`` s smallest singular value.
 
     Implements Theorem 41 from https://arxiv.org/abs/1806.01838
 

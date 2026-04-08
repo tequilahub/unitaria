@@ -3,7 +3,7 @@ from typing import Sequence
 
 import numpy as np
 
-from ..node import Node
+from unitaria.nodes.node import Node
 from unitaria.subspace import Subspace
 
 

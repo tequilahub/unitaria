@@ -2,7 +2,7 @@
 
 .. currentmodule:: {{ module }}
 
-{% if name == "Node" %}
+{% if name in ["Node", "ProxyNode", "MultilinearNode"] %}
 .. autoclass:: {{ objname }}
    :show-inheritance:
    :members:
@@ -11,6 +11,9 @@
    :undoc-members:
    :private-members:
    :member-order: groupwise
+{% elif "_subspace_in" in members %}
+.. autoclass:: {{ objname }}
+   :show-inheritance:
 {% else %}
 .. autoclass:: {{ objname }}
    :show-inheritance:

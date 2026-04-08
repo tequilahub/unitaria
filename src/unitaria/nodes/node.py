@@ -267,7 +267,7 @@ class Node(ABC):
     def clean_ancilla_count(self) -> int:
         """
         Returns the number of borrowed ancillae used by the circuit of this node,
-        i.e. qubits that must be in state |0> at the beginning of the circuit and
+        i.e. qubits that must be in state ``|0>`` at the beginning of the circuit and
         will be returned to this state by the end of the circuit.
         """
         raise NotImplementedError

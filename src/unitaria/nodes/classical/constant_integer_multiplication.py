@@ -1,6 +1,6 @@
 import numpy as np
 
-from ..node import Node
+from unitaria.nodes.node import Node
 from unitaria.subspace import Subspace
 
 from unitaria.nodes.classical.constant_integer_addition import ConstantIntegerAddition
