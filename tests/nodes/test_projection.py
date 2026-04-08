@@ -1,9 +1,7 @@
-from unitaria.nodes.basic.projection import Projection
-from unitaria.subspace import Subspace
-from unitaria.verifier import verify
+import unitaria as ut
 
 
 def test_projection():
-    verify(Projection(Subspace(bits=1), Subspace(bits=1)))
-    verify(Projection(Subspace(bits=2), Subspace(bits=1, zero_qubits=1)))
-    verify(Projection(Subspace(bits=1, zero_qubits=1), Subspace(bits=2)))
+    ut.verify(ut.Projection(ut.Subspace(bits=1), ut.Subspace(bits=1)))
+    ut.verify(ut.Projection(ut.Subspace(bits=2), ut.Subspace(bits=1, zero_qubits=1)))
+    ut.verify(ut.Projection(ut.Subspace(bits=1, zero_qubits=1), ut.Subspace(bits=2)))

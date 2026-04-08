@@ -1,9 +1,11 @@
 import numpy as np
-import unitaria as ut
+from unitaria.nodes.node import Node
+from unitaria.nodes.proxy_node import ProxyNode
+from unitaria.nodes.qsvt.qsvt import QSVT
 
 
-class GroverAmplification(ut.ProxyNode):
-    def __init__(self, A: ut.Node, iterations: int):
+class GroverAmplification(ProxyNode):
+    def __init__(self, A: Node, iterations: int):
         assert A.is_vector()
         assert iterations >= 0
 
@@ -12,7 +14,7 @@ class GroverAmplification(ut.ProxyNode):
         self.A = A
         self.iterations = iterations
 
-    def definition(self) -> ut.Node:
+    def definition(self) -> Node:
         # Angles for the Chebyshev polynomial
         angles = np.pi / 2 * np.ones(2 * self.iterations + 2)
         angles[0] = -self.iterations * np.pi / 2
@@ -24,4 +26,4 @@ class GroverAmplification(ut.ProxyNode):
             angles[0] += np.pi / 2
             angles[-1] += np.pi / 2
 
-        return ut.QSVT(A=self.A, coefficients=angles, format="angles")
+        return QSVT(A=self.A, coefficients=angles, format="angles")

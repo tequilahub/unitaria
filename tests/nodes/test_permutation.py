@@ -1,6 +1,6 @@
 import pytest
 
-from unitaria.subspace import Subspace, ControlledSubspace, ID, ZeroQubit
+import unitaria as ut
 from unitaria.nodes.permutation.permutation import (
     _find_matching_partitioning,
     permute,
@@ -9,92 +9,93 @@ from unitaria.nodes.permutation.permutation import (
     _rotate,
     AddZerosToControl,
 )
-from unitaria.verifier import verify
 
 
 def test_find_permutation_trivial():
-    verify(permute(Subspace(bits=0), Subspace(bits=0)))
-    verify(permute(Subspace(bits=0, zero_qubits=1), Subspace(bits=0, zero_qubits=1)))
-    verify(permute(Subspace(bits=1), Subspace(bits=1)))
-    verify(permute(Subspace(bits=1, zero_qubits=1), Subspace(bits=1, zero_qubits=1)))
-    verify(permute(Subspace(bits=1, zero_qubits=2), Subspace(bits=1, zero_qubits=2)))
-    c = ControlledSubspace(Subspace(bits=1), Subspace(bits=0, zero_qubits=1))
-    verify(permute(Subspace([c]), Subspace([c])))
+    ut.verify(permute(ut.Subspace(bits=0), ut.Subspace(bits=0)))
+    ut.verify(permute(ut.Subspace(bits=0, zero_qubits=1), ut.Subspace(bits=0, zero_qubits=1)))
+    ut.verify(permute(ut.Subspace(bits=1), ut.Subspace(bits=1)))
+    ut.verify(permute(ut.Subspace(bits=1, zero_qubits=1), ut.Subspace(bits=1, zero_qubits=1)))
+    ut.verify(permute(ut.Subspace(bits=1, zero_qubits=2), ut.Subspace(bits=1, zero_qubits=2)))
+    c = ut.ControlledSubspace(ut.Subspace(bits=1), ut.Subspace(bits=0, zero_qubits=1))
+    ut.verify(permute(ut.Subspace([c]), ut.Subspace([c])))
 
-    verify(permute(Subspace(bits=0), Subspace(bits=0, zero_qubits=1)))
-    verify(permute(Subspace(bits=1), Subspace(bits=1, zero_qubits=1)))
-    verify(permute(Subspace([c]), Subspace([c], zero_qubits=1)))
+    ut.verify(permute(ut.Subspace(bits=0), ut.Subspace(bits=0, zero_qubits=1)))
+    ut.verify(permute(ut.Subspace(bits=1), ut.Subspace(bits=1, zero_qubits=1)))
+    ut.verify(permute(ut.Subspace([c]), ut.Subspace([c], zero_qubits=1)))
 
 
 def test_find_permutation_matching_partitioning():
-    verify(permute(Subspace([ZeroQubit(), ID]), Subspace(bits=1)))
-    verify(permute(Subspace(bits=1), Subspace([ZeroQubit(), ID])))
+    ut.verify(permute(ut.Subspace([ut.ZeroQubit(), ut.ID]), ut.Subspace(bits=1)))
+    ut.verify(permute(ut.Subspace(bits=1), ut.Subspace([ut.ZeroQubit(), ut.ID])))
 
 
 def test_add_zeros_to_control():
-    subspace_in = Subspace([ControlledSubspace(Subspace(bits=1, zero_qubits=2), Subspace(bits=0, zero_qubits=3))])
-    verify(AddZerosToControl(subspace_in, 0))
-    verify(AddZerosToControl(subspace_in, 1))
-    verify(AddZerosToControl(subspace_in, 2))
-    verify(AddZerosToControl.remove_zeros(subspace_in, 1))
-    verify(AddZerosToControl.remove_zeros(subspace_in, 2))
+    subspace_in = ut.Subspace(
+        [ut.ControlledSubspace(ut.Subspace(bits=1, zero_qubits=2), ut.Subspace(bits=0, zero_qubits=3))]
+    )
+    ut.verify(AddZerosToControl(subspace_in, 0))
+    ut.verify(AddZerosToControl(subspace_in, 1))
+    ut.verify(AddZerosToControl(subspace_in, 2))
+    ut.verify(AddZerosToControl.remove_zeros(subspace_in, 1))
+    ut.verify(AddZerosToControl.remove_zeros(subspace_in, 2))
 
 
 def test_subspace_rotation():
-    verify(_rotate(Subspace(bits=2), False))
-    verify(_rotate(Subspace(bits=2), True))
-    subspace = Subspace([ControlledSubspace(Subspace(bits=1), Subspace(bits=0, zero_qubits=1))])
-    verify(_rotate(subspace, True))
-    subspace = Subspace([ControlledSubspace(Subspace(bits=0, zero_qubits=1), Subspace(bits=1))])
-    verify(_rotate(subspace, False))
-    subspace = Subspace(
+    ut.verify(_rotate(ut.Subspace(bits=2), False))
+    ut.verify(_rotate(ut.Subspace(bits=2), True))
+    subspace = ut.Subspace([ut.ControlledSubspace(ut.Subspace(bits=1), ut.Subspace(bits=0, zero_qubits=1))])
+    ut.verify(_rotate(subspace, True))
+    subspace = ut.Subspace([ut.ControlledSubspace(ut.Subspace(bits=0, zero_qubits=1), ut.Subspace(bits=1))])
+    ut.verify(_rotate(subspace, False))
+    subspace = ut.Subspace(
         [
-            ID,
-            ControlledSubspace(
-                Subspace([ZeroQubit(), ID]),
-                Subspace([ControlledSubspace(Subspace(bits=0, zero_qubits=1), Subspace(bits=1))]),
+            ut.ID,
+            ut.ControlledSubspace(
+                ut.Subspace([ut.ZeroQubit(), ut.ID]),
+                ut.Subspace([ut.ControlledSubspace(ut.Subspace(bits=0, zero_qubits=1), ut.Subspace(bits=1))]),
             ),
         ]
     )
-    verify(_rotate(subspace, True))
-    verify(_rotate(subspace, False))
-    subspace = Subspace(
+    ut.verify(_rotate(subspace, True))
+    ut.verify(_rotate(subspace, False))
+    subspace = ut.Subspace(
         [
-            ID,
-            ControlledSubspace(
-                Subspace([ZeroQubit(), ID]),
-                Subspace([ControlledSubspace(Subspace(bits=0, zero_qubits=1), Subspace(bits=1))]),
+            ut.ID,
+            ut.ControlledSubspace(
+                ut.Subspace([ut.ZeroQubit(), ut.ID]),
+                ut.Subspace([ut.ControlledSubspace(ut.Subspace(bits=0, zero_qubits=1), ut.Subspace(bits=1))]),
             ),
         ],
         zero_qubits=1,
     )
-    verify(_rotate(subspace, True))
-    verify(_rotate(subspace, False))
-    subspace = Subspace(
+    ut.verify(_rotate(subspace, True))
+    ut.verify(_rotate(subspace, False))
+    subspace = ut.Subspace(
         [
-            ID,
-            ControlledSubspace(
-                Subspace([ZeroQubit(), ID]),
-                Subspace([ControlledSubspace(Subspace(bits=0, zero_qubits=1), Subspace(bits=1))]),
+            ut.ID,
+            ut.ControlledSubspace(
+                ut.Subspace([ut.ZeroQubit(), ut.ID]),
+                ut.Subspace([ut.ControlledSubspace(ut.Subspace(bits=0, zero_qubits=1), ut.Subspace(bits=1))]),
             ),
         ],
         zero_qubits=3,
     )
-    verify(_rotate(subspace, True))
-    verify(_rotate(subspace, False))
+    ut.verify(_rotate(subspace, True))
+    ut.verify(_rotate(subspace, False))
 
 
 @pytest.mark.parametrize(
     "subspace",
     [
-        Subspace(bits=2),
-        Subspace(bits=3),
-        Subspace([ControlledSubspace(Subspace(bits=0, zero_qubits=1), Subspace(bits=1))]),
-        Subspace(
+        ut.Subspace(bits=2),
+        ut.Subspace(bits=3),
+        ut.Subspace([ut.ControlledSubspace(ut.Subspace(bits=0, zero_qubits=1), ut.Subspace(bits=1))]),
+        ut.Subspace(
             [
-                ControlledSubspace(
-                    Subspace([ID, ZeroQubit(), ZeroQubit()]),
-                    Subspace([ZeroQubit(), ID, ZeroQubit()]),
+                ut.ControlledSubspace(
+                    ut.Subspace([ut.ID, ut.ZeroQubit(), ut.ZeroQubit()]),
+                    ut.Subspace([ut.ZeroQubit(), ut.ID, ut.ZeroQubit()]),
                 ),
             ]
         ),
@@ -102,92 +103,94 @@ def test_subspace_rotation():
 )
 def test_rotate_to(subspace):
     for i in range(1, subspace.dimension):
-        verify(_rotate_to(subspace, i))
+        ut.verify(_rotate_to(subspace, i))
 
 
 def test_1_simple_rotation():
-    a = Subspace(bits=1)
-    a1 = Subspace(bits=1, zero_qubits=1)
-    b = Subspace([ControlledSubspace(a, a)])
-    c = Subspace([ControlledSubspace(b, a1)])
-    d = Subspace([ControlledSubspace(a1, b)])
-    verify(permute(d, c))
-    verify(permute(c, d))
+    a = ut.Subspace(bits=1)
+    a1 = ut.Subspace(bits=1, zero_qubits=1)
+    b = ut.Subspace([ut.ControlledSubspace(a, a)])
+    c = ut.Subspace([ut.ControlledSubspace(b, a1)])
+    d = ut.Subspace([ut.ControlledSubspace(a1, b)])
+    ut.verify(permute(d, c))
+    ut.verify(permute(c, d))
 
 
 def test_2_simple_rotations():
-    a = Subspace(bits=2)
+    a = ut.Subspace(bits=2)
 
     # Left
-    b1 = Subspace(bits=1)
-    b2 = Subspace([ControlledSubspace(b1, Subspace(bits=0, zero_qubits=1))])
-    b3 = Subspace([ControlledSubspace(b2, Subspace(bits=0, zero_qubits=2))])
-    verify(permute(a, b3))
-    verify(permute(b3, a))
+    b1 = ut.Subspace(bits=1)
+    b2 = ut.Subspace([ut.ControlledSubspace(b1, ut.Subspace(bits=0, zero_qubits=1))])
+    b3 = ut.Subspace([ut.ControlledSubspace(b2, ut.Subspace(bits=0, zero_qubits=2))])
+    ut.verify(permute(a, b3))
+    ut.verify(permute(b3, a))
 
     # Right
-    b1 = Subspace(bits=1)
-    b2 = Subspace([ControlledSubspace(Subspace(bits=0, zero_qubits=1), b1)])
-    b3 = Subspace([ControlledSubspace(Subspace(bits=0, zero_qubits=2), b2)])
-    verify(permute(a, b3))
-    verify(permute(b3, a))
+    b1 = ut.Subspace(bits=1)
+    b2 = ut.Subspace([ut.ControlledSubspace(ut.Subspace(bits=0, zero_qubits=1), b1)])
+    b3 = ut.Subspace([ut.ControlledSubspace(ut.Subspace(bits=0, zero_qubits=2), b2)])
+    ut.verify(permute(a, b3))
+    ut.verify(permute(b3, a))
 
 
 def test_double_rotation_left_right():
-    a = Subspace(bits=2)
+    a = ut.Subspace(bits=2)
 
-    b1 = Subspace(bits=1)
-    b2 = Subspace([ControlledSubspace(Subspace(bits=0, zero_qubits=1), b1)])
-    b3 = Subspace([ControlledSubspace(b2, Subspace(bits=0, zero_qubits=2))])
-    verify(permute(a, b3))
+    b1 = ut.Subspace(bits=1)
+    b2 = ut.Subspace([ut.ControlledSubspace(ut.Subspace(bits=0, zero_qubits=1), b1)])
+    b3 = ut.Subspace([ut.ControlledSubspace(b2, ut.Subspace(bits=0, zero_qubits=2))])
+    ut.verify(permute(a, b3))
 
 
 def test_double_rotation_right_left():
-    a = Subspace(bits=2)
+    a = ut.Subspace(bits=2)
 
-    b1 = Subspace(bits=1)
-    b2 = Subspace([ControlledSubspace(b1, Subspace(bits=0, zero_qubits=1))])
-    b3 = Subspace([ControlledSubspace(Subspace(bits=0, zero_qubits=2), b2)])
-    verify(permute(a, b3))
+    b1 = ut.Subspace(bits=1)
+    b2 = ut.Subspace([ut.ControlledSubspace(b1, ut.Subspace(bits=0, zero_qubits=1))])
+    b3 = ut.Subspace([ut.ControlledSubspace(ut.Subspace(bits=0, zero_qubits=2), b2)])
+    ut.verify(permute(a, b3))
 
 
 def test_permute_registers():
-    verify(PermuteRegisters(Subspace(bits=1), [0]))
-    verify(PermuteRegisters(Subspace(bits=2), [0, 1]))
-    verify(PermuteRegisters(Subspace(bits=2), [1, 0]))
-    verify(PermuteRegisters(Subspace(bits=3), [0, 1, 2]))
-    verify(PermuteRegisters(Subspace(bits=3), [0, 2, 1]))
-    verify(PermuteRegisters(Subspace(bits=3), [1, 0, 2]))
-    verify(PermuteRegisters(Subspace(bits=3), [1, 2, 0]))
-    verify(PermuteRegisters(Subspace(bits=3), [2, 0, 1]))
-    verify(PermuteRegisters(Subspace(bits=3), [2, 1, 0]))
+    ut.verify(PermuteRegisters(ut.Subspace(bits=1), [0]))
+    ut.verify(PermuteRegisters(ut.Subspace(bits=2), [0, 1]))
+    ut.verify(PermuteRegisters(ut.Subspace(bits=2), [1, 0]))
+    ut.verify(PermuteRegisters(ut.Subspace(bits=3), [0, 1, 2]))
+    ut.verify(PermuteRegisters(ut.Subspace(bits=3), [0, 2, 1]))
+    ut.verify(PermuteRegisters(ut.Subspace(bits=3), [1, 0, 2]))
+    ut.verify(PermuteRegisters(ut.Subspace(bits=3), [1, 2, 0]))
+    ut.verify(PermuteRegisters(ut.Subspace(bits=3), [2, 0, 1]))
+    ut.verify(PermuteRegisters(ut.Subspace(bits=3), [2, 1, 0]))
 
 
 def test_find_matching_partitioning():
-    assert _find_matching_partitioning(Subspace(bits=0), Subspace(bits=0)) == []
-    assert _find_matching_partitioning(Subspace(bits=1), Subspace(bits=1)) == [(Subspace(bits=1), Subspace(bits=1))]
-    assert _find_matching_partitioning(Subspace(bits=2), Subspace(bits=2)) == [
-        (Subspace(bits=1), Subspace(bits=1)),
-        (Subspace(bits=1), Subspace(bits=1)),
+    assert _find_matching_partitioning(ut.Subspace(bits=0), ut.Subspace(bits=0)) == []
+    assert _find_matching_partitioning(ut.Subspace(bits=1), ut.Subspace(bits=1)) == [
+        (ut.Subspace(bits=1), ut.Subspace(bits=1))
+    ]
+    assert _find_matching_partitioning(ut.Subspace(bits=2), ut.Subspace(bits=2)) == [
+        (ut.Subspace(bits=1), ut.Subspace(bits=1)),
+        (ut.Subspace(bits=1), ut.Subspace(bits=1)),
     ]
 
-    c = ControlledSubspace(Subspace(bits=1), Subspace(bits=1))
-    assert _find_matching_partitioning(Subspace([c]), Subspace(bits=2)) == [
-        (Subspace(bits=1), Subspace(bits=1)),
-        (Subspace(bits=1), Subspace(bits=1)),
+    c = ut.ControlledSubspace(ut.Subspace(bits=1), ut.Subspace(bits=1))
+    assert _find_matching_partitioning(ut.Subspace([c]), ut.Subspace(bits=2)) == [
+        (ut.Subspace(bits=1), ut.Subspace(bits=1)),
+        (ut.Subspace(bits=1), ut.Subspace(bits=1)),
     ]
-    assert _find_matching_partitioning(Subspace(bits=2), Subspace(registers=[c])) == [
-        (Subspace(bits=1), Subspace(bits=1)),
-        (Subspace(bits=1), Subspace(bits=1)),
+    assert _find_matching_partitioning(ut.Subspace(bits=2), ut.Subspace(registers=[c])) == [
+        (ut.Subspace(bits=1), ut.Subspace(bits=1)),
+        (ut.Subspace(bits=1), ut.Subspace(bits=1)),
     ]
-    c = ControlledSubspace(Subspace(bits=1), Subspace(bits=0, zero_qubits=1))
-    assert _find_matching_partitioning(Subspace(registers=[c]), Subspace(registers=[c])) == [
-        (Subspace(registers=[c]), Subspace(registers=[c]))
+    c = ut.ControlledSubspace(ut.Subspace(bits=1), ut.Subspace(bits=0, zero_qubits=1))
+    assert _find_matching_partitioning(ut.Subspace(registers=[c]), ut.Subspace(registers=[c])) == [
+        (ut.Subspace(registers=[c]), ut.Subspace(registers=[c]))
     ]
-    assert _find_matching_partitioning(Subspace(registers=[ID, c]), Subspace(registers=[c, ID])) == [
-        (Subspace(registers=[ID, c]), Subspace(registers=[c, ID]))
+    assert _find_matching_partitioning(ut.Subspace(registers=[ut.ID, c]), ut.Subspace(registers=[c, ut.ID])) == [
+        (ut.Subspace(registers=[ut.ID, c]), ut.Subspace(registers=[c, ut.ID]))
     ]
-    assert _find_matching_partitioning(Subspace(registers=[ID, c]), Subspace(registers=[ID, c])) == [
-        (Subspace(bits=1), Subspace(bits=1)),
-        (Subspace(registers=[c]), Subspace(registers=[c])),
+    assert _find_matching_partitioning(ut.Subspace(registers=[ut.ID, c]), ut.Subspace(registers=[ut.ID, c])) == [
+        (ut.Subspace(bits=1), ut.Subspace(bits=1)),
+        (ut.Subspace(registers=[c]), ut.Subspace(registers=[c])),
     ]

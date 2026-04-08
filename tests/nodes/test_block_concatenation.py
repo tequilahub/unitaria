@@ -1,20 +1,15 @@
-from unitaria.nodes.basic.block_horizontal import BlockHorizontal
-from unitaria.nodes.basic.block_vertical import BlockVertical
-from unitaria.nodes.classical.increment import Increment
-from unitaria.nodes.basic.identity import Identity
-from unitaria.subspace import Subspace
-from unitaria.verifier import verify
+import unitaria as ut
 
 
 def test_block_horizontal():
-    A = Identity(subspace=Subspace(bits=1))
-    B = Increment(bits=1)
-    verify(BlockHorizontal(A, B))
-    verify(BlockHorizontal(B, A))
+    A = ut.Identity(subspace=ut.Subspace(bits=1))
+    B = ut.Increment(bits=1)
+    ut.verify(ut.BlockHorizontal(A, B))
+    ut.verify(ut.BlockHorizontal(B, A))
 
 
 def test_block_vertical():
-    A = Identity(subspace=Subspace(bits=1))
-    B = Increment(bits=1)
-    verify(BlockVertical(A, B))
-    verify(BlockVertical(B, A))
+    A = ut.Identity(subspace=ut.Subspace(bits=1))
+    B = ut.Increment(bits=1)
+    ut.verify(ut.BlockVertical(A, B))
+    ut.verify(ut.BlockVertical(B, A))

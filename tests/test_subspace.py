@@ -1,53 +1,56 @@
 import numpy as np
 import pytest
-
-from unitaria.subspace import Subspace, ControlledSubspace, ID
+import unitaria as ut
 
 
 def test_eq():
-    assert Subspace(bits=0) == Subspace(bits=0)
-    assert Subspace(bits=1) == Subspace(bits=1)
-    assert Subspace(bits=0, zero_qubits=1) == Subspace(bits=0, zero_qubits=1)
-    assert Subspace(bits=1, zero_qubits=0) != Subspace(bits=1, zero_qubits=1)
-    assert Subspace(bits=1) == Subspace(registers=[ID])
-    c = ControlledSubspace(Subspace(bits=0), Subspace(bits=0))
-    assert Subspace(bits=1) == Subspace(registers=[c])
-    c = ControlledSubspace(Subspace(bits=1), Subspace(bits=0, zero_qubits=1))
-    assert Subspace(registers=[c]) == Subspace(registers=[c])
-    assert Subspace(registers=[c]) != Subspace(bits=1)
+    assert ut.Subspace(bits=0) == ut.Subspace(bits=0)
+    assert ut.Subspace(bits=1) == ut.Subspace(bits=1)
+    assert ut.Subspace(bits=0, zero_qubits=1) == ut.Subspace(bits=0, zero_qubits=1)
+    assert ut.Subspace(bits=1, zero_qubits=0) != ut.Subspace(bits=1, zero_qubits=1)
+    assert ut.Subspace(bits=1) == ut.Subspace(registers=[ut.ID])
+    c = ut.ControlledSubspace(ut.Subspace(bits=0), ut.Subspace(bits=0))
+    assert ut.Subspace(bits=1) == ut.Subspace(registers=[c])
+    c = ut.ControlledSubspace(ut.Subspace(bits=1), ut.Subspace(bits=0, zero_qubits=1))
+    assert ut.Subspace(registers=[c]) == ut.Subspace(registers=[c])
+    assert ut.Subspace(registers=[c]) != ut.Subspace(bits=1)
 
 
 def test_is_trivial():
-    assert Subspace(bits=0).is_trivial()
-    assert Subspace(bits=0, zero_qubits=1).is_trivial()
-    assert not Subspace(bits=1).is_trivial()
-    assert not Subspace(registers=[ControlledSubspace(Subspace(bits=1), Subspace(bits=0, zero_qubits=1))]).is_trivial()
-    assert not Subspace(
+    assert ut.Subspace(bits=0).is_trivial()
+    assert ut.Subspace(bits=0, zero_qubits=1).is_trivial()
+    assert not ut.Subspace(bits=1).is_trivial()
+    assert not ut.Subspace(
+        registers=[ut.ControlledSubspace(ut.Subspace(bits=1), ut.Subspace(bits=0, zero_qubits=1))]
+    ).is_trivial()
+    assert not ut.Subspace(
         registers=[
-            ID,
-            ControlledSubspace(Subspace(bits=0, zero_qubits=1), Subspace(bits=0, zero_qubits=1)),
+            ut.ID,
+            ut.ControlledSubspace(ut.Subspace(bits=0, zero_qubits=1), ut.Subspace(bits=0, zero_qubits=1)),
         ],
         zero_qubits=2,
     ).is_trivial()
 
 
 def test_basis():
-    assert Subspace(bits=0, zero_qubits=1).test_basis(0)
-    assert not Subspace(bits=0, zero_qubits=1).test_basis(1)
+    assert ut.Subspace(bits=0, zero_qubits=1).test_basis(0)
+    assert not ut.Subspace(bits=0, zero_qubits=1).test_basis(1)
 
-    np.testing.assert_allclose(Subspace(bits=0).enumerate_basis(), np.array([0]))
-    np.testing.assert_allclose(Subspace(bits=0, zero_qubits=1).enumerate_basis(), np.array([0]))
-    np.testing.assert_allclose(Subspace(bits=1).enumerate_basis(), np.array([0, 1]))
+    np.testing.assert_allclose(ut.Subspace(bits=0).enumerate_basis(), np.array([0]))
+    np.testing.assert_allclose(ut.Subspace(bits=0, zero_qubits=1).enumerate_basis(), np.array([0]))
+    np.testing.assert_allclose(ut.Subspace(bits=1).enumerate_basis(), np.array([0, 1]))
     np.testing.assert_allclose(
-        Subspace(registers=[ControlledSubspace(Subspace(bits=1), Subspace(bits=0, zero_qubits=1))]).enumerate_basis(),
+        ut.Subspace(
+            registers=[ut.ControlledSubspace(ut.Subspace(bits=1), ut.Subspace(bits=0, zero_qubits=1))]
+        ).enumerate_basis(),
         np.array([0, 1, 2]),
     )
     # TODO
     # circuit = Circuit()
     np.testing.assert_allclose(
-        Subspace(
+        ut.Subspace(
             registers=[
-                ID,
+                ut.ID,
                 # Controlled(QubitMap(0, 1), QubitMap(0, 1)),
             ],
             zero_qubits=1,
@@ -57,15 +60,20 @@ def test_basis():
 
 
 def test_total_qubits():
-    assert Subspace(bits=0).total_qubits == 0
-    assert Subspace(bits=0, zero_qubits=1).total_qubits == 1
-    assert Subspace(bits=1).total_qubits == 1
-    assert Subspace(registers=[ControlledSubspace(Subspace(bits=1), Subspace(bits=0, zero_qubits=1))]).total_qubits == 2
+    assert ut.Subspace(bits=0).total_qubits == 0
+    assert ut.Subspace(bits=0, zero_qubits=1).total_qubits == 1
+    assert ut.Subspace(bits=1).total_qubits == 1
     assert (
-        Subspace(
+        ut.Subspace(
+            registers=[ut.ControlledSubspace(ut.Subspace(bits=1), ut.Subspace(bits=0, zero_qubits=1))]
+        ).total_qubits
+        == 2
+    )
+    assert (
+        ut.Subspace(
             registers=[
-                ID,
-                ControlledSubspace(Subspace(bits=0, zero_qubits=1), Subspace(bits=0, zero_qubits=1)),
+                ut.ID,
+                ut.ControlledSubspace(ut.Subspace(bits=0, zero_qubits=1), ut.Subspace(bits=0, zero_qubits=1)),
             ],
             zero_qubits=2,
         ).total_qubits
@@ -76,36 +84,43 @@ def test_total_qubits():
 @pytest.mark.parametrize(
     "subspace",
     [
-        Subspace(bits=0),
-        Subspace(bits=1, zero_qubits=1),
-        Subspace(registers=[ID, ControlledSubspace(Subspace(bits=1), Subspace(bits=0, zero_qubits=1))]),
-        Subspace(
+        ut.Subspace(bits=0),
+        ut.Subspace(bits=1, zero_qubits=1),
+        ut.Subspace(registers=[ut.ID, ut.ControlledSubspace(ut.Subspace(bits=1), ut.Subspace(bits=0, zero_qubits=1))]),
+        ut.Subspace(
             registers=[
-                ID,
-                ControlledSubspace(
-                    Subspace(registers=[ControlledSubspace(Subspace(bits=0, zero_qubits=1), Subspace(bits=1)), ID]),
-                    Subspace(bits=1, zero_qubits=2),
+                ut.ID,
+                ut.ControlledSubspace(
+                    ut.Subspace(
+                        registers=[
+                            ut.ControlledSubspace(ut.Subspace(bits=0, zero_qubits=1), ut.Subspace(bits=1)),
+                            ut.ID,
+                        ]
+                    ),
+                    ut.Subspace(bits=1, zero_qubits=2),
                 ),
             ]
         ),
     ],
 )
-def test_circuit(subspace: Subspace):
+def test_circuit(subspace: ut.Subspace):
     subspace.verify_circuit()
 
 
 @pytest.mark.parametrize(
     "subspace",
     [
-        Subspace(bits=0),
-        Subspace(bits=1, zero_qubits=1),
-        Subspace([ID, ControlledSubspace(Subspace(bits=1), Subspace(bits=0, zero_qubits=1))]),
-        Subspace(
+        ut.Subspace(bits=0),
+        ut.Subspace(bits=1, zero_qubits=1),
+        ut.Subspace([ut.ID, ut.ControlledSubspace(ut.Subspace(bits=1), ut.Subspace(bits=0, zero_qubits=1))]),
+        ut.Subspace(
             [
-                ID,
-                ControlledSubspace(
-                    Subspace([ControlledSubspace(Subspace(bits=0, zero_qubits=1), Subspace(bits=1)), ID]),
-                    Subspace(bits=1, zero_qubits=2),
+                ut.ID,
+                ut.ControlledSubspace(
+                    ut.Subspace(
+                        [ut.ControlledSubspace(ut.Subspace(bits=0, zero_qubits=1), ut.Subspace(bits=1)), ut.ID]
+                    ),
+                    ut.Subspace(bits=1, zero_qubits=2),
                 ),
             ]
         ),
@@ -115,27 +130,27 @@ def test_trailing_zeros(subspace):
     trailing_zeros = subspace.trailing_zeros()
     assert len(subspace.registers) >= trailing_zeros
     assert trailing_zeros == len(subspace.registers) or isinstance(
-        subspace.registers[-(trailing_zeros + 1)], ControlledSubspace
+        subspace.registers[-(trailing_zeros + 1)], ut.ControlledSubspace
     )
 
 
 def test_case_zero():
-    assert Subspace(bits=0).case_zero() is None
-    assert Subspace(bits=1, zero_qubits=1).case_zero() == Subspace(bits=0)
-    assert Subspace(
-        [ID, ControlledSubspace(Subspace(bits=1), Subspace(bits=0, zero_qubits=1))]
-    ).case_zero() == Subspace(bits=2)
+    assert ut.Subspace(bits=0).case_zero() is None
+    assert ut.Subspace(bits=1, zero_qubits=1).case_zero() == ut.Subspace(bits=0)
+    assert ut.Subspace(
+        [ut.ID, ut.ControlledSubspace(ut.Subspace(bits=1), ut.Subspace(bits=0, zero_qubits=1))]
+    ).case_zero() == ut.Subspace(bits=2)
 
-    subspace = Subspace(
+    subspace = ut.Subspace(
         [
-            ID,
-            ControlledSubspace(
-                Subspace(bits=0, zero_qubits=2),
-                Subspace([ControlledSubspace(Subspace(bits=0, zero_qubits=1), Subspace(bits=1))]),
+            ut.ID,
+            ut.ControlledSubspace(
+                ut.Subspace(bits=0, zero_qubits=2),
+                ut.Subspace([ut.ControlledSubspace(ut.Subspace(bits=0, zero_qubits=1), ut.Subspace(bits=1))]),
             ),
         ]
     )
-    case_zero = Subspace(
+    case_zero = ut.Subspace(
         bits=1,
         zero_qubits=2,
     )
@@ -145,14 +160,14 @@ def test_case_zero():
 @pytest.mark.parametrize(
     ("subspace", "expected"),
     [
-        (Subspace(bits=0), "<zero qubit subspace>"),
-        (Subspace(bits=1, zero_qubits=1),
+        (ut.Subspace(bits=0), "<zero qubit subspace>"),
+        (ut.Subspace(bits=1, zero_qubits=1),
             "  │\n"
             "1 0\n"
             "  │\n"
             "0 #"
         ),
-        (Subspace([ID, ControlledSubspace(Subspace(bits=1), Subspace(bits=0, zero_qubits=1))]),
+        (ut.Subspace([ut.ID, ut.ControlledSubspace(ut.Subspace(bits=1), ut.Subspace(bits=0, zero_qubits=1))]),
             "  │\n"
             "2 ?─┬─┐\n"
             "    │ │\n"
@@ -160,10 +175,10 @@ def test_case_zero():
             "  ╔═╩═╛\n"
             "0 #"),
         (
-            Subspace(
+            ut.Subspace(
                 [
-                    ID,
-                    ControlledSubspace(Subspace([ControlledSubspace(Subspace(bits=0, zero_qubits=1), Subspace(bits=1)), ID]), Subspace(bits=1, zero_qubits=2)),
+                    ut.ID,
+                    ut.ControlledSubspace(ut.Subspace([ut.ControlledSubspace(ut.Subspace(bits=0, zero_qubits=1), ut.Subspace(bits=1)), ut.ID]), ut.Subspace(bits=1, zero_qubits=2)),
                 ]
             ),
             "  │\n"
@@ -179,5 +194,5 @@ def test_case_zero():
         ),
     ],
 )  # fmt: skip
-def test_str(subspace: Subspace, expected: str):
+def test_str(subspace: ut.Subspace, expected: str):
     assert str(subspace) == expected

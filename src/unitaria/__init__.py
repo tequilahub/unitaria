@@ -25,6 +25,8 @@ from unitaria.nodes.basic.add import Add
 from unitaria.nodes.basic.block_horizontal import BlockHorizontal
 from unitaria.nodes.basic.block_vertical import BlockVertical
 
+from unitaria.nodes.fourier_transform import FourierTransform
+
 from unitaria.nodes.nonlinear import ComponentwiseMul
 
 from unitaria.nodes.classical.constant_integer_addition import ConstantIntegerAddition
@@ -32,8 +34,11 @@ from unitaria.nodes.classical.constant_integer_multiplication import ConstantInt
 from unitaria.nodes.classical.increment import Increment
 from unitaria.nodes.classical.integer_addition import IntegerAddition
 
-from unitaria.nodes.qsvt.qsvt import QSVT
+from unitaria.nodes.qsvt.qsvt import QSVT, QSVTCoefficients
 from unitaria.nodes.inversion.pseudoinverse import Pseudoinverse
+from unitaria.nodes.amplification.grover_amplification import GroverAmplification
+from unitaria.nodes.amplification.linear_amplification import LinearAmplification
+from unitaria.nodes.amplification.fixed_point_amplification import FixedPointAmplification
 
 __all__ = [
     "Node",
@@ -52,15 +57,20 @@ __all__ = [
     "ConstantIntegerMultiplication",
     "ConstantUnitary",
     "ConstantVector",
+    "FixedPointAmplification",
+    "FourierTransform",
+    "GroverAmplification",
     "Identity",
     "Increment",
     "IntegerAddition",
+    "LinearAmplification",
     "Mul",
     "MultilinearNode",
     "Projection",
     "ProxyNode",
     "Pseudoinverse",
     "QSVT",
+    "QSVTCoefficients",
     "Scale",
     "Tensor",
     "ControlledSubspace",
