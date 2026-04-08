@@ -62,9 +62,7 @@ def test_qsvt_grover():
 def test_qsvt_with_ancillas():
     # Define v so it has some subnormalization
     A = ut.Identity(
-        subspace=ut.Subspace(
-            registers=[ut.ID, ut.ControlledSubspace(ut.Subspace(bits=1), ut.Subspace(bits=0, zero_qubits=1))]
-        )
+        subspace=ut.Subspace([ut.ID, ut.ControlledSubspace(ut.Subspace(bits=1), ut.Subspace(bits=0, zero_qubits=1))])
     )
     assert A.subspace.total_qubits + A.subspace.clean_ancilla_count() > 2
     B = ut.QSVT(A, np.array(4 * [np.pi]), "angles")

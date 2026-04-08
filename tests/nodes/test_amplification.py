@@ -48,13 +48,9 @@ def test_linear_amplification():
         ut.ConstantUnitary(rot_matrix(np.arccos(0.2))) | ut.ConstantUnitary(rot_matrix(np.arccos(0.3)))
     )
     node = (
-        ut.Projection(
-            subspace_from=ut.Subspace(bits=3), subspace_to=ut.Subspace(registers=[ut.ZeroQubit(), ut.ID, ut.ID])
-        )
+        ut.Projection(subspace_from=ut.Subspace(bits=3), subspace_to=ut.Subspace([ut.ZeroQubit(), ut.ID, ut.ID]))
         @ A
-        @ ut.Projection(
-            subspace_from=ut.Subspace(registers=[ut.ZeroQubit(), ut.ID, ut.ID]), subspace_to=ut.Subspace(bits=3)
-        )
+        @ ut.Projection(subspace_from=ut.Subspace([ut.ZeroQubit(), ut.ID, ut.ID]), subspace_to=ut.Subspace(bits=3))
     )
     amplified = ut.LinearAmplification(node, 2.0, 0.4, 0.1)
     ut.verify(amplified, np.diag(np.array([0.0, 0.2, 0.4, 0.6])), atol=0.1, check_adjoint=False)

@@ -38,12 +38,12 @@ class ModifyControl(Node):
 
         if self.swap_control_state:
             return Subspace(
-                registers=[ControlledSubspace(subspace_one, subspace_zero)],
+                [ControlledSubspace(subspace_one, subspace_zero)],
                 zero_qubits=self.A.subspace_in.trailing_zeros(),
             )
         else:
             return Subspace(
-                registers=[ControlledSubspace(subspace_zero, subspace_one)],
+                [ControlledSubspace(subspace_zero, subspace_one)],
                 zero_qubits=self.A.subspace_in.trailing_zeros(),
             )
 
@@ -53,12 +53,12 @@ class ModifyControl(Node):
 
         if self.swap_control_state:
             return Subspace(
-                registers=[ControlledSubspace(subspace_one, subspace_zero)],
+                [ControlledSubspace(subspace_one, subspace_zero)],
                 zero_qubits=self.A.subspace_out.trailing_zeros(),
             )
         else:
             return Subspace(
-                registers=[ControlledSubspace(subspace_zero, subspace_one)],
+                [ControlledSubspace(subspace_zero, subspace_one)],
                 zero_qubits=self.A.subspace_out.trailing_zeros(),
             )
 

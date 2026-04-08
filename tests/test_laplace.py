@@ -185,7 +185,7 @@ def test_preconditioned_laplace_1d():
         #         [0, 1 / 2],
         #         [1, np.sqrt(3) / 2],
         #         [0, 1 / 2],
-        #     ])) & Identity(subspace=Subspace(registers=l - 1))
+        #     ])) & Identity(subspace=Subspace(l - 1))
 
         if i == L:
             TC = 2 ** (-i / 2) * C_l

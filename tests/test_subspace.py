@@ -8,12 +8,12 @@ def test_eq():
     assert ut.Subspace(bits=1) == ut.Subspace(bits=1)
     assert ut.Subspace(bits=0, zero_qubits=1) == ut.Subspace(bits=0, zero_qubits=1)
     assert ut.Subspace(bits=1, zero_qubits=0) != ut.Subspace(bits=1, zero_qubits=1)
-    assert ut.Subspace(bits=1) == ut.Subspace(registers=[ut.ID])
+    assert ut.Subspace(bits=1) == ut.Subspace([ut.ID])
     c = ut.ControlledSubspace(ut.Subspace(bits=0), ut.Subspace(bits=0))
-    assert ut.Subspace(bits=1) == ut.Subspace(registers=[c])
+    assert ut.Subspace(bits=1) == ut.Subspace([c])
     c = ut.ControlledSubspace(ut.Subspace(bits=1), ut.Subspace(bits=0, zero_qubits=1))
-    assert ut.Subspace(registers=[c]) == ut.Subspace(registers=[c])
-    assert ut.Subspace(registers=[c]) != ut.Subspace(bits=1)
+    assert ut.Subspace([c]) == ut.Subspace([c])
+    assert ut.Subspace([c]) != ut.Subspace(bits=1)
 
 
 def test_is_trivial():
@@ -21,10 +21,10 @@ def test_is_trivial():
     assert ut.Subspace(bits=0, zero_qubits=1).is_trivial()
     assert not ut.Subspace(bits=1).is_trivial()
     assert not ut.Subspace(
-        registers=[ut.ControlledSubspace(ut.Subspace(bits=1), ut.Subspace(bits=0, zero_qubits=1))]
+        [ut.ControlledSubspace(ut.Subspace(bits=1), ut.Subspace(bits=0, zero_qubits=1))]
     ).is_trivial()
     assert not ut.Subspace(
-        registers=[
+        [
             ut.ID,
             ut.ControlledSubspace(ut.Subspace(bits=0, zero_qubits=1), ut.Subspace(bits=0, zero_qubits=1)),
         ],
@@ -40,16 +40,14 @@ def test_basis():
     np.testing.assert_allclose(ut.Subspace(bits=0, zero_qubits=1).enumerate_basis(), np.array([0]))
     np.testing.assert_allclose(ut.Subspace(bits=1).enumerate_basis(), np.array([0, 1]))
     np.testing.assert_allclose(
-        ut.Subspace(
-            registers=[ut.ControlledSubspace(ut.Subspace(bits=1), ut.Subspace(bits=0, zero_qubits=1))]
-        ).enumerate_basis(),
+        ut.Subspace([ut.ControlledSubspace(ut.Subspace(bits=1), ut.Subspace(bits=0, zero_qubits=1))]).enumerate_basis(),
         np.array([0, 1, 2]),
     )
     # TODO
     # circuit = Circuit()
     np.testing.assert_allclose(
         ut.Subspace(
-            registers=[
+            [
                 ut.ID,
                 # Controlled(QubitMap(0, 1), QubitMap(0, 1)),
             ],
@@ -64,14 +62,11 @@ def test_total_qubits():
     assert ut.Subspace(bits=0, zero_qubits=1).total_qubits == 1
     assert ut.Subspace(bits=1).total_qubits == 1
     assert (
-        ut.Subspace(
-            registers=[ut.ControlledSubspace(ut.Subspace(bits=1), ut.Subspace(bits=0, zero_qubits=1))]
-        ).total_qubits
-        == 2
+        ut.Subspace([ut.ControlledSubspace(ut.Subspace(bits=1), ut.Subspace(bits=0, zero_qubits=1))]).total_qubits == 2
     )
     assert (
         ut.Subspace(
-            registers=[
+            [
                 ut.ID,
                 ut.ControlledSubspace(ut.Subspace(bits=0, zero_qubits=1), ut.Subspace(bits=0, zero_qubits=1)),
             ],
@@ -86,13 +81,13 @@ def test_total_qubits():
     [
         ut.Subspace(bits=0),
         ut.Subspace(bits=1, zero_qubits=1),
-        ut.Subspace(registers=[ut.ID, ut.ControlledSubspace(ut.Subspace(bits=1), ut.Subspace(bits=0, zero_qubits=1))]),
+        ut.Subspace([ut.ID, ut.ControlledSubspace(ut.Subspace(bits=1), ut.Subspace(bits=0, zero_qubits=1))]),
         ut.Subspace(
-            registers=[
+            [
                 ut.ID,
                 ut.ControlledSubspace(
                     ut.Subspace(
-                        registers=[
+                        [
                             ut.ControlledSubspace(ut.Subspace(bits=0, zero_qubits=1), ut.Subspace(bits=1)),
                             ut.ID,
                         ]
@@ -128,9 +123,9 @@ def test_circuit(subspace: ut.Subspace):
 )
 def test_trailing_zeros(subspace):
     trailing_zeros = subspace.trailing_zeros()
-    assert len(subspace.registers) >= trailing_zeros
-    assert trailing_zeros == len(subspace.registers) or isinstance(
-        subspace.registers[-(trailing_zeros + 1)], ut.ControlledSubspace
+    assert len(subspace.tensor_factors) >= trailing_zeros
+    assert trailing_zeros == len(subspace.tensor_factors) or isinstance(
+        subspace.tensor_factors[-(trailing_zeros + 1)], ut.ControlledSubspace
     )
 
 
