@@ -10,7 +10,7 @@ The basic object of this library is a `~unitaria.Node`, which may refer to a
 matrix or a vector.
 
 >>> import unitaria as ut
->>> ut.Identity(1)
+>>> ut.Identity(bits=1)
 Identity('subspace': Subspace(1))
 >>> import numpy as np
 >>> ut.ConstantVector(np.array([1, 2]))
@@ -22,7 +22,7 @@ more complex expressions, stored as a computational graph.
 
 >>> import unitaria as ut
 >>> import numpy as np
->>> print(ut.Identity(1) @ ut.ConstantVector(np.array([1, 2])))
+>>> print(ut.Identity(bits=1) @ ut.ConstantVector(np.array([1, 2])))
 Mul
 ├── ConstantVector{'vec': array([1, 2])}
 └── Identity{'subspace': Subspace(1)}
@@ -34,7 +34,7 @@ performs, available through the methods `~unitaria.Node.compute` and
 
 >>> import unitaria as ut
 >>> import numpy as np
->>> (ut.Identity(1) @ ut.ConstantVector(np.array([1, 2]))).toarray().real
+>>> (ut.Identity(bits=1) @ ut.ConstantVector(np.array([1, 2]))).toarray().real
 array([1., 2.])
 
 On the other hand, each node can give you a quantum circuit, a normalization
@@ -43,9 +43,9 @@ encoding of the vector. The convenience method `~unitaria.Node.simulate`
 combines this data, which should produce the same result as
 `~unitaria.Node.toarray`.
 
->>> unitaria as ut
+>>> import unitaria as ut
 >>> import numpy as np
->>> (ut.Identity(1) @ ut.ConstantVector(np.array([1, 2]))).simulate().real
+>>> (ut.Identity(bits=1) @ ut.ConstantVector(np.array([1, 2]))).simulate().real
 array([1., 2.])
 
 It can be checked wether the results of `~unitaria.Node.toarray` and
