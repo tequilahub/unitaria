@@ -65,6 +65,10 @@ class ProxyNode(Node):
         definition = self._definition_internal()
         return definition.normalization
 
+    def is_guaranteed_unitary(self) -> bool:
+        definition = self._definition_internal()
+        return definition.is_guaranteed_unitary()
+
     def _circuit(
         self, target: Sequence[int], clean_ancillae: Sequence[int], borrowed_ancillae: Sequence[int]
     ) -> Circuit:

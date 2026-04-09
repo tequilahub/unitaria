@@ -9,6 +9,7 @@ from unitaria.subspace import Subspace, ZeroQubitSubspace, ControlledSubspace
 from unitaria.nodes.basic.unsafe_multiplication import UnsafeMul
 from unitaria.nodes.basic.adjoint import Adjoint
 from unitaria.nodes.basic.identity import Identity
+from unitaria.nodes.basic.tensor import Tensor
 from unitaria.circuit import Circuit
 from unitaria.util import logreduce
 
@@ -67,6 +68,9 @@ class PermuteFactors(Node):
 
     def _normalization(self) -> float:
         return 1
+
+    def is_guaranteed_unitary(self) -> bool:
+        return True
 
     def compute(self, input: np.ndarray) -> np.ndarray:
         outer_shape = list(input.shape[:-1])
@@ -450,11 +454,11 @@ def permute(a: Subspace, b: Subspace) -> tuple[Node, Node]:
 
     subperms_a, subperms_b = zip(*[_brute_force(a, b) for a, b in partitioning])
 
-    subperms_a = logreduce(lambda x, y: x & y, subperms_a)
+    subperms_a = logreduce(Tensor, subperms_a)
     move_a_in = _move_zeros_to_end(subperms_a.subspace_in)
     move_a_out = _move_zeros_to_end(subperms_a.subspace_out)
     perm_a = UnsafeMul(UnsafeMul(perm_a, Adjoint(move_a_in)), UnsafeMul(subperms_a, move_a_out))
-    subperms_b = logreduce(lambda x, y: x & y, subperms_b)
+    subperms_b = logreduce(Tensor, subperms_b)
     move_b_in = _move_zeros_to_end(subperms_b.subspace_in)
     move_b_out = _move_zeros_to_end(subperms_b.subspace_out)
     perm_b = UnsafeMul(UnsafeMul(perm_b, Adjoint(move_b_in)), UnsafeMul(subperms_b, move_b_out))

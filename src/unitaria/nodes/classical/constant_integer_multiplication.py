@@ -9,7 +9,6 @@ from unitaria.nodes.basic.identity import Identity
 from unitaria.nodes.basic.block_diagonal import BlockDiagonal
 from unitaria.nodes.permutation.permutation import PermuteFactors
 from unitaria.nodes.basic.adjoint import Adjoint
-from unitaria.nodes.basic.mul import Mul
 
 
 class ConstantIntegerMultiplication(ProxyNode):
@@ -32,7 +31,7 @@ class ConstantIntegerMultiplication(ProxyNode):
         if constant < 0:
             raise ValueError(f"Constant factor {constant} is negative.")
         if constant & 1 != 1:
-            raise ValueError(f"Constant factor {constant} is uneven. This would result in a non-reversible operation.")
+            raise ValueError(f"Constant factor {constant} is even. This would result in a non-reversible operation.")
         if bits < 1:
             raise ValueError()
         self.bits = bits
@@ -57,15 +56,10 @@ class ConstantIntegerMultiplication(ProxyNode):
                 ConstantIntegerAddition(bits=add_bits, constant=c),
             )
             permutation = PermuteFactors(Subspace("#" * (add_bits + 1)), [add_bits] + list(range(add_bits)))
-            # TODO: The skip_projection can be removed onces this is done automatically
-            const_add = Mul(
-                Adjoint(permutation),
-                Mul(const_add, permutation, skip_projection=True),
-                skip_projection=True,
-            )
-            const_add = Identity(Subspace("#" * i)) & const_add
+            const_add = permutation @ const_add @ Adjoint(permutation)
+            const_add = const_add & Identity(Subspace("#" * i))
             if result is not None:
-                result = Mul(result, const_add, skip_projection=True)
+                result = const_add @ result
             else:
                 result = const_add
         return result

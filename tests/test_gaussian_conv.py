@@ -9,10 +9,10 @@ def test_1d_gaussian_conv():
     prep = ut.ConstantVector(np.append([0], np.sqrt(gaussian)))
     conv = (
         ut.Projection(subspace_from=ut.Subspace("####"), subspace_to=ut.Subspace("0###"))
-        @ (ut.Adjoint(prep) & ut.Identity(ut.Subspace("####")))
-        @ (ut.Identity(ut.Subspace("0###")) & ut.ConstantIntegerAddition(bits=4, constant=-4))
+        @ (ut.Identity(ut.Subspace("####")) & ut.Adjoint(prep))
+        @ (ut.ConstantIntegerAddition(bits=4, constant=-4) & ut.Identity(ut.Subspace("0###")))
         @ ut.IntegerAddition(source_bits=3, target_bits=4)
-        @ (prep & ut.Identity(ut.Subspace("####")))
+        @ (ut.Identity(ut.Subspace("####")) & prep)
         @ ut.Projection(subspace_from=ut.Subspace("0###"), subspace_to=ut.Subspace("####"))
     )
     ut.verify(conv)
@@ -35,7 +35,7 @@ def test_2d_gaussian_conv():
         ut.Mul(
             ut.Mul(
                 ut.Projection(subspace_from=ut.Subspace("0##"), subspace_to=ut.Subspace("###")),
-                prep & ut.Identity(ut.Subspace("###")),
+                ut.Identity(ut.Subspace("###")) & prep,
                 skip_projection=True,
             ),
             ut.IntegerAddition(source_bits=2, target_bits=3),
@@ -43,8 +43,8 @@ def test_2d_gaussian_conv():
         ),
         ut.Mul(
             ut.Mul(
-                ut.Identity(ut.Subspace("##")) & ut.ConstantIntegerAddition(bits=3, constant=-2),
-                ut.Adjoint(prep) & ut.Identity(ut.Subspace("###")),
+                ut.ConstantIntegerAddition(bits=3, constant=-2) & ut.Identity(ut.Subspace("##")),
+                ut.Identity(ut.Subspace("###")) & ut.Adjoint(prep),
                 skip_projection=True,
             ),
             ut.Projection(subspace_from=ut.Subspace("###"), subspace_to=ut.Subspace("0##")),

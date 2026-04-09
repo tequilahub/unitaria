@@ -16,18 +16,19 @@ class Tensor(Node):
 
     >>> import unitaria as ut
     >>> import numpy as np
-    >>> ut.Tensor(ut.Increment(bits=1), ut.Identity(dim=2)).toarray().real
+    >>> ut.Tensor(ut.Increment(bits=1), ut.Identity(ut.Subspace("#"))).toarray().real
     array([[0., 1., 0., 0.],
            [1., 0., 0., 0.],
            [0., 0., 0., 1.],
            [0., 0., 1., 0.]])
 
-    The and operator for `ut.Node` is overloaded to be the tensor product,
-    i.e. you can equivalently write
+    The `&` operator for `ut.Node` is overloaded to be the tensor product.
+    However, the arguments are flipped to comply with the usual convention, i.e.
+    you can equivalently write
 
     >>> import unitaria as ut
     >>> import numpy as np
-    >>> (ut.Increment(bits=1) & ut.Identity(dim=2)).toarray().real
+    >>> (ut.Identity(ut.Subspace("#")) & ut.Increment(bits=1)).toarray().real
     array([[0., 1., 0., 0.],
            [1., 0., 0., 0.],
            [0., 0., 0., 1.],
@@ -118,4 +119,4 @@ class Tensor(Node):
         return self.A.borrowed_ancilla_count() + self.B.borrowed_ancilla_count()
 
 
-Node.__and__ = lambda A, B: Tensor(A, B)
+Node.__and__ = lambda A, B: Tensor(B, A)
