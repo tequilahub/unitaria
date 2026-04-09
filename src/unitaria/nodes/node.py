@@ -29,12 +29,12 @@ class Node(ABC):
     due to how the properties of `Node` are cached.
 
     To check that these methods are implemented correctly, use
-    `~unitaria.verifier.verify`.
+    `~unitaria.verify`.
 
     As an alternative if you can represent your custom node in terms of other
     nodes, and just want to provide a more efficient implementation of some
     of the functions -- say `compute` and `compute_adjoint` -- you can instead
-    create a subclass of `~unitaria.nodes.ProxyNode`.
+    create a subclass of `~unitaria.ProxyNode`.
     """
 
     def __init__(self, dimension_in: int, dimension_out: int):

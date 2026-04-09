@@ -16,7 +16,7 @@ class Tensor(Node):
 
     >>> import unitaria as ut
     >>> import numpy as np
-    >>> ut.Tensor(ut.Increment(bits=1), ut.Identity(bits=1)).toarray().real
+    >>> ut.Tensor(ut.Increment(bits=1), ut.Identity(dim=2)).toarray().real
     array([[0., 1., 0., 0.],
            [1., 0., 0., 0.],
            [0., 0., 0., 1.],
@@ -27,7 +27,7 @@ class Tensor(Node):
 
     >>> import unitaria as ut
     >>> import numpy as np
-    >>> (ut.Increment(bits=1) & ut.Identity(bits=1)).toarray().real
+    >>> (ut.Increment(bits=1) & ut.Identity(dim=2)).toarray().real
     array([[0., 1., 0., 0.],
            [1., 0., 0., 0.],
            [0., 0., 0., 1.],

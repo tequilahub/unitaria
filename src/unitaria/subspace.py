@@ -15,9 +15,98 @@ from unitaria.util import cached_property
 
 
 class Subspace:
-    # TODO: More documentation
     """
     Subspace of the statespace of a number of qubits.
+
+    In ``unitaria``, subspaces are always the span of vectors in the
+    computational basis, so this object just stores the indices of
+    these computational basis states.
+
+    Constructors
+    ------------
+
+    If you just need a subspace with a given dimension, use `Subspace.from_dim`.
+
+    Otherwise, the preferred way to construct subspaces is using the string
+    constructor. It takes a string consisting of ``#`` and ``0``, respectively
+    representing a bit that can be in either state, or a bit that should be in
+    its ``0`` state.
+
+        >>> import unitaria as ut
+        >>> ut.Subspace("#").enumerate_basis()
+        array([0, 1], dtype=int32)
+        >>> ut.Subspace("0").enumerate_basis()
+        array([0], dtype=int32)
+
+    Alternatively, the subspace can be constructed according to its internal
+    representation, see below.
+
+    When given multiple symbols, they are combined using tensor products as
+    expected.
+
+        >>> import unitaria as ut
+        >>> ut.Subspace("##0").enumerate_basis()
+        array([0, 2, 4, 6], dtype=int32)
+
+    Subspaces can be combined using the operators ``&`` (tensor product) or
+    ``|`` direct sum.
+
+        >>> import unitaria as ut
+        >>> (ut.Subspace("#") & ut.Subspace("0")).enumerate_basis()
+        array([0, 2], dtype=int32)
+        >>> (ut.Subspace("#") | ut.Subspace("0")).enumerate_basis()
+        array([0, 1, 2], dtype=int32)
+
+    Intutively, with the ``|`` operator the highest bit decides the subspace
+    of the lower bits. So in the example above, when the highes bit is ``0``
+    then the lower bit can either be ``0`` or ``1``, but when the highest bit
+    is ``1`` then the lower bit has to be ``0``.
+
+    Reading the subspace
+    --------------------
+
+    The method `enumerate_basis` gives a list of all the indices in the
+    subspace, but this should typically only be used for verification. It
+    does not make sense as part of an efficient quantum algorithm, since the
+    complexity of `enumerate_basis` is always linear in the dimension.
+
+    The methods `test_basis` on the other hand is efficient. It checks whether a
+    given index is in the subspace.
+
+    The dimension of the subspace can be obtained using `Subspace.dimension`.
+    The dimension of the super-space can be caluclated from the number of
+    qubits, which is stored in `Subspace.total_qubits`. Specifically, the
+    super-space dimension is ``2 ** subspace.total_qubits``.
+
+        >>> import unitaria as ut
+        >>> ut.Subspace("0#0").dimension
+        2
+        >>> ut.Subspace("0#0").total_qubits
+        3
+
+    Internal representation
+    -----------------------
+
+    Typically one does not need to inspect `Subspace` objects, most properties
+    can be derived using its methods. Internally, the object stores a
+    decomposition of the subspace into tensor factors. This decomposition is
+    simplified at construction and so does not have to correspond to the factors
+    that are put in. Any of the factors can be either
+
+    * a `ZeroQubitSubspace`, indicating the subspace of the space of one
+      qubit, where this qubit is zero, or
+    * a `ControlledSubspace`, indicating that a subspace, where the
+      most siginificant bit determines the subspaces of the lower bits.
+      These subspaces are given by `ControlledSubspace.case_zero` and
+      `ControlledSubspace.case_one`. With this one can also construct the full
+      subspace of a qubit by `ControlledSubspace(Subspace(), Subspace())`.
+      (For this there is also the constant `~unitaria.FullQubitSubspace`.)
+
+    :param tensor_factors: List or string of factors making up the subspace, see below.
+
+    :raises ValueError:
+        If a string with characters other than ``#`` or ``0`` is given or a list
+        with anything that is not a `SubspaceFactor`
     """
 
     tensor_factors: list[SubspaceFactor]
@@ -27,9 +116,9 @@ class Subspace:
             self.tensor_factors = []
             for c in reversed(tensor_factors):
                 if c == "0":
-                    self.tensor_factors.append(ZeroQubit())
+                    self.tensor_factors.append(ZeroQubitSubspace())
                 elif c == "#":
-                    self.tensor_factors.append(ID)
+                    self.tensor_factors.append(FullQubitSubspace)
                 else:
                     raise ValueError()
         else:
@@ -37,7 +126,7 @@ class Subspace:
 
         for factor in self.tensor_factors:
             if not isinstance(factor, SubspaceFactor):
-                if factor is ZeroQubit:
+                if factor is ZeroQubitSubspace:
                     raise ValueError(
                         f"{factor} is not a valid factor in a Subspace. Use `ZeroQubit()` instead of `ZeroQubit`"
                     )
@@ -62,12 +151,14 @@ class Subspace:
         return (case_zero | case_one) & Subspace("0" * (bits - min_bits))
 
     def __repr__(self) -> str:
+        if len(self.tensor_factors) == 0:
+            return "Subspace()"
         string_constructor = ""
         output = ""
         for factor in self.tensor_factors:
-            if factor == ZeroQubit():
+            if factor == ZeroQubitSubspace():
                 string_constructor = "0" + string_constructor
-            elif factor == ID:
+            elif factor == FullQubitSubspace:
                 string_constructor = "#" + string_constructor
             elif isinstance(factor, ControlledSubspace):
                 if len(string_constructor) != 0:
@@ -171,7 +262,7 @@ class Subspace:
 
     def initial_zeros(self) -> int:
         for i in reversed(range(len(self.tensor_factors))):
-            if not isinstance(self.tensor_factors[i], ZeroQubit):
+            if not isinstance(self.tensor_factors[i], ZeroQubitSubspace):
                 return len(self.tensor_factors) - i - 1
         return len(self.tensor_factors)
 
@@ -202,7 +293,7 @@ class Subspace:
                     if not result:
                         return False
                     bits = bits >> (num_qubits + 1)
-                case ZeroQubit():
+                case ZeroQubitSubspace():
                     if bits & 1 != 0:
                         return False
                     bits = bits >> 1
@@ -241,14 +332,14 @@ class Subspace:
         circuit = Circuit()
 
         for factor in self.tensor_factors:
-            if isinstance(factor, ZeroQubit):
+            if isinstance(factor, ZeroQubitSubspace):
                 # Zero qubits already behave like flag qubits, so we only need to toggle it
                 circuit += tq.gates.X(target=target[index])
                 intermediate_flags.append(target[index])
                 index += 1
                 continue
 
-            if factor == ID:
+            if factor == FullQubitSubspace:
                 # No need to do anything here
                 index += 1
                 continue
@@ -344,7 +435,7 @@ class SubspaceFactor(ABC):
 
 
 @dataclass(frozen=True)
-class ZeroQubit(SubspaceFactor):
+class ZeroQubitSubspace(SubspaceFactor):
     def total_qubits(self) -> int:
         return 1
 
@@ -355,7 +446,7 @@ class ZeroQubit(SubspaceFactor):
         return "0"
 
 
-@dataclass(frozen=True, repr=False)
+@dataclass(frozen=True)
 class ControlledSubspace(SubspaceFactor):
     """
     SubspaceFactor where the most significant qubit determines the subspace
@@ -372,11 +463,6 @@ class ControlledSubspace(SubspaceFactor):
 
     def __post_init__(self):
         assert self.case_zero.total_qubits == self.case_one.total_qubits
-
-    def __repr__(self) -> str:
-        if self == ID:
-            return "ID"
-        return f"ControlledSubspace(case_zero={repr(self.case_zero)}, case_one={repr(self.case_one)})"
 
     def total_qubits(self) -> int:
         return 1 + self.case_zero.total_qubits
@@ -418,8 +504,8 @@ class ControlledSubspace(SubspaceFactor):
         qubits, this common part can be factored out. E.g.
 
             >>> import unitaria as ut
-            >>> ut.ControlledSubspace(ut.Subspace(bits=2), ut.Subspace(bits=1, zero_qubits=1)).simplify()
-            [ID, ControlledSubspace(case_zero=Subspace(1), case_one=Subspace(0, zero_qubits=1))]
+            >>> ut.ControlledSubspace(ut.Subspace("##"), ut.Subspace("0#")).simplify()
+            [ControlledSubspace(case_zero=Subspace(), case_one=Subspace()), ControlledSubspace(case_zero=Subspace("#"), case_one=Subspace("0"))]
         """
         min_len = min(len(self.case_zero.tensor_factors), len(self.case_one.tensor_factors))
         for i in range(min_len):
@@ -459,4 +545,4 @@ class ControlledSubspace(SubspaceFactor):
         return max(self.case_zero.clean_ancilla_count(), self.case_one.clean_ancilla_count())
 
 
-ID = ControlledSubspace(Subspace([]), Subspace([]))
+FullQubitSubspace = ControlledSubspace(Subspace([]), Subspace([]))

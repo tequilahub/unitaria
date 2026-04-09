@@ -9,7 +9,7 @@ def test_eq():
     assert ut.Subspace("0") == ut.Subspace("0")
     assert ut.Subspace("#") != ut.Subspace("#0")
     assert ut.Subspace("#") & ut.Subspace("0") == ut.Subspace("#0")
-    assert ut.Subspace("#") == ut.Subspace([ut.ID])
+    assert ut.Subspace("#") == ut.Subspace([ut.ControlledSubspace(ut.Subspace(), ut.Subspace())])
     c = ut.Subspace() | ut.Subspace()
     assert ut.Subspace("#") == c
     c = ut.Subspace("#") | ut.Subspace("0")

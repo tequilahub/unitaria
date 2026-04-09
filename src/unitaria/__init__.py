@@ -1,6 +1,6 @@
 import unitaria.util as util
 
-from unitaria.subspace import Subspace, ControlledSubspace, ID, ZeroQubit
+from unitaria.subspace import Subspace, SubspaceFactor, ControlledSubspace, ZeroQubitSubspace, FullQubitSubspace
 from unitaria.circuit import Circuit
 from unitaria.verifier import verify
 
@@ -76,8 +76,9 @@ __all__ = [
     "QSVTCoefficients",
     "Scale",
     "Tensor",
+    "SubspaceFactor",
     "ControlledSubspace",
-    "ID",
-    "ZeroQubit",
+    "ZeroQubitSubspace",
+    "FullQubitSubspace",
     "util",
 ]

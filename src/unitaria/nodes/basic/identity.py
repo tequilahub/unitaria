@@ -11,15 +11,26 @@ class Identity(Node):
     """
     Node representing the identity matrix on a given vectorspace
 
+    Should specify exactly one of ``subspace`` or ``dim``
+
     :param subspace:
         The domain of the identity matrix
+    :param dim:
+        The dimension of the domain
     """
 
     subspace: Subspace
 
-    def __init__(self, subspace: Subspace = None):
-        super().__init__(subspace.dimension, subspace.dimension)
-        self.subspace = subspace
+    def __init__(self, subspace: Subspace | None = None, *, dim: int | None = None):
+        if dim is not None:
+            if subspace is not None:
+                raise ValueError("Either subspace or dim has to be specified")
+            self.subspace = Subspace.from_dim(dim)
+        else:
+            if subspace is None:
+                raise ValueError("Either subspace or dim has to be specified")
+            self.subspace = subspace
+        super().__init__(self.subspace.dimension, self.subspace.dimension)
 
     def children(self) -> list[Node]:
         return []

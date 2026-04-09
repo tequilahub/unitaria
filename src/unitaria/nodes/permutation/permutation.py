@@ -5,7 +5,7 @@ from typing import Sequence
 import numpy as np
 import tequila as tq
 from unitaria.nodes.node import Node
-from unitaria.subspace import Subspace, ZeroQubit, ControlledSubspace
+from unitaria.subspace import Subspace, ZeroQubitSubspace, ControlledSubspace
 from unitaria.nodes.basic.unsafe_multiplication import UnsafeMul
 from unitaria.nodes.basic.adjoint import Adjoint
 from unitaria.nodes.basic.identity import Identity
@@ -17,7 +17,7 @@ def _move_zeros_to_end(subspace: Subspace) -> PermuteFactors:
     nonzero_factors = []
     zero_factors = []
     for i, factor in enumerate(subspace.tensor_factors):
-        if isinstance(factor, ZeroQubit):
+        if isinstance(factor, ZeroQubitSubspace):
             zero_factors.append(i)
         else:
             nonzero_factors.append(i)
