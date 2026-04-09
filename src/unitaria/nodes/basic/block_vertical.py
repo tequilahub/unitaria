@@ -45,7 +45,7 @@ class BlockVertical(ProxyNode):
         diag = BlockDiagonal(A_permuted, B_permuted)
 
         rotation_in = Tensor(
-            Identity(subspace=diag.subspace_out.case_zero()),
+            Identity(diag.subspace_out.case_zero()),
             ConstantVector(np.array([self.A.normalization, self.B.normalization])),
         )
 

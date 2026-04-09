@@ -17,13 +17,7 @@ class Identity(Node):
 
     subspace: Subspace
 
-    def __init__(self, subspace: Subspace = None, *, bits: int = None):
-        if subspace is not None:
-            subspace = subspace
-        elif bits is not None:
-            subspace = Subspace(bits=bits)
-        else:
-            raise TypeError("Identity constructor requires subspace=... or bits=... as keyword arguments")
+    def __init__(self, subspace: Subspace = None):
         super().__init__(subspace.dimension, subspace.dimension)
         self.subspace = subspace
 

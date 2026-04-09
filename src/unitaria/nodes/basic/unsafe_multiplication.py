@@ -27,13 +27,12 @@ class UnsafeMul(Node):
     B: Node
 
     def __init__(self, A: Node, B: Node):
-        if not A.subspace_out.match_nonzero(B.subspace_in):
-            raise ValueError(f"Non matching qubit maps {A.subspace_out} and {B.subspace_in}")
-
-        super().__init__(A.dimension_in, B.dimension_out)
-
         self.A = A
         self.B = B
+        if not A.subspace_out.match_nonzero(B.subspace_in):
+            raise ValueError(f"Non matching qubit maps {repr(A.subspace_out)} and {repr(B.subspace_in)}")
+
+        super().__init__(A.dimension_in, B.dimension_out)
 
     def children(self) -> list[Node]:
         return [self.A, self.B]
@@ -58,17 +57,11 @@ class UnsafeMul(Node):
 
     def _subspace_in(self) -> Subspace:
         max_qubits = max(self.A.subspace_in.total_qubits, self.B.subspace_out.total_qubits)
-        return Subspace(
-            self.A.subspace_in.tensor_factors,
-            zero_qubits=max_qubits - self.A.subspace_in.total_qubits,
-        )
+        return Subspace("0" * (max_qubits - self.A.subspace_in.total_qubits)) & self.A.subspace_in
 
     def _subspace_out(self) -> Subspace:
         max_qubits = max(self.A.subspace_in.total_qubits, self.B.subspace_out.total_qubits)
-        return Subspace(
-            self.B.subspace_out.tensor_factors,
-            zero_qubits=max_qubits - self.B.subspace_out.total_qubits,
-        )
+        return Subspace("0" * (max_qubits - self.B.subspace_out.total_qubits)) & self.B.subspace_out
 
     def _normalization(self) -> float:
         return self.A.normalization * self.B.normalization

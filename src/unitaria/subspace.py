@@ -22,21 +22,18 @@ class Subspace:
 
     tensor_factors: list[SubspaceFactor]
 
-    def __init__(
-        self, tensor_factors: list[SubspaceFactor] = None, *, bits: int = None, dim: int = None, zero_qubits: int = 0
-    ):
-        if dim is not None:
-            assert tensor_factors is None
-            assert zero_qubits == 0
-            subspace = Subspace._from_dim(dim, bits=bits)
-            self.tensor_factors = subspace.tensor_factors
-        elif bits is not None:
-            assert tensor_factors is None
-            self.tensor_factors = [ID] * bits
-        elif tensor_factors is not None:
-            self.tensor_factors = tensor_factors
-        else:
+    def __init__(self, tensor_factors: list[SubspaceFactor] | str = []):
+        if isinstance(tensor_factors, str):
             self.tensor_factors = []
+            for c in reversed(tensor_factors):
+                if c == "0":
+                    self.tensor_factors.append(ZeroQubit())
+                elif c == "#":
+                    self.tensor_factors.append(ID)
+                else:
+                    raise ValueError()
+        else:
+            self.tensor_factors = tensor_factors
 
         for factor in self.tensor_factors:
             if not isinstance(factor, SubspaceFactor):
@@ -51,19 +48,45 @@ class Subspace:
                 simplified_factors += factor.simplify()
             else:
                 simplified_factors.append(factor)
-
-        self.tensor_factors = simplified_factors + [ZeroQubit()] * zero_qubits
+        self.tensor_factors = simplified_factors
 
     @staticmethod
-    def _from_dim(dim: int, bits: int | None = None) -> Subspace:
+    def from_dim(dim: int, bits: int | None = None) -> Subspace:
         if bits is None:
             bits = int(np.ceil(np.log2(dim)))
         if dim == 1:
-            return Subspace(bits=0, zero_qubits=bits)
+            return Subspace("0" * bits)
         min_bits = int(np.ceil(np.log2(dim)))
-        case_zero = Subspace(bits=min_bits - 1)
-        case_one = Subspace(dim=dim - 2 ** (min_bits - 1), bits=min_bits - 1)
-        return Subspace(tensor_factors=[ControlledSubspace(case_zero, case_one)], zero_qubits=bits - min_bits)
+        case_zero = Subspace("#" * (min_bits - 1))
+        case_one = Subspace.from_dim(dim - 2 ** (min_bits - 1), bits=min_bits - 1)
+        return (case_zero | case_one) & Subspace("0" * (bits - min_bits))
+
+    def __repr__(self) -> str:
+        string_constructor = ""
+        output = ""
+        for factor in self.tensor_factors:
+            if factor == ZeroQubit():
+                string_constructor = "0" + string_constructor
+            elif factor == ID:
+                string_constructor = "#" + string_constructor
+            elif isinstance(factor, ControlledSubspace):
+                if len(string_constructor) != 0:
+                    if len(output) == 0:
+                        output = f'Subspace("{string_constructor}")'
+                    else:
+                        output = f'Subspace("{string_constructor}") & {output}'
+                if len(output) == 0:
+                    output = f"({repr(factor.case_zero)} | {repr(factor.case_one)})"
+                else:
+                    output = f"({repr(factor.case_zero)} | {repr(factor.case_one)}) & {output}"
+            else:
+                raise NotImplementedError
+        if len(string_constructor) != 0:
+            if len(output) == 0:
+                output = f'Subspace("{string_constructor}")'
+            else:
+                output = f'Subspace("{string_constructor}") & {output}'
+        return output
 
     @cached_property
     def dimension(self) -> int:
@@ -93,18 +116,6 @@ class Subspace:
 
     def match_nonzero(self, other: Subspace) -> bool:
         return self.nonzero_factors() == other.nonzero_factors()
-
-    def __repr__(self) -> str:
-        trailing_zeros = self.trailing_zeros()
-        factors = self.nonzero_factors()
-        str_factors = str(len(factors))
-        for factor in factors:
-            if factor != ID:
-                str_factors = repr(factors)
-                break
-        if trailing_zeros == 0:
-            return f"Subspace({str_factors})"
-        return f"Subspace({str_factors}, zero_qubits={trailing_zeros})"
 
     def __str__(self) -> str:
         if len(self.tensor_factors) == 0:
@@ -158,24 +169,18 @@ class Subspace:
                         output += "║\n"
         return output
 
-    def is_trivial(self) -> bool:
-        """
-        Tests whether the subspace only contains the ``|0>`` state
-        """
-        return self.trailing_zeros() == len(self.tensor_factors)
-
-    def trailing_zeros(self) -> int:
+    def initial_zeros(self) -> int:
         for i in reversed(range(len(self.tensor_factors))):
             if not isinstance(self.tensor_factors[i], ZeroQubit):
                 return len(self.tensor_factors) - i - 1
         return len(self.tensor_factors)
 
     def nonzero_factors(self) -> list[SubspaceFactor]:
-        trailing_zeros = self.trailing_zeros()
-        if trailing_zeros == 0:
+        initial_zeros = self.initial_zeros()
+        if initial_zeros == 0:
             return self.tensor_factors
         else:
-            return self.tensor_factors[:-trailing_zeros]
+            return self.tensor_factors[:-initial_zeros]
 
     def test_basis(self, bits: int) -> bool:
         """
@@ -294,27 +299,27 @@ class Subspace:
                 assert result[i + 2**self.total_qubits] == 1
 
     def case_zero(self) -> Subspace:
-        trailing_zeros = self.trailing_zeros()
-        if trailing_zeros == len(self.tensor_factors):
+        initial_zeros = self.initial_zeros()
+        if initial_zeros == len(self.tensor_factors):
             return None
 
         return Subspace(
-            self.tensor_factors[: -(trailing_zeros + 1)]
-            + self.tensor_factors[-(trailing_zeros + 1)].case_zero.tensor_factors,
+            self.tensor_factors[: -(initial_zeros + 1)]
+            + self.tensor_factors[-(initial_zeros + 1)].case_zero.tensor_factors,
         )
 
     def case_one(self) -> Subspace:
-        trailing_zeros = self.trailing_zeros()
-        if trailing_zeros == len(self.tensor_factors):
+        initial_zeros = self.initial_zeros()
+        if initial_zeros == len(self.tensor_factors):
             return None
 
         return Subspace(
-            self.tensor_factors[: -(trailing_zeros + 1)]
-            + self.tensor_factors[-(trailing_zeros + 1)].case_one.tensor_factors,
+            self.tensor_factors[: -(initial_zeros + 1)]
+            + self.tensor_factors[-(initial_zeros + 1)].case_one.tensor_factors,
         )
 
     def __and__(self, other: Subspace) -> Subspace:
-        return Subspace(self.tensor_factors + other.tensor_factors)
+        return Subspace(other.tensor_factors + self.tensor_factors)
 
     def __or__(self, other: Subspace) -> Subspace:
         return Subspace([ControlledSubspace(self, other)])
@@ -454,4 +459,4 @@ class ControlledSubspace(SubspaceFactor):
         return max(self.case_zero.clean_ancilla_count(), self.case_one.clean_ancilla_count())
 
 
-ID = ControlledSubspace(Subspace(tensor_factors=[]), Subspace(tensor_factors=[]))
+ID = ControlledSubspace(Subspace([]), Subspace([]))

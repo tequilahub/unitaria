@@ -8,12 +8,12 @@ def test_1d_gaussian_conv():
     gaussian = np.exp(-(x**2))
     prep = ut.ConstantVector(np.append([0], np.sqrt(gaussian)))
     conv = (
-        ut.Projection(subspace_from=ut.Subspace(bits=4), subspace_to=ut.Subspace(bits=3, zero_qubits=1))
-        @ (ut.Adjoint(prep) & ut.Identity(subspace=ut.Subspace(bits=4)))
-        @ (ut.Identity(subspace=ut.Subspace(bits=3, zero_qubits=1)) & ut.ConstantIntegerAddition(bits=4, constant=-4))
+        ut.Projection(subspace_from=ut.Subspace("####"), subspace_to=ut.Subspace("0###"))
+        @ (ut.Adjoint(prep) & ut.Identity(ut.Subspace("####")))
+        @ (ut.Identity(ut.Subspace("0###")) & ut.ConstantIntegerAddition(bits=4, constant=-4))
         @ ut.IntegerAddition(source_bits=3, target_bits=4)
-        @ (prep & ut.Identity(subspace=ut.Subspace(bits=4)))
-        @ ut.Projection(subspace_from=ut.Subspace(bits=3, zero_qubits=1), subspace_to=ut.Subspace(bits=4))
+        @ (prep & ut.Identity(ut.Subspace("####")))
+        @ ut.Projection(subspace_from=ut.Subspace("0###"), subspace_to=ut.Subspace("####"))
     )
     ut.verify(conv)
 
@@ -34,8 +34,8 @@ def test_2d_gaussian_conv():
     one_dim_conv = ut.Mul(
         ut.Mul(
             ut.Mul(
-                ut.Projection(subspace_from=ut.Subspace(bits=2, zero_qubits=1), subspace_to=ut.Subspace(bits=3)),
-                prep & ut.Identity(bits=3),
+                ut.Projection(subspace_from=ut.Subspace("0##"), subspace_to=ut.Subspace("###")),
+                prep & ut.Identity(ut.Subspace("###")),
                 skip_projection=True,
             ),
             ut.IntegerAddition(source_bits=2, target_bits=3),
@@ -43,11 +43,11 @@ def test_2d_gaussian_conv():
         ),
         ut.Mul(
             ut.Mul(
-                ut.Identity(subspace=ut.Subspace(bits=2)) & ut.ConstantIntegerAddition(bits=3, constant=-2),
-                ut.Adjoint(prep) & ut.Identity(subspace=ut.Subspace(bits=3)),
+                ut.Identity(ut.Subspace("##")) & ut.ConstantIntegerAddition(bits=3, constant=-2),
+                ut.Adjoint(prep) & ut.Identity(ut.Subspace("###")),
                 skip_projection=True,
             ),
-            ut.Projection(subspace_from=ut.Subspace(bits=3), subspace_to=ut.Subspace(bits=2, zero_qubits=1)),
+            ut.Projection(subspace_from=ut.Subspace("###"), subspace_to=ut.Subspace("0##")),
             skip_projection=True,
         ),
         skip_projection=True,

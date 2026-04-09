@@ -47,23 +47,23 @@ class ConstantIntegerMultiplication(ProxyNode):
     def definition(self) -> Node:
         if self.bits == 1:
             assert self.constant == 1
-            return Identity(subspace=Subspace(bits=1))
+            return Identity(Subspace("#"))
         result = None
         for i in reversed(range(self.bits - 1)):
             add_bits = self.bits - 1 - i
             c = (self.constant >> 1) & ((1 << add_bits) - 1)
             const_add = BlockDiagonal(
-                Identity(subspace=Subspace(bits=add_bits)),
+                Identity(Subspace("#" * add_bits)),
                 ConstantIntegerAddition(bits=add_bits, constant=c),
             )
-            permutation = PermuteFactors(Subspace(bits=add_bits + 1), [add_bits] + list(range(add_bits)))
+            permutation = PermuteFactors(Subspace("#" * (add_bits + 1)), [add_bits] + list(range(add_bits)))
             # TODO: The skip_projection can be removed onces this is done automatically
             const_add = Mul(
                 Adjoint(permutation),
                 Mul(const_add, permutation, skip_projection=True),
                 skip_projection=True,
             )
-            const_add = Identity(subspace=Subspace(bits=i)) & const_add
+            const_add = Identity(Subspace("#" * i)) & const_add
             if result is not None:
                 result = Mul(result, const_add, skip_projection=True)
             else:

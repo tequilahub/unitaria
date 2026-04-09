@@ -161,7 +161,7 @@ def ref_CP_1d(L, DIM):
 def test_laplace(n: int):
     C = ut.Increment(bits=n)
     A = ut.Add(
-        ut.Scale(ut.Identity(subspace=ut.Subspace(bits=n)), -2),
+        ut.Scale(ut.Identity(ut.Subspace("#" * n)), -2),
         ut.Scale(ut.Add(C, ut.Adjoint(C)), 1),
     )
     ut.verify(A)
@@ -174,18 +174,18 @@ def test_preconditioned_laplace_1d():
     C_F = []
 
     for i in range(L, 0, -1):
-        I_l = ut.Projection(ut.Subspace(dim=2**i - 1, bits=i), ut.Subspace(bits=i))
+        I_l = ut.Projection(ut.Subspace.from_dim(2**i - 1, bits=i), ut.Subspace("#" * i))
         N_l = ut.Increment(bits=i) @ I_l
         C_l = 2 ** (i / 2) * (I_l - N_l)
 
-        T_l = ut.ConstantUnitary(np.sqrt(1 / 2) * np.array([[1], [1]])) & ut.Identity(subspace=ut.Subspace(bits=i - 1))
+        T_l = ut.ConstantUnitary(np.sqrt(1 / 2) * np.array([[1], [1]])) & ut.Identity(ut.Subspace("#" * (i - 1)))
         # T_l = ConstantUnitary(
         #     np.sqrt(1 / 2) * np.array([
         #         [1, -np.sqrt(3) / 2],
         #         [0, 1 / 2],
         #         [1, np.sqrt(3) / 2],
         #         [0, 1 / 2],
-        #     ])) & Identity(subspace=Subspace(l - 1))
+        #     ])) & Subspace(l - 1))
 
         if i == L:
             TC = 2 ** (-i / 2) * C_l

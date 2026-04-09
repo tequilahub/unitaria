@@ -47,10 +47,10 @@ class ConstantUnitary(Node):
         return {"unitary": self.unitary}
 
     def _subspace_in(self) -> Subspace:
-        return Subspace(dim=self.unitary.shape[1], bits=self.bits)
+        return Subspace.from_dim(self.unitary.shape[1], bits=self.bits)
 
     def _subspace_out(self) -> Subspace:
-        return Subspace(dim=self.unitary.shape[0], bits=self.bits)
+        return Subspace.from_dim(self.unitary.shape[0], bits=self.bits)
 
     def _normalization(self) -> Subspace:
         return 1

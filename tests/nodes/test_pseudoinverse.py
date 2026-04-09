@@ -11,9 +11,9 @@ def test_pseudoinverse():
         ut.ConstantUnitary(rot_matrix(np.pi / 4)) | ut.ConstantUnitary(rot_matrix(0.0))
     )
     B = (
-        ut.Projection(subspace_from=ut.Subspace(bits=3), subspace_to=ut.Subspace([ut.ZeroQubit(), ut.ID, ut.ID]))
+        ut.Projection(subspace_from=ut.Subspace("###"), subspace_to=ut.Subspace("##0"))
         @ A
-        @ ut.Projection(subspace_from=ut.Subspace([ut.ZeroQubit(), ut.ID, ut.ID]), subspace_to=ut.Subspace(bits=3))
+        @ ut.Projection(subspace_from=ut.Subspace("##0"), subspace_to=ut.Subspace("###"))
     )
     B_inv = ut.Pseudoinverse(B, condition=10.0, tolerance=0.1)
     C = B_inv @ B  # should be roughly a projector on all but the first basis states
@@ -23,9 +23,9 @@ def test_pseudoinverse():
 def test_pseudoinverse_normalization():
     A = 2 * ut.ConstantUnitary(rot_matrix(np.pi / 3))
     B = (
-        ut.Projection(subspace_from=ut.Subspace(bits=1), subspace_to=ut.Subspace([ut.ZeroQubit()]))
+        ut.Projection(subspace_from=ut.Subspace("#"), subspace_to=ut.Subspace("0"))
         @ A
-        @ ut.Projection(subspace_from=ut.Subspace([ut.ZeroQubit()]), subspace_to=ut.Subspace(bits=1))
+        @ ut.Projection(subspace_from=ut.Subspace("0"), subspace_to=ut.Subspace("#"))
     )
     B_inv = ut.Pseudoinverse(B, condition=2.0, tolerance=0.1)
     C = B_inv @ B

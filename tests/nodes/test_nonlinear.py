@@ -3,13 +3,9 @@ import numpy as np
 
 
 def test_componentwise_mul():
-    ut.verify(ut.ComponentwiseMul(ut.Subspace(bits=1)))
-    ut.verify(ut.ComponentwiseMul(ut.Subspace(bits=1, zero_qubits=1)))
-    ut.verify(
-        ut.ComponentwiseMul(
-            ut.Subspace([ut.ID, ut.ControlledSubspace(ut.Subspace(bits=1), ut.Subspace(bits=0, zero_qubits=1))])
-        )
-    )
+    ut.verify(ut.ComponentwiseMul(ut.Subspace("#")))
+    ut.verify(ut.ComponentwiseMul(ut.Subspace("0#")))
+    ut.verify(ut.ComponentwiseMul((ut.Subspace("#") | ut.Subspace("0")) & ut.Subspace("#")))
 
 
 def test_componentwise_mul_partial():

@@ -8,6 +8,8 @@ from unitaria.circuit import Circuit
 from unitaria.subspace import Subspace
 from unitaria.nodes.node import Node
 
+# TODO: Rename this file
+
 
 class SubspaceCircuit(Node):
     """
@@ -32,10 +34,10 @@ class SubspaceCircuit(Node):
         return []
 
     def _subspace_in(self) -> Subspace:
-        return Subspace(self.subspace.tensor_factors, zero_qubits=1)
+        return Subspace("0") & self.subspace
 
     def _subspace_out(self) -> Subspace:
-        return Subspace(self.subspace.tensor_factors, zero_qubits=1)
+        return Subspace("0") & self.subspace
 
     def _normalization(self) -> float:
         return 1
