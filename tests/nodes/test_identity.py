@@ -1,10 +1,8 @@
-from unitaria.nodes.basic.identity import Identity
-from unitaria.subspace import Subspace
-from unitaria.verifier import verify
+import unitaria as ut
 
 
 def test_identity():
-    Id = Identity(subspace=Subspace(bits=1))
-    verify(Id)
-    Id = Identity(subspace=Subspace(bits=0))
-    verify(Id)
+    Id = ut.Identity(subspace=ut.Subspace(bits=1))
+    ut.verify(Id)
+    Id = ut.Identity(subspace=ut.Subspace(bits=0))
+    ut.verify(Id)

@@ -1,5 +1,5 @@
 from unitaria import Node
-from unitaria.nodes import ProxyNode
+from unitaria.nodes.proxy_node import ProxyNode
 from unitaria.poly_approx import sign_poly
 from unitaria.nodes.qsvt.qsvt import QSVT
 

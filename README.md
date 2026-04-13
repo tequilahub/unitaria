@@ -1,5 +1,7 @@
 # unitaria :rainbow:
 
+:warning: The main functionality of this project is still being developed. All interfaces and features may still change, and no compatibility is guaranteed.
+
 `unitaria` is a library for working with so called "block encodings" of matrices
 and vectors. These are format for performing linear algebra calculations on
 quantum computers. It allows constructing quantum algorithms using a simple,
@@ -24,10 +26,9 @@ GlobalPhase(target=(), control=(), parameter=0.0)
 )
 ```
 
-## Installation
+[**Documentation**](https://tequilahub.github.io/unitaria/index.html)
 
-`unitaria` requires at least Python version 3.12, and follows [Numpy's deprecation policy](https://numpy.org/neps/nep-0029-deprecation_policy.html),
-i.e. at least Python 3.13 will be required starting April 2027.
+## Installation
 
 The best way to install this library is using `pip`:
 
@@ -39,6 +40,11 @@ This installs everything needed to work with `unitaria`, including the
 simulation backend `qulacs`. Additional backends compatible with `tequila`,
 which is used for communcating with the backends, can also be installed, see
 [tequila](https://github.com/tequilahub/tequila).
+
+## Python versions
+
+`unitaria` requires at least Python version 3.12, and follows [Numpy's deprecation policy](https://numpy.org/neps/nep-0029-deprecation_policy.html),
+i.e. at least Python 3.13 will be required starting April 2027.
 
 ## Development
 

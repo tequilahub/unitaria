@@ -8,56 +8,51 @@ from abc import ABC, abstractmethod
 from typing import Sequence
 
 import numpy as np
+import tequila as tq
 
 from unitaria.circuit import Circuit
-import tequila as tq
+from unitaria.util import cached_property
 
 
 class Subspace:
     # TODO: More documentation
     """
     Subspace of the statespace of a number of qubits.
-
-    :param registers:
-        List of registers, each describing a subspace. The total subspace of
-        all registers is the tensor product of the individual subspaces.
-    :param zero_qubits:
-        Add an additional ``zero_qubits * [ZeroQubit()]`` to ``registers``.
     """
 
-    registers: list[Register]
+    tensor_factors: list[SubspaceFactor]
 
-    def __init__(self, registers: list[Register] = None, *, bits: int = None, dim: int = None, zero_qubits: int = 0):
+    def __init__(
+        self, tensor_factors: list[SubspaceFactor] = None, *, bits: int = None, dim: int = None, zero_qubits: int = 0
+    ):
         if dim is not None:
-            assert registers is None
+            assert tensor_factors is None
             assert zero_qubits == 0
             subspace = Subspace._from_dim(dim, bits=bits)
-            self.registers = subspace.registers
+            self.tensor_factors = subspace.tensor_factors
         elif bits is not None:
-            assert registers is None
-            self.registers = [ID] * bits
-        elif registers is not None:
-            self.registers = list(registers)
+            assert tensor_factors is None
+            self.tensor_factors = [ID] * bits
+        elif tensor_factors is not None:
+            self.tensor_factors = tensor_factors
         else:
-            self.registers = []
+            self.tensor_factors = []
 
-        for register in self.registers:
-            if not isinstance(register, Register):
-                if register is ZeroQubit:
+        for factor in self.tensor_factors:
+            if not isinstance(factor, SubspaceFactor):
+                if factor is ZeroQubit:
                     raise ValueError(
-                        f"{register} is not a valid register in a Subspace. Use `ZeroQubit()` instead of `ZeroQubit`"
+                        f"{factor} is not a valid factor in a Subspace. Use `ZeroQubit()` instead of `ZeroQubit`"
                     )
-                raise ValueError(f"{register} is not a valid register in a Subspace.")
-        simplified_registers = []
-        for register in self.registers:
-            if isinstance(register, ControlledSubspace):
-                simplified_registers += register.simplify()
+                raise ValueError(f"{factor} is not a valid factor in a Subspace.")
+        simplified_factors = []
+        for factor in self.tensor_factors:
+            if isinstance(factor, ControlledSubspace):
+                simplified_factors += factor.simplify()
             else:
-                simplified_registers.append(register)
+                simplified_factors.append(factor)
 
-        self.registers = simplified_registers + [ZeroQubit()] * zero_qubits
-        self._dimension = None
-        self._total_qubits = None
+        self.tensor_factors = simplified_factors + [ZeroQubit()] * zero_qubits
 
     @staticmethod
     def _from_dim(dim: int, bits: int | None = None) -> Subspace:
@@ -68,53 +63,51 @@ class Subspace:
         min_bits = int(np.ceil(np.log2(dim)))
         case_zero = Subspace(bits=min_bits - 1)
         case_one = Subspace(dim=dim - 2 ** (min_bits - 1), bits=min_bits - 1)
-        return Subspace(registers=[ControlledSubspace(case_zero, case_one)], zero_qubits=bits - min_bits)
+        return Subspace(tensor_factors=[ControlledSubspace(case_zero, case_one)], zero_qubits=bits - min_bits)
 
-    @property
+    @cached_property
     def dimension(self) -> int:
         """
         The dimension of the subspace
         """
-        if self._dimension is None:
-            self._dimension = 1
-            for register in self.registers:
-                self._dimension *= register.dimension()
+        dimension = 1
+        for factor in self.tensor_factors:
+            dimension *= factor.dimension()
 
-        return self._dimension
+        return dimension
 
-    @property
+    @cached_property
     def total_qubits(self) -> int:
         """
         The number of qubits of the state space in which the subspace lives
 
         The dimension of the state space is ``2 ** total_qubits``
         """
-        if self._total_qubits is None:
-            self._total_qubits = 0
-            for register in self.registers:
-                self._total_qubits += register.total_qubits()
-        return self._total_qubits
+        total_qubits = 0
+        for factor in self.tensor_factors:
+            total_qubits += factor.total_qubits()
+        return total_qubits
 
     def __eq__(self, other) -> bool:
-        return self.registers == other.registers
+        return self.tensor_factors == other.tensor_factors
 
     def match_nonzero(self, other: Subspace) -> bool:
-        return self.nonzero_registers() == other.nonzero_registers()
+        return self.nonzero_factors() == other.nonzero_factors()
 
     def __repr__(self) -> str:
         trailing_zeros = self.trailing_zeros()
-        registers = self.nonzero_registers()
-        str_registers = str(len(registers))
-        for register in registers:
-            if register != ID:
-                str_registers = repr(registers)
+        factors = self.nonzero_factors()
+        str_factors = str(len(factors))
+        for factor in factors:
+            if factor != ID:
+                str_factors = repr(factors)
                 break
         if trailing_zeros == 0:
-            return f"Subspace({str_registers})"
-        return f"Subspace({str_registers}, zero_qubits={trailing_zeros})"
+            return f"Subspace({str_factors})"
+        return f"Subspace({str_factors}, zero_qubits={trailing_zeros})"
 
     def __str__(self) -> str:
-        if len(self.registers) == 0:
+        if len(self.tensor_factors) == 0:
             return "<zero qubit subspace>"
         tree = self.draw_tree()
         output = ""
@@ -133,14 +126,14 @@ class Subspace:
 
     def draw_tree(self) -> str:
         output = ""
-        for i, register in enumerate(reversed(self.registers)):
+        for i, factor in enumerate(reversed(self.tensor_factors)):
             if i == 0:
                 output += "│\n"
-            str_register = str(register)
-            output += str_register
+            str_factor = str(factor)
+            output += str_factor
             output += "\n"
-            if i != len(self.registers) - 1:
-                last_line = str_register.rsplit("\n", 1)
+            if i != len(self.tensor_factors) - 1:
+                last_line = str_factor.rsplit("\n", 1)
                 if len(last_line) > 1:
                     last_line = last_line[-1]
                     for i, c in enumerate(last_line):
@@ -159,7 +152,7 @@ class Subspace:
                             output += "╩"
                     output += "\n"
                 else:
-                    if str_register == "0":
+                    if str_factor == "0":
                         output += "│\n"
                     else:
                         output += "║\n"
@@ -169,20 +162,20 @@ class Subspace:
         """
         Tests whether the subspace only contains the ``|0>`` state
         """
-        return self.trailing_zeros() == len(self.registers)
+        return self.trailing_zeros() == len(self.tensor_factors)
 
     def trailing_zeros(self) -> int:
-        for i in reversed(range(len(self.registers))):
-            if not isinstance(self.registers[i], ZeroQubit):
-                return len(self.registers) - i - 1
-        return len(self.registers)
+        for i in reversed(range(len(self.tensor_factors))):
+            if not isinstance(self.tensor_factors[i], ZeroQubit):
+                return len(self.tensor_factors) - i - 1
+        return len(self.tensor_factors)
 
-    def nonzero_registers(self) -> list[Register]:
+    def nonzero_factors(self) -> list[SubspaceFactor]:
         trailing_zeros = self.trailing_zeros()
         if trailing_zeros == 0:
-            return self.registers
+            return self.tensor_factors
         else:
-            return self.registers[:-trailing_zeros]
+            return self.tensor_factors[:-trailing_zeros]
 
     def test_basis(self, bits: int) -> bool:
         """
@@ -190,8 +183,8 @@ class Subspace:
         """
         if bits >= 2**self.total_qubits:
             raise ValueError
-        for register in self.registers:
-            match register:
+        for factor in self.tensor_factors:
+            match factor:
                 case ControlledSubspace(case_zero, case_one):
                     num_qubits = case_zero.total_qubits
                     relevant_bits = bits & ((1 << num_qubits) - 1)
@@ -233,7 +226,7 @@ class Subspace:
         Specifically, this qubit will be flipped if the other qubits
         represent a state outside the embedded vector space.
         """
-        # Index of the current register
+        # Index of the current factor
         index = 0
         # Next unused ancilla index
         ancilla_index = 0
@@ -242,31 +235,31 @@ class Subspace:
 
         circuit = Circuit()
 
-        for register in self.registers:
-            if isinstance(register, ZeroQubit):
+        for factor in self.tensor_factors:
+            if isinstance(factor, ZeroQubit):
                 # Zero qubits already behave like flag qubits, so we only need to toggle it
                 circuit += tq.gates.X(target=target[index])
                 intermediate_flags.append(target[index])
                 index += 1
                 continue
 
-            if register == ID:
+            if factor == ID:
                 # No need to do anything here
                 index += 1
                 continue
 
-            if not isinstance(register, ControlledSubspace):
-                raise ValueError("Registers that aren't of type Qubit are unsupported")
+            if not isinstance(factor, ControlledSubspace):
+                raise ValueError("SubspaceFactors that aren't of type Qubit are unsupported")
 
-            circuit += register.circuit(
-                target=target[index : index + register.total_qubits()],
+            circuit += factor.circuit(
+                target=target[index : index + factor.total_qubits()],
                 flag=ancillae[ancilla_index],
                 ancillae=ancillae[ancilla_index + 1 :],
             )
             circuit += tq.gates.X(target=ancillae[ancilla_index])
             intermediate_flags.append(ancillae[ancilla_index])
 
-            index += register.total_qubits()
+            index += factor.total_qubits()
             ancilla_index += 1
 
         # Apply the constructed circuit, add a multi-controlled NOT to determine
@@ -278,7 +271,7 @@ class Subspace:
         return circuit
 
     def clean_ancilla_count(self) -> int:
-        controlled_subspaces = filter(lambda r: isinstance(r, ControlledSubspace), self.registers)
+        controlled_subspaces = filter(lambda r: isinstance(r, ControlledSubspace), self.tensor_factors)
         return max(
             [i + r.clean_ancilla_count() for (i, r) in enumerate(controlled_subspaces, start=1)],
             default=0,
@@ -302,30 +295,32 @@ class Subspace:
 
     def case_zero(self) -> Subspace:
         trailing_zeros = self.trailing_zeros()
-        if trailing_zeros == len(self.registers):
+        if trailing_zeros == len(self.tensor_factors):
             return None
 
         return Subspace(
-            self.registers[: -(trailing_zeros + 1)] + self.registers[-(trailing_zeros + 1)].case_zero.registers,
+            self.tensor_factors[: -(trailing_zeros + 1)]
+            + self.tensor_factors[-(trailing_zeros + 1)].case_zero.tensor_factors,
         )
 
     def case_one(self) -> Subspace:
         trailing_zeros = self.trailing_zeros()
-        if trailing_zeros == len(self.registers):
+        if trailing_zeros == len(self.tensor_factors):
             return None
 
         return Subspace(
-            self.registers[: -(trailing_zeros + 1)] + self.registers[-(trailing_zeros + 1)].case_one.registers,
+            self.tensor_factors[: -(trailing_zeros + 1)]
+            + self.tensor_factors[-(trailing_zeros + 1)].case_one.tensor_factors,
         )
 
     def __and__(self, other: Subspace) -> Subspace:
-        return Subspace(self.registers + other.registers)
+        return Subspace(self.tensor_factors + other.tensor_factors)
 
     def __or__(self, other: Subspace) -> Subspace:
         return Subspace([ControlledSubspace(self, other)])
 
 
-class Register(ABC):
+class SubspaceFactor(ABC):
     @abstractmethod
     def total_qubits(self) -> int:
         """
@@ -344,7 +339,7 @@ class Register(ABC):
 
 
 @dataclass(frozen=True)
-class ZeroQubit(Register):
+class ZeroQubit(SubspaceFactor):
     def total_qubits(self) -> int:
         return 1
 
@@ -356,9 +351,9 @@ class ZeroQubit(Register):
 
 
 @dataclass(frozen=True, repr=False)
-class ControlledSubspace(Register):
+class ControlledSubspace(SubspaceFactor):
     """
-    Register where the most significant qubit determines the subspace
+    SubspaceFactor where the most significant qubit determines the subspace
     corresponding to lower qubits
 
     :param case_zero:
@@ -410,30 +405,30 @@ class ControlledSubspace(Register):
 
         return output
 
-    def simplify(self) -> list[Register]:
+    def simplify(self) -> list[SubspaceFactor]:
         """
-        Returns a potentially simpler representation of this register
+        Returns a potentially simpler representation of this factor
 
         Specifically, if `case_one` and `case_zero` agree in a number of lowest
         qubits, this common part can be factored out. E.g.
 
-            >>> from unitaria.subspace import Subspace, ControlledSubspace
-            >>> ControlledSubspace(Subspace(2), Subspace(1, 1)).simplify()
+            >>> import unitaria as ut
+            >>> ut.ControlledSubspace(ut.Subspace(bits=2), ut.Subspace(bits=1, zero_qubits=1)).simplify()
             [ID, ControlledSubspace(case_zero=Subspace(1), case_one=Subspace(0, zero_qubits=1))]
         """
-        min_len = min(len(self.case_zero.registers), len(self.case_one.registers))
+        min_len = min(len(self.case_zero.tensor_factors), len(self.case_one.tensor_factors))
         for i in range(min_len):
-            if self.case_zero.registers[i] != self.case_one.registers[i]:
-                return self.case_zero.registers[:i] + [
+            if self.case_zero.tensor_factors[i] != self.case_one.tensor_factors[i]:
+                return self.case_zero.tensor_factors[:i] + [
                     ControlledSubspace(
-                        Subspace(registers=self.case_zero.registers[i:]),
-                        Subspace(registers=self.case_one.registers[i:]),
+                        Subspace(tensor_factors=self.case_zero.tensor_factors[i:]),
+                        Subspace(tensor_factors=self.case_one.tensor_factors[i:]),
                     )
                 ]
-        return self.case_zero.registers[:min_len] + [
+        return self.case_zero.tensor_factors[:min_len] + [
             ControlledSubspace(
-                Subspace(registers=self.case_zero.registers[min_len:]),
-                Subspace(registers=self.case_one.registers[min_len:]),
+                Subspace(tensor_factors=self.case_zero.tensor_factors[min_len:]),
+                Subspace(tensor_factors=self.case_one.tensor_factors[min_len:]),
             )
         ]
 
@@ -459,4 +454,4 @@ class ControlledSubspace(Register):
         return max(self.case_zero.clean_ancilla_count(), self.case_one.clean_ancilla_count())
 
 
-ID = ControlledSubspace(Subspace(registers=[]), Subspace(registers=[]))
+ID = ControlledSubspace(Subspace(tensor_factors=[]), Subspace(tensor_factors=[]))

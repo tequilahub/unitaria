@@ -1,12 +1,12 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from functools import cached_property
 from typing import Sequence
 
 import numpy as np
 from rich.tree import Tree
 from rich.console import Console
 
+from unitaria.util import cached_property
 from unitaria.subspace import Subspace
 from unitaria.circuit import Circuit
 
@@ -86,6 +86,7 @@ class Node(ABC):
         In the formalism of block encodings this corresponds to the projection
         :math:`\\Pi_1`.
         """
+        __tracebackhide__ = True
         return self._subspace_in()
 
     @abstractmethod
@@ -110,6 +111,7 @@ class Node(ABC):
         In the formalism of block encodings this corresponds to the projection
         :math:`\\Pi_2`.
         """
+        __tracebackhide__ = True
         return self._subspace_out()
 
     @abstractmethod
@@ -129,6 +131,7 @@ class Node(ABC):
         Non-negative number, which has to be multiplied with the outputs of the
         circuit to ensure proper scaling of the result.
         """
+        __tracebackhide__ = True
         return self._normalization()
 
     @abstractmethod
@@ -139,6 +142,16 @@ class Node(ABC):
         To be implemented in all subclasses of `Node`.
         """
         raise NotImplementedError
+
+    def is_guaranteed_unitary(self) -> bool:
+        """
+        If this returns true, the matrix the node represents divided by its
+        normalization must be unitary.
+
+        This must be ensured by the implementor of this method. A unitary node
+        is useful, since it avoids having to use projections in multiplications.
+        """
+        return False
 
     def is_vector(self) -> bool:
         """
@@ -191,6 +204,7 @@ class Node(ABC):
         if target is None:
             assert clean_ancillae is None
             assert borrowed_ancillae is None
+            __tracebackhide__ = True
             target = range(self.target_qubit_count())
             clean_ancillae = range(self.target_qubit_count(), self.target_qubit_count() + self.clean_ancilla_count())
             borrowed_ancillae = range(
@@ -225,6 +239,7 @@ class Node(ABC):
         being the qubits 0, 1, ... so that the result can be cached.
         This is then mapped by circuit to the actually requested qubit indices.
         """
+        __tracebackhide__ = True
         target = range(self.target_qubit_count())
         clean_ancillae = range(self.target_qubit_count(), self.target_qubit_count() + self.clean_ancilla_count())
         borrowed_ancillae = range(
@@ -252,7 +267,7 @@ class Node(ABC):
     def clean_ancilla_count(self) -> int:
         """
         Returns the number of borrowed ancillae used by the circuit of this node,
-        i.e. qubits that must be in state |0> at the beginning of the circuit and
+        i.e. qubits that must be in state ``|0>`` at the beginning of the circuit and
         will be returned to this state by the end of the circuit.
         """
         raise NotImplementedError
@@ -324,7 +339,7 @@ class Node(ABC):
         if self.is_vector() and input is None:
             input = 0
         if input is not None:
-            wavefunction = self.circuit().simulate(input=input)
+            wavefunction = self.circuit().simulate(input=input, backend="qulacs")
             return self.normalization * self.subspace_out.project(wavefunction)
         else:
             output = np.zeros((self.dimension_out, self.dimension_in))

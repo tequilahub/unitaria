@@ -1,24 +1,21 @@
-from unitaria.nodes.basic.identity import Identity
-from unitaria.nodes.classical.increment import Increment
-from unitaria.subspace import Subspace
-from unitaria.verifier import verify
+import unitaria as ut
 
 
 def test_block_diagonal():
-    A = Identity(subspace=Subspace(bits=2, zero_qubits=1))
-    B = Increment(bits=2)
+    A = ut.Identity(subspace=ut.Subspace(bits=2, zero_qubits=1))
+    B = ut.Increment(bits=2)
 
     D = A | B
-    verify(D)
+    ut.verify(D)
     D = B | A
-    verify(D)
+    ut.verify(D)
 
 
 def test_block_diagonal_with_permutation():
-    A = Identity(subspace=Subspace(bits=2))
-    B = Increment(bits=2)
+    A = ut.Identity(subspace=ut.Subspace(bits=2))
+    B = ut.Increment(bits=2)
 
     D = A | B
-    verify(D)
+    ut.verify(D)
     D = B | A
-    verify(D)
+    ut.verify(D)

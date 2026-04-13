@@ -2,8 +2,8 @@ from typing import Sequence
 
 import numpy as np
 
-from ..node import Node
-from .classical import Classical
+from unitaria.nodes.node import Node
+from unitaria.nodes.classical.classical import Classical
 from unitaria.subspace import Subspace
 from unitaria.circuit import Circuit
 from unitaria.circuits.arithmetic import const_addition_circuit
@@ -38,6 +38,9 @@ class ConstantIntegerAddition(Classical):
 
     def _subspace_out(self) -> Subspace:
         return Subspace(bits=self.bits)
+
+    def is_guaranteed_unitary(self) -> bool:
+        return True
 
     def compute_classical(self, input: np.ndarray) -> np.ndarray:
         return (input + self.constant) % 2**self.bits

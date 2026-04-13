@@ -66,6 +66,9 @@ class BlockDiagonal(ProxyNode):
     def _normalization(self) -> float:
         return self.A.normalization
 
+    def is_guaranteed_unitary(self) -> bool:
+        return self.A.is_guaranteed_unitary() and self.B.is_guaranteed_unitary()
+
     def compute(self, input: np.ndarray) -> np.ndarray:
         dim_A = self.A.dimension_in
         input_A, input_B = np.split(input, [dim_A], axis=-1)
@@ -86,9 +89,9 @@ def _controlled_qubits(A_controlled: Subspace, B_controlled: Subspace) -> Subspa
     A = A_controlled.case_one()
     B = B_controlled.case_one()
     controlled_qubits = max(A.total_qubits, B.total_qubits)
-    case_zero = Subspace(registers=A.registers, zero_qubits=max(0, controlled_qubits - A.total_qubits))
-    case_one = Subspace(registers=B.registers, zero_qubits=max(0, controlled_qubits - B.total_qubits))
-    return Subspace(registers=[ControlledSubspace(case_zero, case_one)], zero_qubits=zeros)
+    case_zero = Subspace(A.tensor_factors, zero_qubits=max(0, controlled_qubits - A.total_qubits))
+    case_one = Subspace(B.tensor_factors, zero_qubits=max(0, controlled_qubits - B.total_qubits))
+    return Subspace([ControlledSubspace(case_zero, case_one)], zero_qubits=zeros)
 
 
 Node.__or__ = lambda A, B: BlockDiagonal(A, B)

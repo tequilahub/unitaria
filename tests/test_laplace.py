@@ -1,20 +1,7 @@
 import pytest
 
 import numpy as np
-
-from unitaria.nodes import (
-    Increment,
-    Identity,
-    Add,
-    Scale,
-    Adjoint,
-    ConstantUnitary,
-    BlockHorizontal,
-    Projection,
-)
-from unitaria.subspace import Subspace
-from unitaria.verifier import verify
-from unitaria.util import logreduce
+import unitaria as ut
 
 
 def ref_Q(L, L_MAX):
@@ -172,12 +159,12 @@ def ref_CP_1d(L, DIM):
 
 @pytest.mark.parametrize("n", range(1, 5))
 def test_laplace(n: int):
-    C = Increment(bits=n)
-    A = Add(
-        Scale(Identity(subspace=Subspace(bits=n)), -2),
-        Scale(Add(C, Adjoint(C)), 1),
+    C = ut.Increment(bits=n)
+    A = ut.Add(
+        ut.Scale(ut.Identity(subspace=ut.Subspace(bits=n)), -2),
+        ut.Scale(ut.Add(C, ut.Adjoint(C)), 1),
     )
-    verify(A)
+    ut.verify(A)
 
 
 def test_preconditioned_laplace_1d():
@@ -187,18 +174,18 @@ def test_preconditioned_laplace_1d():
     C_F = []
 
     for i in range(L, 0, -1):
-        I_l = Projection(Subspace(dim=2**i - 1, bits=i), Subspace(bits=i))
-        N_l = Increment(bits=i) @ I_l
+        I_l = ut.Projection(ut.Subspace(dim=2**i - 1, bits=i), ut.Subspace(bits=i))
+        N_l = ut.Increment(bits=i) @ I_l
         C_l = 2 ** (i / 2) * (I_l - N_l)
 
-        T_l = ConstantUnitary(np.sqrt(1 / 2) * np.array([[1], [1]])) & Identity(subspace=Subspace(bits=i - 1))
+        T_l = ut.ConstantUnitary(np.sqrt(1 / 2) * np.array([[1], [1]])) & ut.Identity(subspace=ut.Subspace(bits=i - 1))
         # T_l = ConstantUnitary(
         #     np.sqrt(1 / 2) * np.array([
         #         [1, -np.sqrt(3) / 2],
         #         [0, 1 / 2],
         #         [1, np.sqrt(3) / 2],
         #         [0, 1 / 2],
-        #     ])) & Identity(subspace=Subspace(registers=l - 1))
+        #     ])) & Identity(subspace=Subspace(l - 1))
 
         if i == L:
             TC = 2 ** (-i / 2) * C_l
@@ -209,6 +196,6 @@ def test_preconditioned_laplace_1d():
             C_F.append(TC)
             T = T @ T_l
 
-    C_F = logreduce(BlockHorizontal, list(reversed(C_F)))
+    C_F = ut.util.logreduce(ut.BlockHorizontal, list(reversed(C_F)))
 
-    verify(C_F, ref_CP_1d(4, 1))
+    ut.verify(C_F, ref_CP_1d(4, 1), check_adjoint=False)

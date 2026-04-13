@@ -29,7 +29,7 @@ class ConstantVector(Node):
         """
         super().__init__(1, vec.shape[0])
         self.n_qubits = round(np.log2(vec.shape[0]))
-        assert 2**self.n_qubits == vec.shape[0]
+        assert (2**self.n_qubits,) == vec.shape
         self.vec = vec
 
     def children(self) -> list[Node]:

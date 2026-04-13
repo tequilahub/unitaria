@@ -35,6 +35,9 @@ class Adjoint(Node):
     def _normalization(self) -> float:
         return self.A.normalization
 
+    def is_guaranteed_unitary(self) -> bool:
+        return self.A.is_guaranteed_unitary()
+
     def compute(self, input: np.ndarray | None) -> np.ndarray:
         return self.A.compute_adjoint(input)
 
@@ -51,3 +54,6 @@ class Adjoint(Node):
 
     def borrowed_ancilla_count(self) -> int:
         return self.A.borrowed_ancilla_count()
+
+
+Node.adjoint = lambda x: Adjoint(x)

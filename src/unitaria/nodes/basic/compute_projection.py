@@ -32,10 +32,10 @@ class SubspaceCircuit(Node):
         return []
 
     def _subspace_in(self) -> Subspace:
-        return Subspace(registers=self.subspace.registers, zero_qubits=1)
+        return Subspace(self.subspace.tensor_factors, zero_qubits=1)
 
     def _subspace_out(self) -> Subspace:
-        return Subspace(registers=self.subspace.registers, zero_qubits=1)
+        return Subspace(self.subspace.tensor_factors, zero_qubits=1)
 
     def _normalization(self) -> float:
         return 1

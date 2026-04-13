@@ -1,35 +1,41 @@
 import numpy as np
-
-from unitaria.nodes.constants.constant_unitary import ConstantUnitary
-from unitaria.nodes.constants.constant_vector import ConstantVector
-from unitaria.verifier import verify
+import scipy.stats
+import unitaria as ut
 
 
 def test_constant_vector():
-    A = ConstantVector(np.array([1, 2j, 1 / 3, -1j / 4]))
-    verify(A)
-    verify(ConstantUnitary(np.sqrt(1 / 2) * np.array([[1, 1], [1, -1]])))
-    verify(ConstantUnitary(np.array([[0, 1], [1, 0]])))
+    A = ut.ConstantVector(np.array([1, 2j, 1 / 3, -1j / 4]))
+    ut.verify(A)
+    ut.verify(ut.ConstantUnitary(np.sqrt(1 / 2) * np.array([[1, 1], [1, -1]])))
+    ut.verify(ut.ConstantUnitary(np.array([[0, 1], [1, 0]])))
     angle = 1.23
-    verify(ConstantUnitary(np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])))
-    verify(ConstantUnitary(np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 0, 1], [0, 0, 1, 0]])))
+    ut.verify(ut.ConstantUnitary(np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])))
+    ut.verify(ut.ConstantUnitary(np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 0, 1], [0, 0, 1, 0]])))
 
 
 def test_constant_unitary():
-    verify(ConstantUnitary(np.eye(1)))
-    verify(ConstantUnitary(np.eye(2)))
-    verify(ConstantUnitary(np.eye(4)))
+    ut.verify(ut.ConstantUnitary(np.eye(1)))
+    ut.verify(ut.ConstantUnitary(np.eye(2)))
+    ut.verify(ut.ConstantUnitary(np.eye(4)))
+
+    for i in range(1, 5):
+        U = scipy.stats.unitary_group.rvs(2**i, random_state=0)
+        ut.verify(ut.ConstantUnitary(U))
+
+    # Triggers an edge case because of the degenerate eigenvalue
+    U = np.array([[1, 0, 0, 0], [0, 0, 0, 1], [0, -0.81649658, -0.57735027, 0], [0, -0.57735027, 0.81649658, 0]])
+    ut.verify(ut.ConstantUnitary(U))
 
 
 def test_constant_unitary_rectangular():
-    verify(ConstantUnitary(np.array([[1, 0]])))
-    verify(ConstantUnitary(np.array([[1], [0]])))
-    verify(ConstantUnitary(np.array([[0], [1]])))
-    verify(ConstantUnitary(np.array([[np.sqrt(1 / 2)], [np.sqrt(1 / 2)]])))
+    ut.verify(ut.ConstantUnitary(np.array([[1, 0]])))
+    ut.verify(ut.ConstantUnitary(np.array([[1], [0]])))
+    ut.verify(ut.ConstantUnitary(np.array([[0], [1]])))
+    ut.verify(ut.ConstantUnitary(np.array([[np.sqrt(1 / 2)], [np.sqrt(1 / 2)]])))
 
 
 def test_global_phase():
-    A = ConstantVector(np.array([1, -1]))
-    verify(A)
-    A = ConstantVector(np.array([-1, 1]))
-    verify(A)
+    A = ut.ConstantVector(np.array([1, -1]))
+    ut.verify(A)
+    A = ut.ConstantVector(np.array([-1, 1]))
+    ut.verify(A)

@@ -74,6 +74,9 @@ class Scale(Node):
         else:
             return self.scale * self.A.normalization
 
+    def is_guaranteed_unitary(self) -> bool:
+        return self.remove_efficiency == 1 and self.A.is_guaranteed_unitary()
+
     def compute(self, input: np.ndarray | None = None) -> np.ndarray:
         """
         Computes the scaled output for the given input.

@@ -1,22 +1,44 @@
 [build-system]
-requires = ["setuptools"]
-build-backend = "setuptools.build_meta"
+requires = ["uv_build>=0.11.3,<0.12"]
+build-backend = "uv_build"
 
 [project]
 name = "unitaria"
 authors = [
   {name = "Matthias Deiml", email = "matthias.deiml@uni-a.de"},
+  {name = "Oliver Hüttenhofen", email = "oliver.huettenhofer@uni-a.de"},
+  {name = "Jakob S. Kottmann", email = "jakob.kottmann@uni-a.de"},
+  {name = "Ram Mosco", email = "ram.mosco@uni-a.de"},
+  {name = "Daniel Peterseim", email = "daniel.peterseim@uni-a.de"}
 ]
 version = "0.0.0"
-description = "A tool to construct and simulate block encodings for quantum computation"
+description = "Linear algebra on quantum computers using block encodings"
 keywords = ["quantum computing"]
+license = "MIT"
+license-files = ["LICENSE"]
+readme = "README.md"
 dependencies = [
-  "tequila-basic@git+https://github.com/tequilahub/tequila.git@devel",
+  "tequila-basic>=1.9.11",
   "rich==14.0.*",
   "qulacs==0.6.*",
   "numpy==2.4.*",
-  "scipy==1.17.*",
-  "pyqsp==0.2.0"
+  "scipy==1.17.*"
+]
+requires-python = ">=3.12"
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Education",
+  "Intended Audience :: Science/Research",
+  "Topic :: Scientific/Engineering",
+  "Topic :: Scientific/Engineering :: Chemistry",
+  "Topic :: Scientific/Engineering :: Mathematics",
+  "Topic :: Scientific/Engineering :: Physics",
+  "Topic :: Scientific/Engineering :: Quantum Computing",
 ]
 
 [dependency-groups]
@@ -27,7 +49,9 @@ dev = ["pytest"]
 qpic = ["qpic==1.1.*"]
 
 [project.urls]
-Repository = "https://github.com/bequem-py/bequem.git"
+Repository = "https://github.com/tequilahub/unitaria.git"
+Issues = "https://github.com/tequilahub/unitaria/issues"
+Documentation = "https://tequilahub.github.io/unitaria/index.html"
 
 [tool.pytest.ini_options]
 addopts = [

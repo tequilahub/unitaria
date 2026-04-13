@@ -3,8 +3,8 @@ from typing import Sequence
 import numpy as np
 import tequila as tq
 
-from ..node import Node
-from .classical import Classical
+from unitaria.nodes.node import Node
+from unitaria.nodes.classical.classical import Classical
 from unitaria.subspace import Subspace
 from unitaria.circuit import Circuit
 from unitaria.circuits.arithmetic import increment_circuit_single_ancilla
@@ -37,6 +37,9 @@ class Increment(Classical):
 
     def _subspace_out(self) -> Subspace:
         return Subspace(bits=self.bits)
+
+    def is_guaranteed_unitary(self) -> bool:
+        return True
 
     def compute_classical(self, input: np.ndarray) -> np.ndarray:
         return (input + 1) % 2**self.bits
