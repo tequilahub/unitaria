@@ -43,7 +43,7 @@ from unitaria.nodes.amplification.grover_amplification import GroverAmplificatio
 from unitaria.nodes.amplification.linear_amplification import LinearAmplification
 from unitaria.nodes.amplification.fixed_point_amplification import FixedPointAmplification
 
-from unitaria.nodes.permutation.permutation import PermuteRegisters
+from unitaria.nodes.permutation.permutation import PermuteFactors
 
 __all__ = [
     "Node",
@@ -71,7 +71,7 @@ __all__ = [
     "LinearAmplification",
     "Mul",
     "MultilinearNode",
-    "PermuteRegisters",
+    "PermuteFactors",
     "Projection",
     "ProxyNode",
     "Pseudoinverse",
