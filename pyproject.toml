@@ -58,6 +58,7 @@ addopts = [
   "--import-mode=importlib",
   "--doctest-modules",
   "--doctest-glob=README.md",
+  "--doctest-glob=*.rst",
 ]
 pythonpath = ["src"]
 doctest_optionflags = ["NUMBER"]
