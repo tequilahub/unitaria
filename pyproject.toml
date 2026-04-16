@@ -56,8 +56,11 @@ Documentation = "https://tequilahub.github.io/unitaria/index.html"
 [tool.pytest.ini_options]
 addopts = [
   "--import-mode=importlib",
+  "--doctest-modules",
+  "--doctest-glob=README.md",
 ]
 pythonpath = ["src"]
+doctest_optionflags = ["NUMBER"]
 
 [tool.ruff]
 line-length = 120

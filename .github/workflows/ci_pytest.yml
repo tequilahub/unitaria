@@ -24,6 +24,4 @@ jobs:
       - name: Install dependencies
         run: uv sync --dev
       - name: Run tests
-        run: uv run pytest tests
-      - name: Run doctest
-        run: uv run pytest --doctest-glob="README.md" README.md
+        run: uv run pytest
