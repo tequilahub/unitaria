@@ -21,7 +21,7 @@ class ConstantUnitary(Node):
     def __init__(self, unitary: np.ndarray):
         """
         Initialize a ConstantUnitary node.
-        
+
         :param unitary: The unitary matrix to be applied. Can be rectangular; will be extended to square if needed.
         :raises ValueError: If the provided matrix is square but not unitary.
         """
