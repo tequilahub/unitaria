@@ -9,34 +9,46 @@ from unitaria.nodes.node import Node
 
 class Tensor(Node):
     """
-    Node representing the tensor product of two other nodes
+    Node representing the tensor (Kronecker) product of two other nodes, consistent with numpy's np.kron(A, B).
 
-    The order of operations is such that ``A`` corresponds to the lower
-    significant digits of the index, i.e.
+    The order of operations is such that Tensor(A, B) and (A & B) correspond to np.kron(A, B):
+    - A acts on the left part, B acts on the right part.
+    - In the compute methods, B is applied first, then A, matching the action of np.kron(A, B) on a vector.
 
-    >>> import unitaria as ut
-    >>> import numpy as np
-    >>> ut.Tensor(ut.Increment(bits=1), ut.Identity(bits=1)).toarray().real
-    array([[0., 1., 0., 0.],
-           [1., 0., 0., 0.],
-           [0., 0., 0., 1.],
-           [0., 0., 1., 0.]])
+    Example (np.kron from numpy):
+        >>> import numpy as np
+        >>> A = np.array([[1, 2], [3, 4]])
+        >>> B = np.array([[0, 5], [6, 7]])
+        >>> np.kron(A, B)
+        array([[ 0,  5,  0, 10],
+               [ 6,  7, 12, 14],
+               [ 0, 15,  0, 20],
+               [18, 21, 24, 28]])
+
+    Example (unitaria specific):
+        >>> import unitaria as ut
+        >>> import numpy as np
+        >>> ut.Tensor(ut.Increment(bits=1), ut.Identity(bits=1)).toarray().real
+        array([[0., 1., 0., 0.],
+               [1., 0., 0., 0.],
+               [0., 0., 0., 1.],
+               [0., 0., 1., 0.]])
 
     The and operator for `ut.Node` is overloaded to be the tensor product,
     i.e. you can equivalently write
 
-    >>> import unitaria as ut
-    >>> import numpy as np
-    >>> (ut.Increment(bits=1) & ut.Identity(bits=1)).toarray().real
-    array([[0., 1., 0., 0.],
-           [1., 0., 0., 0.],
-           [0., 0., 0., 1.],
-           [0., 0., 1., 0.]])
+        >>> import unitaria as ut
+        >>> import numpy as np
+        >>> (ut.Increment(bits=1) & ut.Identity(bits=1)).toarray().real
+        array([[0., 1., 0., 0.],
+               [1., 0., 0., 0.],
+               [0., 0., 0., 1.],
+               [0., 0., 1., 0.]])
 
     :param A:
-        The first factor
+        The left (second) factor
     :param B:
-        The second factor
+        The right (first) factor
     """
 
     A: Node
@@ -54,12 +66,12 @@ class Tensor(Node):
         if input is None:
             input = np.array([1])
         batch_shape = list(input.shape[:-1])
-        input = input.reshape([-1, self.A.dimension_in])
-        input = self.A.compute(input)
-        input = input.reshape(batch_shape + [self.B.dimension_in, self.A.dimension_out])
-        input = np.swapaxes(input, -1, -2)
         input = input.reshape([-1, self.B.dimension_in])
         input = self.B.compute(input)
+        input = input.reshape(batch_shape + [self.A.dimension_in, self.B.dimension_out])
+        input = np.swapaxes(input, -1, -2)
+        input = input.reshape([-1, self.A.dimension_in])
+        input = self.A.compute(input)
         input = input.reshape(batch_shape + [self.A.dimension_out, self.B.dimension_out])
         input = np.swapaxes(input, -1, -2)
         return np.reshape(input, batch_shape + [-1])
@@ -68,12 +80,12 @@ class Tensor(Node):
         if input is None:
             input = np.array([1])
         batch_shape = list(input.shape[:-1])
-        input = input.reshape([-1, self.A.dimension_out])
-        input = self.A.compute_adjoint(input)
-        input = input.reshape(batch_shape + [self.B.dimension_out, self.A.dimension_in])
-        input = np.swapaxes(input, -1, -2)
         input = input.reshape([-1, self.B.dimension_out])
         input = self.B.compute_adjoint(input)
+        input = input.reshape(batch_shape + [self.A.dimension_out, self.B.dimension_in])
+        input = np.swapaxes(input, -1, -2)
+        input = input.reshape([-1, self.A.dimension_out])
+        input = self.A.compute_adjoint(input)
         input = input.reshape(batch_shape + [self.A.dimension_in, self.B.dimension_in])
         input = np.swapaxes(input, -1, -2)
         return np.reshape(input, batch_shape + [-1])
@@ -81,17 +93,16 @@ class Tensor(Node):
     def _circuit(
         self, target: Sequence[int], clean_ancillae: Sequence[int], borrowed_ancillae: Sequence[int]
     ) -> Circuit:
-        # TODO: Optionally optimize for qubit count instead of depth?
         circuit = Circuit()
+        circuit += self.B.circuit(
+            target[self.B.target_qubit_count() :],
+            clean_ancillae[self.B.clean_ancilla_count() :],
+            borrowed_ancillae[self.B.borrowed_ancilla_count() :],
+        )
         circuit += self.A.circuit(
             target[: self.A.target_qubit_count()],
             clean_ancillae[: self.A.clean_ancilla_count()],
             borrowed_ancillae[: self.A.borrowed_ancilla_count()],
-        )
-        circuit += self.B.circuit(
-            target[self.A.target_qubit_count() :],
-            clean_ancillae[self.A.clean_ancilla_count() :],
-            borrowed_ancillae[self.A.borrowed_ancilla_count() :],
         )
         return circuit
 
