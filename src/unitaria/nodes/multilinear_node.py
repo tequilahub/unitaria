@@ -56,7 +56,7 @@ class MultilinearNode(ProxyNode):
                 if apply_product is None:
                     apply_product = node
                 else:
-                    apply_product = Tensor(apply_product, node)
+                    apply_product = Tensor(node, apply_product)
             definition = self.definition()
             self._definition = Mul(apply_product, definition)
         return self._definition

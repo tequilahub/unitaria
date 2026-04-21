@@ -58,12 +58,12 @@ class Add(ProxyNode):
         sqrt_A = np.sqrt(np.abs(self.A.normalization))
         sqrt_B = np.sqrt(np.abs(self.B.normalization))
         rotation_in = Tensor(
-            Identity(diag.subspace_in.case_zero()),
             ConstantVector(np.array([sqrt_A, sqrt_B])),
+            Identity(diag.subspace_in.case_zero()),
         )
         rotation_out = Tensor(
-            Identity(diag.subspace_out.case_zero()),
             ConstantVector(np.array([self.A.normalization / sqrt_A, self.B.normalization / sqrt_B])),
+            Identity(diag.subspace_out.case_zero()),
         )
 
         return UnsafeMul(UnsafeMul(rotation_in, diag), Adjoint(rotation_out))

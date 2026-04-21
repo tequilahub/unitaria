@@ -454,11 +454,11 @@ def permute(a: Subspace, b: Subspace) -> tuple[Node, Node]:
 
     subperms_a, subperms_b = zip(*[_brute_force(a, b) for a, b in partitioning])
 
-    subperms_a = logreduce(Tensor, subperms_a)
+    subperms_a = logreduce(Tensor, list(reversed(subperms_a)))
     move_a_in = _move_zeros_to_end(subperms_a.subspace_in)
     move_a_out = _move_zeros_to_end(subperms_a.subspace_out)
     perm_a = UnsafeMul(UnsafeMul(perm_a, Adjoint(move_a_in)), UnsafeMul(subperms_a, move_a_out))
-    subperms_b = logreduce(Tensor, subperms_b)
+    subperms_b = logreduce(Tensor, list(reversed(subperms_b)))
     move_b_in = _move_zeros_to_end(subperms_b.subspace_in)
     move_b_out = _move_zeros_to_end(subperms_b.subspace_out)
     perm_b = UnsafeMul(UnsafeMul(perm_b, Adjoint(move_b_in)), UnsafeMul(subperms_b, move_b_out))

@@ -45,8 +45,8 @@ class BlockVertical(ProxyNode):
         diag = BlockDiagonal(A_permuted, B_permuted)
 
         rotation_in = Tensor(
-            Identity(diag.subspace_out.case_zero()),
             ConstantVector(np.array([self.A.normalization, self.B.normalization])),
+            Identity(diag.subspace_out.case_zero()),
         )
 
         return UnsafeMul(rotation_in, diag)
