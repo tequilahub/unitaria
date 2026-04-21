@@ -33,10 +33,10 @@ class Increment(Classical):
         return {"bits": self.bits}
 
     def _subspace_in(self) -> Subspace:
-        return Subspace(bits=self.bits)
+        return Subspace("#" * self.bits)
 
     def _subspace_out(self) -> Subspace:
-        return Subspace(bits=self.bits)
+        return Subspace("#" * self.bits)
 
     def is_guaranteed_unitary(self) -> bool:
         return True

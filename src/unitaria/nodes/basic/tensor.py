@@ -16,7 +16,7 @@ class Tensor(Node):
 
     >>> import unitaria as ut
     >>> import numpy as np
-    >>> ut.Tensor(ut.Increment(bits=1), ut.Identity(bits=1)).toarray().real
+    >>> ut.Tensor(ut.Increment(bits=1), ut.Identity(dim=2)).toarray().real
     array([[0., 1., 0., 0.],
            [1., 0., 0., 0.],
            [0., 0., 0., 1.],
@@ -27,7 +27,7 @@ class Tensor(Node):
 
     >>> import unitaria as ut
     >>> import numpy as np
-    >>> (ut.Increment(bits=1) & ut.Identity(bits=1)).toarray().real
+    >>> (ut.Increment(bits=1) & ut.Identity(dim=2)).toarray().real
     array([[0., 1., 0., 0.],
            [1., 0., 0., 0.],
            [0., 0., 0., 1.],
@@ -98,12 +98,12 @@ class Tensor(Node):
     def _subspace_in(self) -> Subspace:
         subspace_A = self.A.subspace_in
         subspace_B = self.B.subspace_in
-        return subspace_A & subspace_B
+        return subspace_B & subspace_A
 
     def _subspace_out(self) -> Subspace:
         subspace_A = self.A.subspace_out
         subspace_B = self.B.subspace_out
-        return subspace_A & subspace_B
+        return subspace_B & subspace_A
 
     def _normalization(self) -> float:
         return self.A.normalization * self.B.normalization

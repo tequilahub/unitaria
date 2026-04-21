@@ -5,7 +5,7 @@ from typing import Sequence
 import numpy as np
 import tequila as tq
 from unitaria.nodes.node import Node
-from unitaria.subspace import Subspace, ZeroQubit, ControlledSubspace
+from unitaria.subspace import Subspace, ZeroQubitSubspace, ControlledSubspace
 from unitaria.nodes.basic.unsafe_multiplication import UnsafeMul
 from unitaria.nodes.basic.adjoint import Adjoint
 from unitaria.nodes.basic.identity import Identity
@@ -23,7 +23,7 @@ def _move_zeros_to_end(subspace: Subspace) -> PermuteFactors:
     nonzero_factors = []
     zero_factors = []
     for i, factor in enumerate(subspace.tensor_factors):
-        if isinstance(factor, ZeroQubit):
+        if isinstance(factor, ZeroQubitSubspace):
             zero_factors.append(i)
         else:
             nonzero_factors.append(i)
@@ -129,20 +129,19 @@ class PermuteFactors(Node):
         return 0
 
 
-def _controlled_trailing_zeros(subspace: Subspace):
+def _controlled_initial_zeros(subspace: Subspace):
     case_zero = subspace.case_zero()
     case_one = subspace.case_one()
-    return min(case_zero.trailing_zeros(), case_one.trailing_zeros())
+    return min(case_zero.initial_zeros(), case_one.initial_zeros())
 
 
 class AddZerosToControl(Node):
     """
     Operation to add zeros to both branches of a controlled subspace.
 
-    Specifically, this implements the identity for
-    ``subspace_in = subspace & z`` and
-    ``subspace_out = (subspace.case_zero() & z) | (subspace.case_one() & z)``,
-    where ``z = Subspace(zero_qubits=num_zeros)``.
+    Specifically, this implements the identity for ``subspace_in = z & subspace``
+    and ``subspace_out = (z & subspace.case_zero()) | (z & subspace.case_one())``
+    where ``z = Subspace("0" * num_zeros)``
 
     :param subspace: The controlled subspace.
     :param num_zeros: Number of zeros to add.
@@ -183,11 +182,11 @@ class AddZerosToControl(Node):
         return {"subspace": self.subspace, "num_zeros": self.num_zeros}
 
     def _subspace_in(self) -> Subspace:
-        return self.subspace & Subspace(zero_qubits=self.num_zeros)
+        return Subspace("0" * self.num_zeros) & self.subspace
 
     def _subspace_out(self) -> Subspace:
-        zeros = Subspace(zero_qubits=self.num_zeros)
-        return (self.subspace.case_zero() & zeros) | (self.subspace.case_one() & zeros)
+        zeros = Subspace("0" * self.num_zeros)
+        return (zeros & self.subspace.case_zero()) | (zeros & self.subspace.case_one())
 
     def _normalization(self) -> float:
         return 1
@@ -219,8 +218,7 @@ class SubspaceRightRotation(Node):
     """
     Identity operation rotating the root bit of the subspace.
 
-    Takes subspace of the form ``(l | m) | (r & Subspace(zero_qubits=1))`` to
-    ``(l & Subspace(zero_qubits=1)) | (m | r)``.
+    Takes subspace of the form ``(l | m) | (Subspace("0") & r)`` to ``(Subspace("0") & l) | (m | r)``.
     """
 
     def __init__(self, subspace: Subspace):
@@ -237,15 +235,8 @@ class SubspaceRightRotation(Node):
         L = pivot.case_zero()
         M = pivot.case_one()
         R = subspace.case_one()
-        assert R.trailing_zeros() >= 1
-        self.subspace_out = Subspace(
-            [
-                ControlledSubspace(
-                    Subspace(L.tensor_factors, zero_qubits=1),
-                    Subspace([ControlledSubspace(M, Subspace(R.tensor_factors[:-1]))]),
-                )
-            ],
-        )
+        assert R.initial_zeros() >= 1
+        self.subspace_out = (Subspace("0") & L) | (M | Subspace(R.tensor_factors[:-1]))
 
         self.subspace = subspace
 
@@ -261,15 +252,8 @@ class SubspaceRightRotation(Node):
         L = subspace.case_zero()
         M = pivot.case_zero()
         R = pivot.case_one()
-        assert L.trailing_zeros() >= 1
-        subspace_in = Subspace(
-            [
-                ControlledSubspace(
-                    Subspace([ControlledSubspace(Subspace(L.tensor_factors[:-1]), M)]),
-                    Subspace(R.tensor_factors, zero_qubits=1),
-                )
-            ],
-        )
+        assert L.initial_zeros() >= 1
+        subspace_in = (Subspace(L.tensor_factors[:-1]) | M) | (Subspace("0") & R)
         return Adjoint(SubspaceRightRotation(subspace_in))
 
     def children(self) -> list[Node]:
@@ -323,11 +307,11 @@ def _rotate(subspace: Subspace, right: bool) -> Node:
     else:
         other = subspace.case_zero()
 
-    trailing_zeros = _controlled_trailing_zeros(subspace)
-    other_zeros = other.trailing_zeros()
-    if other_zeros > 1 and trailing_zeros > 0:
+    initial_zeros = _controlled_initial_zeros(subspace)
+    other_zeros = other.initial_zeros()
+    if other_zeros > 1 and initial_zeros > 0:
         permutation.append(
-            AddZerosToControl.remove_zeros(Subspace(subspace.nonzero_factors()), min(trailing_zeros, other_zeros - 1))
+            AddZerosToControl.remove_zeros(Subspace(subspace.nonzero_factors()), min(initial_zeros, other_zeros - 1))
         )
         subspace = permutation[-1].subspace_out
     elif other_zeros == 0:
@@ -339,7 +323,7 @@ def _rotate(subspace: Subspace, right: bool) -> Node:
     else:
         pivot = subspace.case_one()
 
-    pivot_zeros = pivot.trailing_zeros()
+    pivot_zeros = pivot.initial_zeros()
     if pivot_zeros != 0:
         move = AddZerosToControl(Subspace(pivot.nonzero_factors()), pivot_zeros)
         if right:

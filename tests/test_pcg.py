@@ -31,9 +31,8 @@ class LCG(ut.ProxyNode):
                 skip_projection=True,
             )
             controlled = (
-                ut.Identity(ut.Subspace([ut.ID] * self.bits + [ut.ZeroQubit()] * 2 + [ut.ID] * i))
-                | (step & ut.Identity(bits=i))
-            ) & ut.Identity(bits=self.bits - i - 1)
+                ut.Identity(ut.Subspace("#" * i + "00" + "#" * self.bits)) | (step & ut.Identity(ut.Subspace("#" * i)))
+            ) & ut.Identity(ut.Subspace("#" * (self.bits - i - 1)))
             if result is None:
                 result = controlled
             else:

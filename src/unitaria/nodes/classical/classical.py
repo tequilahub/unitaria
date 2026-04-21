@@ -30,10 +30,10 @@ class Classical(Node):
         super().__init__(2 ** sum(self.input_bits), 2 ** sum(self.output_bits))
 
     def _subspace_in(self) -> Subspace:
-        return Subspace(bits=sum(self.input_bits), zero_qubits=max(0, sum(self.output_bits) - sum(self.input_bits)))
+        return Subspace("0" * max(0, sum(self.output_bits) - sum(self.input_bits)) + "#" * sum(self.input_bits))
 
     def _subspace_out(self) -> Subspace:
-        return Subspace(bits=sum(self.output_bits), zero_qubits=max(0, sum(self.input_bits) - sum(self.output_bits)))
+        return Subspace("0" * max(0, sum(self.input_bits) - sum(self.output_bits)) + "#" * sum(self.output_bits))
 
     def _normalization(self) -> float:
         return 1

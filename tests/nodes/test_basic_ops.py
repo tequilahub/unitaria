@@ -3,7 +3,7 @@ import unitaria as ut
 
 def test_tensor():
     A = ut.Increment(bits=1)
-    B = ut.Identity(subspace=ut.Subspace(bits=1))
+    B = ut.Identity(ut.Subspace("#"))
 
     ut.verify((A & B))
     ut.verify((A & A))

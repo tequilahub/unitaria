@@ -2,7 +2,7 @@ import unitaria as ut
 
 
 def test_identity():
-    Id = ut.Identity(subspace=ut.Subspace(bits=1))
+    Id = ut.Identity(ut.Subspace("#"))
     ut.verify(Id)
-    Id = ut.Identity(subspace=ut.Subspace(bits=0))
+    Id = ut.Identity(ut.Subspace())
     ut.verify(Id)

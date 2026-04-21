@@ -6,7 +6,7 @@ from unitaria.nodes.basic.controlled import Controlled
 from unitaria.nodes.basic.modify_control import ModifyControl
 from unitaria.nodes.basic.unsafe_multiplication import UnsafeMul
 from unitaria.nodes.basic.projection import Projection
-from unitaria.subspace import Subspace, ControlledSubspace
+from unitaria.subspace import Subspace
 
 
 class BlockDiagonal(ProxyNode):
@@ -41,8 +41,8 @@ class BlockDiagonal(ProxyNode):
         subspace_in = _controlled_qubits(A_controlled.subspace_in, B_controlled.subspace_in)
         subspace_mid = _controlled_qubits(A_controlled.subspace_out, B_controlled.subspace_in)
         subspace_out = _controlled_qubits(A_controlled.subspace_out, B_controlled.subspace_out)
-        controlled_bits_A = A_controlled.subspace_in.total_qubits - A_controlled.subspace_in.trailing_zeros()
-        controlled_bits_B = B_controlled.subspace_in.total_qubits - B_controlled.subspace_in.trailing_zeros()
+        controlled_bits_A = A_controlled.subspace_in.total_qubits - A_controlled.subspace_in.initial_zeros()
+        controlled_bits_B = B_controlled.subspace_in.total_qubits - B_controlled.subspace_in.initial_zeros()
 
         A_controlled = ModifyControl(A_controlled, max(0, controlled_bits_B - controlled_bits_A), True)
         A_controlled = UnsafeMul(
@@ -85,13 +85,13 @@ class BlockDiagonal(ProxyNode):
 
 
 def _controlled_qubits(A_controlled: Subspace, B_controlled: Subspace) -> Subspace:
-    zeros = max(A_controlled.trailing_zeros(), B_controlled.trailing_zeros())
+    zeros = max(A_controlled.initial_zeros(), B_controlled.initial_zeros())
     A = A_controlled.case_one()
     B = B_controlled.case_one()
     controlled_qubits = max(A.total_qubits, B.total_qubits)
-    case_zero = Subspace(A.tensor_factors, zero_qubits=max(0, controlled_qubits - A.total_qubits))
-    case_one = Subspace(B.tensor_factors, zero_qubits=max(0, controlled_qubits - B.total_qubits))
-    return Subspace([ControlledSubspace(case_zero, case_one)], zero_qubits=zeros)
+    case_zero = Subspace("0" * max(0, controlled_qubits - A.total_qubits)) & A
+    case_one = Subspace("0" * max(0, controlled_qubits - B.total_qubits)) & B
+    return Subspace("0" * zeros) & (case_zero | case_one)
 
 
 Node.__or__ = lambda A, B: BlockDiagonal(A, B)

@@ -4,8 +4,8 @@ import unitaria as ut
 
 def create_block_encoding():
     # initialize a block encoding with a simple X gate on the first qubit
-    subspace_in = ut.Subspace(bits=1, zero_qubits=1)
-    subspace_out = ut.Subspace(bits=2)
+    subspace_in = ut.Subspace("0#")
+    subspace_out = ut.Subspace("##")
     tequila_circuit = tq.QCircuit()
     tequila_circuit += tq.gates.X(0)
     tequila_circuit.n_qubits = 2

@@ -3,7 +3,7 @@ from typing import Sequence
 import numpy as np
 import tequila as tq
 
-from unitaria.subspace import Subspace, ControlledSubspace
+from unitaria.subspace import Subspace
 from unitaria.nodes.node import Node
 from unitaria.circuit import Circuit
 
@@ -16,7 +16,7 @@ class ModifyControl(Node):
         swap_control_state: bool = False,
     ):
         self.A = A
-        expand_control = Subspace(bits=expand_control_bits)
+        expand_control = Subspace("#" * expand_control_bits)
         super().__init__(
             (A.dimension_in - 1) * expand_control.dimension + 1, (A.dimension_out - 1) * expand_control.dimension + 1
         )
@@ -34,33 +34,21 @@ class ModifyControl(Node):
 
     def _subspace_in(self) -> Subspace:
         subspace_one = self.A.subspace_in.case_one() & self.expand_control
-        subspace_zero = Subspace(bits=0, zero_qubits=subspace_one.total_qubits)
+        subspace_zero = Subspace("0" * subspace_one.total_qubits)
 
         if self.swap_control_state:
-            return Subspace(
-                [ControlledSubspace(subspace_one, subspace_zero)],
-                zero_qubits=self.A.subspace_in.trailing_zeros(),
-            )
+            return Subspace("0" * self.A.subspace_in.initial_zeros()) & (subspace_one | subspace_zero)
         else:
-            return Subspace(
-                [ControlledSubspace(subspace_zero, subspace_one)],
-                zero_qubits=self.A.subspace_in.trailing_zeros(),
-            )
+            return Subspace("0" * self.A.subspace_in.initial_zeros()) & (subspace_zero | subspace_one)
 
     def _subspace_out(self) -> Subspace:
         subspace_one = self.A.subspace_out.case_one() & self.expand_control
-        subspace_zero = Subspace(bits=0, zero_qubits=subspace_one.total_qubits)
+        subspace_zero = Subspace("0" * subspace_one.total_qubits)
 
         if self.swap_control_state:
-            return Subspace(
-                [ControlledSubspace(subspace_one, subspace_zero)],
-                zero_qubits=self.A.subspace_out.trailing_zeros(),
-            )
+            return Subspace("0" * self.A.subspace_out.initial_zeros()) & (subspace_one | subspace_zero)
         else:
-            return Subspace(
-                [ControlledSubspace(subspace_zero, subspace_one)],
-                zero_qubits=self.A.subspace_out.trailing_zeros(),
-            )
+            return Subspace("0" * self.A.subspace_out.initial_zeros()) & (subspace_zero | subspace_one)
 
     def _normalization(self) -> float:
         return self.A.normalization

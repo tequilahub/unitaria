@@ -10,11 +10,11 @@ quantum computers. It allows constructing quantum algorithms using a simple,
 ```python
 >>> import unitaria as ut
 >>> import numpy as np
->>> result = ut.Identity(bits=1) @ ut.ConstantVector(np.array([3, 4]))
+>>> result = ut.Identity(ut.Subspace.from_dim(2)) @ ut.ConstantVector(np.array([3, 4]))
 >>> print(result.draw())
 Mul
 ├── ConstantVector{'vec': array([3, 4])}
-└── Identity{'subspace': Subspace(1)}
+└── Identity{'subspace': Subspace("#")}
 >>> result.toarray().real
 array([3., 4.])
 >>> result.normalization
