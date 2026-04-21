@@ -22,6 +22,13 @@ class Projection(Node):
     subspace_to: Subspace
 
     def __init__(self, subspace_from: Subspace, subspace_to: Subspace):
+        """
+        Initialize a Projection node.
+
+        :param subspace_from: The domain subspace.
+        :param subspace_to: The codomain subspace.
+        :raises ValueError: If the subspaces do not have the same number of qubits.
+        """
         super().__init__(subspace_from.dimension, subspace_to.dimension)
         self.subspace_from = subspace_from
         self.subspace_to = subspace_to

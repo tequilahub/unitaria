@@ -14,6 +14,12 @@ from unitaria.util import logreduce
 
 
 def _move_zeros_to_end(subspace: Subspace) -> PermuteFactors:
+    """
+    Moves all ``ZeroQubit`` factors in the subspace to the end.
+
+    :param subspace: The subspace to permute.
+    :return: Node representing the permutation.
+    """
     nonzero_factors = []
     zero_factors = []
     for i, factor in enumerate(subspace.tensor_factors):
@@ -27,17 +33,25 @@ def _move_zeros_to_end(subspace: Subspace) -> PermuteFactors:
 
 class PermuteFactors(Node):
     """
-    Operation permuting the factors of a state
+    Operation permuting the factors of a state.
 
-    Permutes a vector in the space defined by ``qubits``
-    such that the i-th factor after the operation will be
+    Permutes a vector in the space defined by ``qubits`` such that the i-th factor after the operation will be
     ``subspace.tensor_factors[permutation_map[i]]``.
+
+    :param subspace: The subspace to permute.
+    :param permutation_map: The permutation map to apply.
     """
 
     subspace: Subspace
     permutation_map: list[int]
 
     def __init__(self, subspace: Subspace, permutation_map: list[int]):
+        """
+        Initialize the permutation operation.
+
+        :param subspace: The subspace to permute.
+        :param permutation_map: The permutation map to apply.
+        """
         super().__init__(subspace.dimension, subspace.dimension)
         self.subspace = subspace
         self.permutation_map = permutation_map
@@ -125,18 +139,37 @@ class AddZerosToControl(Node):
     """
     Operation to add zeros to both branches of a controlled subspace.
 
-    Specifically, this implements the identity for ``subspace_in = subspace & z`` and ``subspace_out = (subspace.case_zero() & z) | (subspace.case_one() & z)`` where ``z = Subspace(zero_qubits=num_zeros)``
+    Specifically, this implements the identity for
+    ``subspace_in = subspace & z`` and
+    ``subspace_out = (subspace.case_zero() & z) | (subspace.case_one() & z)``,
+    where ``z = Subspace(zero_qubits=num_zeros)``.
+
+    :param subspace: The controlled subspace.
+    :param num_zeros: Number of zeros to add.
     """
 
     subspace: Subspace
 
     def __init__(self, subspace: Subspace, num_zeros: int):
+        """
+        Initialize the AddZerosToControl operation.
+
+        :param subspace: The controlled subspace.
+        :param num_zeros: Number of zeros to add.
+        """
         assert len(subspace.tensor_factors) > 0 and isinstance(subspace.tensor_factors[-1], ControlledSubspace)
         super().__init__(subspace.dimension, subspace.dimension)
         self.subspace = subspace
         self.num_zeros = num_zeros
 
     def remove_zeros(subspace: Subspace, num_zeros: int):
+        """
+        Remove zeros from the end of a controlled subspace.
+
+        :param subspace: The subspace to modify.
+        :param num_zeros: Number of zeros to remove.
+        :return: Node representing the adjoint operation.
+        """
         assert num_zeros > 0
         return Adjoint(
             AddZerosToControl(
@@ -186,10 +219,16 @@ class SubspaceRightRotation(Node):
     """
     Identity operation rotating the root bit of the subspace.
 
-    Takes subspace of the form ``(l | m) | (r & Subspace(zero_qubits=1))`` to ``(l & Subspace(zero_qubits=1)) | (m | r)``.
+    Takes subspace of the form ``(l | m) | (r & Subspace(zero_qubits=1))`` to
+    ``(l & Subspace(zero_qubits=1)) | (m | r)``.
     """
 
     def __init__(self, subspace: Subspace):
+        """
+        Initialize the SubspaceRightRotation operation.
+
+        :param subspace: The subspace to rotate.
+        """
         assert len(subspace.tensor_factors) > 0 and isinstance(subspace.tensor_factors[-1], ControlledSubspace)
         super().__init__(subspace.dimension, subspace.dimension)
 
@@ -211,6 +250,12 @@ class SubspaceRightRotation(Node):
         self.subspace = subspace
 
     def left_rotate(subspace: Subspace) -> Node:
+        """
+        Perform a left rotation on the root bit of the subspace.
+
+        :param subspace: The subspace to rotate.
+        :return: Node representing the adjoint left rotation.
+        """
         pivot = subspace.case_one()
         assert len(pivot.tensor_factors) > 0 and isinstance(pivot.tensor_factors[-1], ControlledSubspace)
         L = subspace.case_zero()
