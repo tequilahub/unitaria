@@ -12,12 +12,10 @@ class Scale(Node):
     """
     Node representing the product of a scalar and another node
 
-    :param A:
-        The node to scale
-    :param scale:
-        The scalar factor
-    :param absolute:
-        If ``True``, ``A`` is divided by its normalization first
+    :param A: The node to scale.
+    :param scale: The scalar factor (default: 1).
+    :param remove_efficiency: (Unused, must be 1).
+    :param absolute: If True, A is divided by its normalization first (default: False).
     """
 
     A: Node

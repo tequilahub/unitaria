@@ -12,13 +12,18 @@ class ConstantVector(Node):
     """
     Node representing the given vector
 
-    :param vec:
-        The vector represented by this node
+    :param vec: The vector represented by this node
     """
 
     vec: np.ndarray
 
     def __init__(self, vec: np.ndarray):
+        """
+        Initialize a ConstantVector node.
+
+        :param vec: The vector to be represented/prepared.
+        :raises AssertionError: If the vector length is not a power of 2.
+        """
         super().__init__(1, vec.shape[0])
         self.n_qubits = round(np.log2(vec.shape[0]))
         assert (2**self.n_qubits,) == vec.shape
