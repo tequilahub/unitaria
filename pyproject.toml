@@ -6,7 +6,7 @@ build-backend = "uv_build"
 name = "unitaria"
 authors = [
   {name = "Matthias Deiml", email = "matthias.deiml@uni-a.de"},
-  {name = "Oliver Hüttenhofen", email = "oliver.huettenhofer@uni-a.de"},
+  {name = "Oliver Hüttenhofer", email = "oliver.huettenhofer@uni-a.de"},
   {name = "Jakob S. Kottmann", email = "jakob.kottmann@uni-a.de"},
   {name = "Ram Mosco", email = "ram.mosco@uni-a.de"},
   {name = "Daniel Peterseim", email = "daniel.peterseim@uni-a.de"}
@@ -41,11 +41,9 @@ classifiers = [
   "Topic :: Scientific/Engineering :: Quantum Computing",
 ]
 
-[dependency-groups]
+[project.optional-dependencies]
 docs = ["sphinx", "furo"]
 dev = ["pytest"]
-
-[project.optional-dependencies]
 qpic = ["qpic==1.1.*"]
 
 [project.urls]
