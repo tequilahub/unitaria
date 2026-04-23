@@ -61,7 +61,7 @@ pytest
 
 To build the documentation, some additional dependencies are required, which can be installed using
 ```sh
-pip install --editable .[docs]
+pip install --group docs --editable .
 ```
 Then navigate to the `/docs` folder and run
 ```sh
