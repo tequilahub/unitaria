@@ -58,5 +58,5 @@ class MultilinearNode(ProxyNode):
                 else:
                     apply_product = Tensor(node, apply_product)
             definition = self.definition()
-            self._definition = Mul(apply_product, definition)
+            self._definition = Mul(definition, apply_product)
         return self._definition

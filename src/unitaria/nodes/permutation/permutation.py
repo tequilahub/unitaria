@@ -340,7 +340,7 @@ def _rotate(subspace: Subspace, right: bool) -> Node:
         permutation.append(SubspaceRightRotation(Subspace(subspace.nonzero_factors())))
     else:
         permutation.append(SubspaceRightRotation.left_rotate(Subspace(subspace.nonzero_factors())))
-    return logreduce(UnsafeMul, permutation)
+    return logreduce(UnsafeMul, permutation[::-1])
 
 
 def _rotate_to(subspace: Subspace, index: int) -> Node:
@@ -390,7 +390,7 @@ def _rotate_to(subspace: Subspace, index: int) -> Node:
         # Contains just the identity
         return permutation[0]
     else:
-        return logreduce(UnsafeMul, permutation[1:])
+        return logreduce(UnsafeMul, permutation[:0:-1])
 
 
 def _indices_from_root_to(a: Subspace, index: int) -> int:
@@ -457,11 +457,11 @@ def permute(a: Subspace, b: Subspace) -> tuple[Node, Node]:
     subperms_a = logreduce(Tensor, list(reversed(subperms_a)))
     move_a_in = _move_zeros_to_end(subperms_a.subspace_in)
     move_a_out = _move_zeros_to_end(subperms_a.subspace_out)
-    perm_a = UnsafeMul(UnsafeMul(perm_a, Adjoint(move_a_in)), UnsafeMul(subperms_a, move_a_out))
+    perm_a = UnsafeMul(UnsafeMul(move_a_out, subperms_a), UnsafeMul(Adjoint(move_a_in), perm_a))
     subperms_b = logreduce(Tensor, list(reversed(subperms_b)))
     move_b_in = _move_zeros_to_end(subperms_b.subspace_in)
     move_b_out = _move_zeros_to_end(subperms_b.subspace_out)
-    perm_b = UnsafeMul(UnsafeMul(perm_b, Adjoint(move_b_in)), UnsafeMul(subperms_b, move_b_out))
+    perm_b = UnsafeMul(UnsafeMul(move_b_out, subperms_b), UnsafeMul(Adjoint(move_b_in), perm_b))
 
     return perm_a, perm_b
 
@@ -506,15 +506,15 @@ def _brute_force(a: Subspace, b: Subspace) -> tuple[Node, Node]:
     added_zeros_a = perm_a01.subspace_in.total_qubits - a0.total_qubits - 1
     if added_zeros_a:
         move = AddZerosToControl.remove_zeros(perm_a01, added_zeros_a)
-        perm_a01 = UnsafeMul(Adjoint(move), UnsafeMul(perm_a01, move))
+        perm_a01 = UnsafeMul(UnsafeMul(move, perm_a01), Adjoint(move))
     added_zeros_b = perm_b01.subspace_in.total_qubits - b0.total_qubits - 1
     if added_zeros_b:
         move = AddZerosToControl.remove_zeros(perm_b01, added_zeros_b)
-        perm_b01 = UnsafeMul(Adjoint(move), UnsafeMul(perm_b01, move))
+        perm_b01 = UnsafeMul(UnsafeMul(move, perm_b01), Adjoint(move))
 
     if perm_a is not None:
-        perm_a = UnsafeMul(perm_a, perm_a01)
-        perm_b = UnsafeMul(perm_b, perm_b01)
+        perm_a = UnsafeMul(perm_a01, perm_a)
+        perm_b = UnsafeMul(perm_b01, perm_b)
     else:
         perm_a = perm_a01
         perm_b = perm_b01

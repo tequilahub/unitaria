@@ -26,8 +26,8 @@ class LCG(ut.ProxyNode):
         for i in range(self.bits):
             # TODO: skip_projection should be done automatically here
             step = ut.Mul(
-                ut.ConstantIntegerMultiplication(self.bits, acc_mul),
                 ut.ConstantIntegerAddition(self.bits, acc_add),
+                ut.ConstantIntegerMultiplication(self.bits, acc_mul),
                 skip_projection=True,
             )
             controlled = ut.Identity(ut.Subspace("#" * (self.bits - i - 1))) & (
@@ -37,7 +37,7 @@ class LCG(ut.ProxyNode):
                 result = controlled
             else:
                 # TODO: skip_projection should be done automatically here
-                result = ut.Mul(result, controlled, skip_projection=True)
+                result = ut.Mul(controlled, result, skip_projection=True)
             acc_add = (acc_add + acc_mul * acc_add) % (2**self.bits)
             acc_mul = (acc_mul**2) % (2**self.bits)
 
