@@ -19,3 +19,5 @@ def test_scale():
     ut.verify(1 * A)
     ut.verify((-1) * A)
     ut.verify(ut.Scale(A, 0.5, absolute=True))
+    ut.verify(ut.Scale(A, 0.5, remove_efficiency=2.34))
+    ut.verify(ut.Scale(A, 0.5, remove_efficiency=2.34, absolute=True))

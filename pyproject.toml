@@ -65,6 +65,7 @@ addopts = [
 ]
 pythonpath = ["src"]
 doctest_optionflags = ["NUMBER"]
+python_files = ["test_*.py", "example_*.py"]
 
 [tool.ruff]
 line-length = 120

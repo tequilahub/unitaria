@@ -27,13 +27,12 @@ class Scale(Node):
         self,
         A: Node,
         scale: float = 1,
-        remove_efficiency: float = 1,
+        remove_efficiency: None | float = None,
         absolute: bool = False,
     ):
         super().__init__(A.dimension_in, A.dimension_out)
         self.A = A
-        # TODO: remove_efficiency not implemented yet
-        assert remove_efficiency == 1
+        assert remove_efficiency is None or remove_efficiency > 1
         self.remove_efficiency = remove_efficiency
         self.scale = np.abs(scale)
         self.global_phase = np.angle(scale)
@@ -46,16 +45,23 @@ class Scale(Node):
         return {"scale": self.scale, "absolute": self.absolute}
 
     def _subspace_in(self) -> Subspace:
-        return self.A.subspace_in
+        if self.remove_efficiency is None:
+            return self.A.subspace_in
+        else:
+            return Subspace("0") & self.A.subspace_in
 
     def _subspace_out(self) -> Subspace:
-        return self.A.subspace_out
+        if self.remove_efficiency is None:
+            return self.A.subspace_out
+        else:
+            return Subspace("0") & self.A.subspace_out
 
     def _normalization(self) -> float:
+        remove_efficiency = 1 if self.remove_efficiency is None else self.remove_efficiency
         if self.absolute:
-            return self.scale
+            return self.scale * remove_efficiency
         else:
-            return self.scale * self.A.normalization
+            return self.scale * self.A.normalization * remove_efficiency
 
     def is_guaranteed_unitary(self) -> bool:
         return self.remove_efficiency == 1 and self.A.is_guaranteed_unitary()
@@ -76,7 +82,11 @@ class Scale(Node):
         self, target: Sequence[int], clean_ancillae: Sequence[int], borrowed_ancillae: Sequence[int]
     ) -> Circuit:
         circuit = Circuit()
-        circuit += self.A.circuit(target, clean_ancillae, borrowed_ancillae)
+        A_target = target
+        if self.remove_efficiency is not None:
+            A_target = target[:-1]
+            circuit += tq.gates.Ry(2 * np.arccos(1 / self.remove_efficiency), target[-1])
+        circuit += self.A.circuit(A_target, clean_ancillae, borrowed_ancillae)
         circuit += tq.gates.GlobalPhase(self.global_phase)
         return circuit
 
