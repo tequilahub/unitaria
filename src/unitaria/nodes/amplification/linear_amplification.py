@@ -1,6 +1,6 @@
 from unitaria import Node
 from unitaria.nodes.proxy_node import ProxyNode
-from unitaria.poly_approx import trunc_linear_poly
+from unitaria.poly_approx import trunc_linear_poly, rescale_domain
 from unitaria.nodes.qsvt.qsvt import QSVT
 
 
@@ -39,7 +39,7 @@ class LinearAmplification(ProxyNode):
         super().__init__(A.dimension_in, A.dimension_out)
 
         self.A = A
-        self.poly = trunc_linear_poly(amplification, delta, accuracy, guaranteed)
+        self.poly = rescale_domain(trunc_linear_poly(amplification, delta, accuracy, guaranteed), A.normalization)
 
     def definition(self) -> Node:
-        return QSVT(A=self.A, coefficients=self.poly.coef, format="chebyshev")
+        return QSVT(self.A, self.poly)

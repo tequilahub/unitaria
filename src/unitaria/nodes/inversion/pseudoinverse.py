@@ -1,10 +1,8 @@
-import numpy as np
-
 from unitaria.nodes.node import Node
 from unitaria.nodes.proxy_node import ProxyNode
 from unitaria.nodes.basic.adjoint import Adjoint
 from unitaria.nodes.qsvt.qsvt import QSVT
-from unitaria.poly_approx import inverse_poly
+from unitaria.poly_approx import qcheb_poly, rescale_domain
 
 
 class Pseudoinverse(ProxyNode):
@@ -34,22 +32,19 @@ class Pseudoinverse(ProxyNode):
     # TODO: The condition should actually be the condition of the matrix,
     #   the dependence on the subnormalization should be hidden from the user.
     def __init__(self, A: Node, condition: float, tolerance: float, guaranteed: bool = False):
-        super().__init__(A.dimension_in, A.dimension_out)
+        super().__init__(A.dimension_out, A.dimension_in)
         assert condition >= 1
-        assert 0 < tolerance < 0.5
         self.A = A
         self.condition = condition
         self.tolerance = tolerance
         self.guaranteed = guaranteed
 
-        self.poly = inverse_poly(1 / condition, tolerance, False)
+    def definition(self):
+        poly = qcheb_poly(1 / self.condition, self.tolerance * self.A.normalization)
 
         # Rescale the polynomial, so that it fits the input normalization
-        X = np.polynomial.Chebyshev([0, 1])
-        self.poly = self.poly(X / A.normalization) / A.normalization
-
-    def definition(self):
-        return QSVT(A=Adjoint(self.A), coefficients=self.poly.coef, format="chebyshev")
+        poly = rescale_domain(poly, self.A.normalization) / self.A.normalization
+        return QSVT(Adjoint(self.A), poly)
 
     def children(self) -> list[Node]:
         return [self.A]
