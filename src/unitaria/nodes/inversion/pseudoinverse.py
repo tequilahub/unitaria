@@ -1,10 +1,8 @@
-import numpy as np
-
 from unitaria.nodes.node import Node
 from unitaria.nodes.proxy_node import ProxyNode
 from unitaria.nodes.basic.adjoint import Adjoint
 from unitaria.nodes.qsvt.qsvt import QSVT
-from unitaria.poly_approx import qcheb_poly
+from unitaria.poly_approx import qcheb_poly, rescale_domain
 
 
 class Pseudoinverse(ProxyNode):
@@ -45,10 +43,8 @@ class Pseudoinverse(ProxyNode):
         poly = qcheb_poly(1 / self.condition, self.tolerance * self.A.normalization)
 
         # Rescale the polynomial, so that it fits the input normalization
-        X = np.polynomial.Chebyshev([0, 1])
-        poly = poly(X / self.A.normalization) / self.A.normalization
-
-        return QSVT(A=Adjoint(self.A), coefficients=poly.coef, format="chebyshev")
+        poly = rescale_domain(poly, self.A.normalization) / self.A.normalization
+        return QSVT(Adjoint(self.A), poly)
 
     def children(self) -> list[Node]:
         return [self.A]

@@ -5,6 +5,19 @@ from numpy.polynomial.chebyshev import Chebyshev
 from unitaria.util import poly_sup_norm
 
 
+def rescale_domain(polynomial: np.polynomial.Chebyshev, normalization: float) -> np.polynomial.Chebyshev:
+    """
+    Takes a polynomial defined on the domain `[-1, 1]`, and transforms it
+    to the domain `[-normalization, normalization]`.
+
+    Note that this changes the actually represented polynomial.
+
+    :param polynomial: The polynomial to be transformed
+    :param normalization: The new bound for the domain
+    """
+    return polynomial(np.polynomial.Chebyshev([0, 1], domain=[-normalization, normalization]))
+
+
 def erf_poly(k: float, epsilon: float, guaranteed: bool = False) -> Chebyshev:
     """
     For k > 0, 0 < epsilon <= 1 / 5, returns a polynomial in the Chebyshev
@@ -50,7 +63,7 @@ def sign_poly(delta: float, epsilon: float, guaranteed: bool = False) -> Chebysh
     """
     For delta > 0, 0 < epsilon <= 2 / 5, returns a polynomial in the Chebyshev basis
     that approximates the sign function sign(x) with maximum absolute error epsilon
-    in the intervals [-domain, -delta] and [delta, domain].
+    in the intervals [-1, -delta] and [delta, 1].
 
     Implements Lemma 25 from https://arxiv.org/abs/1806.01838,
     based on Corollary 6 from https://arxiv.org/abs/1707.05391.
@@ -184,7 +197,8 @@ def qcheb_poly(delta: float, epsilon: float) -> Chebyshev:
     n = int(np.ceil(np.log(epsilon * delta / 2) / np.log((1 - delta) / (1 + delta))))
 
     X = np.polynomial.Chebyshev([0, 1])
-    P = np.polynomial.Chebyshev([0] * n + [1])((2 * X**2 - delta**2 - 1) / (1 - delta**2))
-    P = 1 - P / P(0)
+    P = np.polynomial.Chebyshev([0] * n + [1])
+    P = P((2 * X**2 - delta**2 - 1) / (1 - delta**2))
+    P = (1 - P / P(0)) // X
 
-    return P // X
+    return P

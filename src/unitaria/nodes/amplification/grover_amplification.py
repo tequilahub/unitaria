@@ -26,4 +26,4 @@ class GroverAmplification(ProxyNode):
             angles[0] += np.pi / 2
             angles[-1] += np.pi / 2
 
-        return QSVT(A=self.A, coefficients=angles, format="angles")
+        return QSVT(self.A, angles)
