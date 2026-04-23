@@ -83,8 +83,8 @@ html_sidebars = {
 }
 
 html_context = {
-  "current_version" : version,
-  "versions" : ["git"] + tags,
+    "current_version": version,
+    "versions": ["git"] + tags,
 }
 
 # -- Options for todo extension ----------------------------------------------
