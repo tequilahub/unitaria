@@ -390,7 +390,7 @@ def _rotate_to(subspace: Subspace, index: int) -> Node:
         # Contains just the identity
         return permutation[0]
     else:
-        return logreduce(UnsafeMul, permutation[1:][::-1])
+        return logreduce(UnsafeMul, permutation[:0:-1])
 
 
 def _indices_from_root_to(a: Subspace, index: int) -> int:
