@@ -27,7 +27,7 @@ Ry(target=(0,), parameter=1.854590436003224)
 
 ```
 
-[**Documentation**](https://tequilahub.github.io/unitaria/index.html)
+[**Documentation**](https://tequilahub.github.io/unitaria/git/index.html)
 
 ## Installation
 
