@@ -80,3 +80,11 @@ def poly_sup_norm(poly, range=(-1.0, 1.0)):
 def is_unitary(U: np.ndarray, tol: float = 1e-8) -> bool:
     identity = np.eye(U.shape[0])
     return np.allclose(U @ np.conj(U.T), identity, atol=tol) and np.allclose(np.conj(U.T) @ U, identity, atol=tol)
+
+
+def is_ipython() -> bool:
+    try:
+        get_ipython()
+        return True
+    except NameError:
+        return False

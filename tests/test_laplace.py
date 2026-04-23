@@ -178,7 +178,7 @@ def test_preconditioned_laplace_1d():
         N_l = ut.Increment(bits=i) @ I_l
         C_l = 2 ** (i / 2) * (I_l - N_l)
 
-        T_l = ut.ConstantUnitary(np.sqrt(1 / 2) * np.array([[1], [1]])) & ut.Identity(ut.Subspace("#" * (i - 1)))
+        T_l = ut.Identity(ut.Subspace("#" * (i - 1))) & ut.ConstantUnitary(np.sqrt(1 / 2) * np.array([[1], [1]]))
         # T_l = ConstantUnitary(
         #     np.sqrt(1 / 2) * np.array([
         #         [1, -np.sqrt(3) / 2],

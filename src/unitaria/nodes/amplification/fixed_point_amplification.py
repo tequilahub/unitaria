@@ -1,6 +1,6 @@
 from unitaria import Node
 from unitaria.nodes.proxy_node import ProxyNode
-from unitaria.poly_approx import sign_poly
+from unitaria.poly_approx import sign_poly, rescale_domain
 from unitaria.nodes.qsvt.qsvt import QSVT
 
 
@@ -36,7 +36,7 @@ class FixedPointAmplification(ProxyNode):
         super().__init__(A.dimension_in, A.dimension_out)
 
         self.A = A
-        self.poly = sign_poly(min_norm, accuracy, guaranteed)
+        self.poly = rescale_domain(sign_poly(min_norm, accuracy, guaranteed), A.normalization)
 
     def definition(self) -> Node:
-        return QSVT(A=self.A, coefficients=self.poly.coef, format="chebyshev")
+        return QSVT(self.A, self.poly)

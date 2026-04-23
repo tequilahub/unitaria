@@ -62,8 +62,8 @@ class Mul(ProxyNode):
             # once match_nonzero is improved
             if A_permuted.subspace_out.total_qubits < B_permuted.subspace_in.total_qubits:
                 projection_subspace = B_permuted.subspace_in
-            A_permuted = Tensor(A_permuted, Identity(Subspace("0")))
-            B_permuted = Tensor(B_permuted, Identity(Subspace("0")))
+            A_permuted = Tensor(Identity(Subspace("0")), A_permuted)
+            B_permuted = Tensor(Identity(Subspace("0")), B_permuted)
             return UnsafeMul(UnsafeMul(A_permuted, SubspaceCircuit(projection_subspace)), B_permuted)
         else:
             return UnsafeMul(A_permuted, B_permuted)

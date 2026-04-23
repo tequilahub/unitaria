@@ -1,4 +1,5 @@
 from typing import Sequence
+import warnings
 
 import numpy as np
 import scipy as sp
@@ -129,8 +130,8 @@ def compute_angles(poly):
 
         # Convert angles to Rx convention
         angles[:] -= np.pi / 2
-        angles[0] += len(angles) * np.pi / 4
-        angles[-1] += len(angles) * np.pi / 4
+        angles[0] += (len(angles) % 8) * np.pi / 4
+        angles[-1] += (len(angles) % 8) * np.pi / 4
 
         result.append((subpoly / normalization, angles, normalization))
 
@@ -150,15 +151,11 @@ class QSVTCoefficients:
         in R convention. If a polynomial is given, it should be non-normalized, i.e.
         the actual polynomial that should be applied to the matrix.
     :param format:
-        One of ``"angles"``, ``"chebyshev"``, or ``"monomial"``
-    :param input_normalization:
-        See below
+        One of ``"angles"`` or ``"chebyshev"``
 
     :ivar polynomial:
-        The non-normalized polynomial
-    :ivar input_normalization:
-        Factor by which the x-axis of the polynomial is normalized, i.e. the
-        normalization of the block encoding that is transformed
+        The normalized polynomial, defined on [-1, 1]. This is always has
+        ``domain == [-1, 1]`` and ``window == [-1, 1]``.
     :ivar output_normalization:
         Factor by which the y-axis of the polynomial is normalized, i.e. the
         normalization of the resulting block encoding
@@ -168,14 +165,12 @@ class QSVTCoefficients:
     """
 
     polynomial: np.polynomial.Chebyshev
-    input_normalization: float
     output_normalization: float
     angles: np.ndarray
 
-    def __init__(self, data: np.ndarray, format: str, input_normalization: float):
+    def __init__(self, data: np.ndarray, format: str):
         self.data = data.astype(np.float64)
         self.format = format
-        self.input_normalization = input_normalization
 
         if format == "angles":
             # TODO: Symmetricise angles
@@ -198,36 +193,79 @@ class QSVTCoefficients:
             self.polynomial = np.polynomial.Chebyshev.fit(xs, value, len(angles_Wx) - 1, domain=[-1, 1])
 
             self.output_normalization = 1
-        else:
-            if format == "monomial":
-                self.polynomial = np.polynomial.Polynomial(self.data).convert(kind=np.polynomial.Chebyshev)
-            elif format == "chebyshev":
-                self.polynomial = np.polynomial.Chebyshev(self.data)
-            else:
-                raise ValueError(
-                    f'format may only be one of "angles", "monomial", or "chebyshev" (passed format={format})'
-                )
+        elif format == "chebyshev":
+            self.polynomial = np.polynomial.Chebyshev(self.data)
 
             parity = self.polynomial.degree() % 2
             np.testing.assert_allclose(
                 self.polynomial.coef[1 - parity :: 2], 0, atol=1e-8, err_msg="Polynomial does not have definite parity"
             )
 
-            poly_input_normalized = self.polynomial(np.polynomial.Chebyshev([0, input_normalization]))
-            poly_input_normalized.coef[1 - parity :: 2] = 0.0
+            self.polynomial.coef[1 - parity :: 2] = 0.0
 
-            subpolys = compute_angles(poly_input_normalized)
+            subpolys = compute_angles(self.polynomial)
             assert len(subpolys) == 1, "Polynomial does not have definite parity"
 
             _poly_normalized, self.angles, self.output_normalization = subpolys[0]
+        else:
+            raise ValueError(f'format may only be one of "angles" or "chebyshev" (passed format={format})')
 
     def degree(self) -> int:
         return self.polynomial.degree()
 
 
 class QSVT(Node):
-    def __init__(self, A: Node, coefficients: np.ndarray, format: str = "monomial"):
-        self.coefficients = QSVTCoefficients(coefficients, format, A.normalization)
+    """
+    Quantum Singular Value Transformation
+
+    The polynomial transformation can be either specified through phase angles
+    in R convention or a polynomial. If angles are given, the resulting block
+    encoding will have normalization 1, and the phase angles of the circuit will
+    exactly correspond to those angles. If a polynomial P is given, the resulting
+    block encoding will encode P(A). The normalization of the block encoding will
+    be roughly the sup-norm
+    $$ \\max_{x \\in [-\\gamma_A, \\gamma_A]} |P(x)| $$
+    though it may be slightly larger.
+
+    If a polynomial is given, it should best be specified using the
+    `np.polynomial.Chebyshev` class, and the `domain` attribute should
+    correspond to ``[-\\gamma_A, \\gamma_A]`` for reasons of numerical
+    stability.
+
+    :param A: The matrix to be transformed
+    :param polynomial:
+        Either a `np.ndarray`, indicating phase angles, or an instance of a class
+        in `np.polynomial`, preferrably `np.polynomial.Chebyshev`.
+    """
+
+    def __init__(self, A: Node, polynomial: np.ndarray | np.polynomial.Chebyshev | np.polynomial.Polynomial):
+        self.polynomial = polynomial
+        if isinstance(self.polynomial, np.ndarray):
+            self.coefficients = QSVTCoefficients(self.polynomial, "angles")
+        else:
+            if not isinstance(self.polynomial, np.polynomial.Chebyshev):
+                try:
+                    self.polynomial = self.polynomial.convert(kind=np.polynomial.Chebyshev)
+                    warnings.warn(
+                        "Consider using np.polynomial.Chebyshev instead, since it is more numerically stable.",
+                        UserWarning,
+                        stacklevel=2,
+                    )
+                except AttributeError:
+                    raise ValueError(
+                        "`polynomial` should either be an array of angles or an instance of a np.polynomial class, prefferably np.polynomial.Chebyshev."
+                    )
+            if not np.allclose(self.polynomial.domain, [-A.normalization, A.normalization]) or not np.allclose(
+                self.polynomial.window, [-1, 1]
+            ):
+                warnings.warn(
+                    "Using the QSVT class with a polynomial, the domain of which does not align with `A`s normalization may cause numerical instabilities.",
+                    UserWarning,
+                    stacklevel=2,
+                )
+            self.polynomial = self.polynomial.convert(domain=[-A.normalization, A.normalization], window=[-1, 1])
+            self.coefficients = QSVTCoefficients(self.polynomial.coef, "chebyshev")
+
         if self.coefficients.degree() % 2 == 0:
             super().__init__(A.dimension_in, A.dimension_in)
         else:
@@ -239,8 +277,7 @@ class QSVT(Node):
 
     def parameters(self) -> dict:
         return {
-            "coefficients": self.coefficients.data,
-            "format": self.coefficients.format,
+            "polynomial": self.polynomial,
             "normalization": self.normalization,
         }
 
@@ -264,23 +301,24 @@ class QSVT(Node):
         # TODO: For now, the polynomial should either be odd or even
         # Probably this should be tested somewhere else
         Tnp = input
+        poly = self.coefficients.polynomial
         if self.coefficients.degree() % 2 == 0:
-            output = Tnp * self.coefficients.polynomial.coef[0]
+            output = Tnp * poly.coef[0]
         else:
-            assert np.isclose(self.coefficients.polynomial.coef[0], 0)
-            output = np.zeros_like(compute(input))
+            assert np.isclose(poly.coef[0], 0)
+            output = np.zeros_like(compute(input) / self.A.normalization)
         if self.coefficients.degree() >= 0:
-            Tn = compute(Tnp)
+            Tn = compute(Tnp) / self.A.normalization
         for n in range(1, self.coefficients.degree() + 1):
             if (self.coefficients.degree() + n) % 2 == 0:
-                output += Tn * self.coefficients.polynomial.coef[n]
+                output += Tn * poly.coef[n]
             else:
-                assert np.isclose(self.coefficients.polynomial.coef[n], 0)
+                assert np.isclose(poly.coef[n], 0)
             if n < self.coefficients.degree():
                 if n % 2 == 0:
-                    Tnp, Tn = Tn, 2 * compute(Tn) - Tnp
+                    Tnp, Tn = Tn, 2 * compute(Tn) / self.A.normalization - Tnp
                 else:
-                    Tnp, Tn = Tn, 2 * compute_adjoint(Tn) - Tnp
+                    Tnp, Tn = Tn, 2 * compute_adjoint(Tn) / self.A.normalization - Tnp
         return output
 
     def compute(self, input: np.ndarray) -> np.ndarray:
@@ -332,4 +370,4 @@ class QSVT(Node):
         )
 
     def borrowed_ancilla_count(self) -> int:
-        return 0
+        return self.A.borrowed_ancilla_count()

@@ -43,7 +43,7 @@ classifiers = [
 
 [project.optional-dependencies]
 docs = ["sphinx", "furo"]
-dev = ["pytest"]
+dev = ["ipykernel>=7.2.0", "pytest"]
 qpic = ["qpic==1.1.*"]
 
 [project.urls]
@@ -60,6 +60,7 @@ addopts = [
 ]
 pythonpath = ["src"]
 doctest_optionflags = ["NUMBER"]
+python_files = ["test_*.py", "example_*.py"]
 
 [tool.ruff]
 line-length = 120

@@ -11,23 +11,23 @@ class Tensor(Node):
     """
     Node representing the tensor product of two other nodes
 
-    The order of operations is such that ``A`` corresponds to the lower
+    The order of operations is such that ``A`` corresponds to the more
     significant digits of the index, i.e.
 
     >>> import unitaria as ut
     >>> import numpy as np
-    >>> ut.Tensor(ut.Increment(bits=1), ut.Identity(dim=2)).toarray().real
+    >>> ut.Tensor(ut.Identity(ut.Subspace("#")), ut.Increment(bits=1)).toarray().real
     array([[0., 1., 0., 0.],
            [1., 0., 0., 0.],
            [0., 0., 0., 1.],
            [0., 0., 1., 0.]])
 
-    The and operator for `ut.Node` is overloaded to be the tensor product,
-    i.e. you can equivalently write
+    The `&` operator for `ut.Node` is overloaded to be the tensor product, i.e.
+    you can equivalently write
 
     >>> import unitaria as ut
     >>> import numpy as np
-    >>> (ut.Increment(bits=1) & ut.Identity(dim=2)).toarray().real
+    >>> (ut.Identity(ut.Subspace("#")) & ut.Increment(bits=1)).toarray().real
     array([[0., 1., 0., 0.],
            [1., 0., 0., 0.],
            [0., 0., 0., 1.],
@@ -54,13 +54,13 @@ class Tensor(Node):
         if input is None:
             input = np.array([1])
         batch_shape = list(input.shape[:-1])
-        input = input.reshape([-1, self.A.dimension_in])
-        input = self.A.compute(input)
-        input = input.reshape(batch_shape + [self.B.dimension_in, self.A.dimension_out])
-        input = np.swapaxes(input, -1, -2)
         input = input.reshape([-1, self.B.dimension_in])
         input = self.B.compute(input)
-        input = input.reshape(batch_shape + [self.A.dimension_out, self.B.dimension_out])
+        input = input.reshape(batch_shape + [self.A.dimension_in, self.B.dimension_out])
+        input = np.swapaxes(input, -1, -2)
+        input = input.reshape([-1, self.A.dimension_in])
+        input = self.A.compute(input)
+        input = input.reshape(batch_shape + [self.B.dimension_out, self.A.dimension_out])
         input = np.swapaxes(input, -1, -2)
         return np.reshape(input, batch_shape + [-1])
 
@@ -68,13 +68,13 @@ class Tensor(Node):
         if input is None:
             input = np.array([1])
         batch_shape = list(input.shape[:-1])
-        input = input.reshape([-1, self.A.dimension_out])
-        input = self.A.compute_adjoint(input)
-        input = input.reshape(batch_shape + [self.B.dimension_out, self.A.dimension_in])
-        input = np.swapaxes(input, -1, -2)
         input = input.reshape([-1, self.B.dimension_out])
         input = self.B.compute_adjoint(input)
-        input = input.reshape(batch_shape + [self.A.dimension_in, self.B.dimension_in])
+        input = input.reshape(batch_shape + [self.A.dimension_out, self.B.dimension_in])
+        input = np.swapaxes(input, -1, -2)
+        input = input.reshape([-1, self.A.dimension_out])
+        input = self.A.compute_adjoint(input)
+        input = input.reshape(batch_shape + [self.B.dimension_in, self.A.dimension_in])
         input = np.swapaxes(input, -1, -2)
         return np.reshape(input, batch_shape + [-1])
 
@@ -83,27 +83,27 @@ class Tensor(Node):
     ) -> Circuit:
         # TODO: Optionally optimize for qubit count instead of depth?
         circuit = Circuit()
-        circuit += self.A.circuit(
-            target[: self.A.target_qubit_count()],
-            clean_ancillae[: self.A.clean_ancilla_count()],
-            borrowed_ancillae[: self.A.borrowed_ancilla_count()],
-        )
         circuit += self.B.circuit(
-            target[self.A.target_qubit_count() :],
-            clean_ancillae[self.A.clean_ancilla_count() :],
-            borrowed_ancillae[self.A.borrowed_ancilla_count() :],
+            target[: self.B.target_qubit_count()],
+            clean_ancillae[: self.B.clean_ancilla_count()],
+            borrowed_ancillae[: self.B.borrowed_ancilla_count()],
+        )
+        circuit += self.A.circuit(
+            target[self.B.target_qubit_count() :],
+            clean_ancillae[self.B.clean_ancilla_count() :],
+            borrowed_ancillae[self.B.borrowed_ancilla_count() :],
         )
         return circuit
 
     def _subspace_in(self) -> Subspace:
         subspace_A = self.A.subspace_in
         subspace_B = self.B.subspace_in
-        return subspace_B & subspace_A
+        return subspace_A & subspace_B
 
     def _subspace_out(self) -> Subspace:
         subspace_A = self.A.subspace_out
         subspace_B = self.B.subspace_out
-        return subspace_B & subspace_A
+        return subspace_A & subspace_B
 
     def _normalization(self) -> float:
         return self.A.normalization * self.B.normalization
