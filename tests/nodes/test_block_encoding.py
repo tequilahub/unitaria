@@ -8,8 +8,8 @@ def create_block_encoding():
     subspace_out = ut.Subspace("##")
     tequila_circuit = tq.QCircuit()
     tequila_circuit += tq.gates.X(0)
-    tequila_circuit.n_qubits = 2
     circuit = ut.Circuit(tequila_circuit)
+    circuit.n_qubits = 2
     normalization = 1.0
     return ut.BlockEncoding(circuit, subspace_in, subspace_out, normalization)
 

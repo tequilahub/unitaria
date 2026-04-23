@@ -23,10 +23,7 @@ np.float64(5.0)
 Circuit(_tq_circuit=circuit: 
 GlobalPhase(target=(), control=(), parameter=0.0)
 Ry(target=(0,), parameter=1.854590436003224)
-Rx(target=(0,), parameter=0.0)
-Rx(target=(0,), parameter=-0.0)
-Rx(target=(0,), parameter=0.0)
-)
+, n_qubits=1)
 
 ```
 

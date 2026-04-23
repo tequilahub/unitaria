@@ -367,7 +367,9 @@ class Subspace:
         return circuit
 
     def clean_ancilla_count(self) -> int:
-        controlled_subspaces = filter(lambda r: isinstance(r, ControlledSubspace), self.tensor_factors)
+        controlled_subspaces = filter(
+            lambda r: isinstance(r, ControlledSubspace) and r != FullQubitSubspace, self.tensor_factors
+        )
         return max(
             [i + r.clean_ancilla_count() for (i, r) in enumerate(controlled_subspaces, start=1)],
             default=0,
@@ -382,6 +384,7 @@ class Subspace:
                 self.total_qubits + 1 + self.clean_ancilla_count(),
             ),
         )
+        circuit.n_qubits = self.total_qubits + 1 + self.clean_ancilla_count()
         for i in range(2**self.total_qubits):
             result = circuit.simulate(i)
             if self.test_basis(i):
