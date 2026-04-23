@@ -382,6 +382,7 @@ class Subspace:
                 self.total_qubits + 1 + self.clean_ancilla_count(),
             ),
         )
+        circuit.n_qubits = self.total_qubits + 1 + self.clean_ancilla_count()
         for i in range(2**self.total_qubits):
             result = circuit.simulate(i)
             if self.test_basis(i):

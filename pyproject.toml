@@ -43,7 +43,10 @@ classifiers = [
 
 [dependency-groups]
 docs = ["sphinx", "furo"]
-dev = ["pytest"]
+dev = [
+    "ipykernel>=7.2.0",
+    "pytest",
+]
 
 [project.optional-dependencies]
 qpic = ["qpic==1.1.*"]
