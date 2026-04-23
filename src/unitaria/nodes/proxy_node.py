@@ -34,7 +34,7 @@ class ProxyNode(Node):
         """
         raise NotImplementedError
 
-    def _definition_internal(self) -> Node:
+    def get_definition(self) -> Node:
         """
         :no-index:
         """
@@ -46,41 +46,41 @@ class ProxyNode(Node):
     def compute(self, input: np.ndarray | None) -> np.ndarray:
         # TODO: Use something more concise for lazy calculation, instead of manually
         #  checking for None everywhere
-        definition = self._definition_internal()
+        definition = self.get_definition()
         return definition.compute(input)
 
     def compute_adjoint(self, input: np.ndarray | None) -> np.ndarray:
-        definition = self._definition_internal()
+        definition = self.get_definition()
         return definition.compute_adjoint(input)
 
     def _subspace_in(self) -> Subspace:
-        definition = self._definition_internal()
+        definition = self.get_definition()
         return definition.subspace_in
 
     def _subspace_out(self) -> Subspace:
-        definition = self._definition_internal()
+        definition = self.get_definition()
         return definition.subspace_out
 
     def _normalization(self) -> float:
-        definition = self._definition_internal()
+        definition = self.get_definition()
         return definition.normalization
 
     def is_guaranteed_unitary(self) -> bool:
-        definition = self._definition_internal()
+        definition = self.get_definition()
         return definition.is_guaranteed_unitary()
 
     def _circuit(
         self, target: Sequence[int], clean_ancillae: Sequence[int], borrowed_ancillae: Sequence[int]
     ) -> Circuit:
-        definition = self._definition_internal()
+        definition = self.get_definition()
         return definition.circuit(target, clean_ancillae, borrowed_ancillae)
 
     def clean_ancilla_count(self) -> int:
-        definition = self._definition_internal()
+        definition = self.get_definition()
         return definition.clean_ancilla_count()
 
     def borrowed_ancilla_count(self) -> int:
-        definition = self._definition_internal()
+        definition = self.get_definition()
         return definition.borrowed_ancilla_count()
 
     def tree_label(self, verbose: bool = False):
@@ -88,5 +88,5 @@ class ProxyNode(Node):
         if not verbose:
             return label
         else:
-            definition = self._definition_internal()
+            definition = self.get_definition()
             return Panel(definition.tree(verbose=True, holes=self.children()), title=label, title_align="left")
