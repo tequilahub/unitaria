@@ -178,3 +178,13 @@ def inverse_poly(delta: float, epsilon: float, guaranteed: bool = False) -> Cheb
         return poly_r
     else:
         return poly
+
+
+def qcheb_poly(delta: float, epsilon: float) -> Chebyshev:
+    n = int(np.ceil(np.log(epsilon * delta / 2) / np.log((1 - delta) / (1 + delta))))
+
+    X = np.polynomial.Chebyshev([0, 1])
+    P = np.polynomial.Chebyshev([0] * n + [1])((2 * X**2 - delta**2 - 1) / (1 - delta**2))
+    P = 1 - P / P(0)
+
+    return P // X
