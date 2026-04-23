@@ -108,6 +108,23 @@ class Circuit:
     def depth(self) -> int:
         return self._tq_circuit.depth
 
+    def _remove_global_phase(self) -> tuple[Circuit, float]:
+        tq_circuit = tq.QCircuit()
+        global_phase = 0
+        for gate in self._tq_circuit.gates:
+            if isinstance(gate, tq.circuit._gates_impl.GlobalPhaseGateImpl):
+                global_phase += gate.parameter
+            elif (
+                isinstance(gate, tq.circuit._gates_impl.RotationGateImpl | tq.circuit._gates_impl.PhaseGateImpl)
+                and gate.parameter == 0
+            ):
+                pass
+            else:
+                tq_circuit += gate
+        result = Circuit(tq_circuit)
+        result.n_qubits = self.n_qubits
+        return result, global_phase
+
     def draw(self) -> str:
         """
         Draw this circuit and return a string representation.
@@ -118,13 +135,22 @@ class Circuit:
         """
         if tq.circuit.qpic.system_has_qpic:
             _handle, file = tempfile.mkstemp(suffix=".pdf")
-            tq.circuit.qpic.export_to(self._padded(), file, style="standard")
+            circuit, _global_phase = self._remove_global_phase()
+            tq.circuit.qpic.export_to(circuit._padded(), file, style="standard")
             if is_ipython():
                 import IPython
+                import subprocess
 
-                with open(file, "rb") as file:
-                    data = file.read().rstrip()
-                    IPython.display.display_pdf(data, raw=True)
+                png_file = file[:-4] + ".png"
+
+                subprocess.run(
+                    ["gs", "-dSAFER", "-r200", "-sDEVICE=pngalpha", "-o", png_file, file], stdout=subprocess.DEVNULL
+                )
+
+                with open(png_file, "rb") as f:
+                    data = f.read().rstrip()
+                    image = IPython.display.Image(data, unconfined=True)
+                    IPython.display.display(image)
             else:
                 return f"Circuit stored at file://{file}"
         else:
