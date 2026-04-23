@@ -5,11 +5,11 @@ build-backend = "uv_build"
 [project]
 name = "unitaria"
 authors = [
-  {name = "Matthias Deiml", email = "matthias.deiml@uni-a.de"},
-  {name = "Oliver Hüttenhofer", email = "oliver.huettenhofer@uni-a.de"},
-  {name = "Jakob S. Kottmann", email = "jakob.kottmann@uni-a.de"},
-  {name = "Ram Mosco", email = "ram.mosco@uni-a.de"},
-  {name = "Daniel Peterseim", email = "daniel.peterseim@uni-a.de"}
+    { name = "Matthias Deiml", email = "matthias.deiml@uni-a.de" },
+    { name = "Oliver Hüttenhofer", email = "oliver.huettenhofer@uni-a.de" },
+    { name = "Jakob S. Kottmann", email = "jakob.kottmann@uni-a.de" },
+    { name = "Ram Mosco", email = "ram.mosco@uni-a.de" },
+    { name = "Daniel Peterseim", email = "daniel.peterseim@uni-a.de" }
 ]
 version = "0.0.0"
 description = "Linear algebra on quantum computers using block encodings"
@@ -18,32 +18,37 @@ license = "MIT"
 license-files = ["LICENSE"]
 readme = "README.md"
 dependencies = [
-  "tequila-basic>=1.9.11",
-  "rich==14.0.*",
-  "qulacs==0.6.*",
-  "numpy==2.4.*",
-  "scipy==1.17.*"
+    "tequila-basic>=1.9.11",
+    "rich==14.0.*",
+    "qulacs==0.6.*",
+    "numpy==2.4.*",
+    "scipy==1.17.*"
 ]
 requires-python = ">=3.12"
 classifiers = [
-  "Development Status :: 3 - Alpha",
-  "Programming Language :: Python",
-  "Programming Language :: Python :: 3.12",
-  "Programming Language :: Python :: 3.13",
-  "Programming Language :: Python :: 3.14",
-  "Intended Audience :: Developers",
-  "Intended Audience :: Education",
-  "Intended Audience :: Science/Research",
-  "Topic :: Scientific/Engineering",
-  "Topic :: Scientific/Engineering :: Chemistry",
-  "Topic :: Scientific/Engineering :: Mathematics",
-  "Topic :: Scientific/Engineering :: Physics",
-  "Topic :: Scientific/Engineering :: Quantum Computing",
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Education",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Chemistry",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Topic :: Scientific/Engineering :: Quantum Computing",
+]
+
+[dependency-groups]
+docs = ["sphinx", "furo"]
+dev = [
+    "ipykernel>=7.2.0",
+    "pytest",
 ]
 
 [project.optional-dependencies]
-docs = ["sphinx", "furo"]
-dev = ["ipykernel>=7.2.0", "pytest"]
 qpic = ["qpic==1.1.*"]
 
 [project.urls]
@@ -53,10 +58,10 @@ Documentation = "https://tequilahub.github.io/unitaria/index.html"
 
 [tool.pytest.ini_options]
 addopts = [
-  "--import-mode=importlib",
-  "--doctest-modules",
-  "--doctest-glob=README.md",
-  "--doctest-glob=*.rst",
+    "--import-mode=importlib",
+    "--doctest-modules",
+    "--doctest-glob=README.md",
+    "--doctest-glob=*.rst",
 ]
 pythonpath = ["src"]
 doctest_optionflags = ["NUMBER"]
