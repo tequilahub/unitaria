@@ -30,9 +30,9 @@ class LCG(ut.ProxyNode):
                 ut.ConstantIntegerAddition(self.bits, acc_add),
                 skip_projection=True,
             )
-            controlled = (
-                ut.Identity(ut.Subspace("#" * i + "00" + "#" * self.bits)) | (step & ut.Identity(ut.Subspace("#" * i)))
-            ) & ut.Identity(ut.Subspace("#" * (self.bits - i - 1)))
+            controlled = ut.Identity(ut.Subspace("#" * (self.bits - i - 1))) & (
+                ut.Identity(ut.Subspace("#" * i + "00" + "#" * self.bits)) | (ut.Identity(ut.Subspace("#" * i)) & step)
+            )
             if result is None:
                 result = controlled
             else:
