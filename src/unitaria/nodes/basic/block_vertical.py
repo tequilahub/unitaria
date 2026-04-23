@@ -39,8 +39,8 @@ class BlockVertical(ProxyNode):
     def definition(self) -> Node:
         permute_A, permute_B = permute(self.A.subspace_in, self.B.subspace_in)
 
-        A_permuted = Scale(UnsafeMul(Adjoint(permute_A), self.A), absolute=True)
-        B_permuted = Scale(UnsafeMul(Adjoint(permute_B), self.B), absolute=True)
+        A_permuted = Scale(UnsafeMul(self.A, Adjoint(permute_A)), absolute=True)
+        B_permuted = Scale(UnsafeMul(self.B, Adjoint(permute_B)), absolute=True)
 
         diag = BlockDiagonal(A_permuted, B_permuted)
 
@@ -49,7 +49,7 @@ class BlockVertical(ProxyNode):
             Identity(diag.subspace_out.case_zero()),
         )
 
-        return UnsafeMul(rotation_in, diag)
+        return UnsafeMul(diag, rotation_in)
 
     def _normalization(self) -> float:
         return np.sqrt(np.abs(self.A.normalization) ** 2 + np.abs(self.B.normalization) ** 2)

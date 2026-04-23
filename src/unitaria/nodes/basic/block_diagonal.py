@@ -47,21 +47,21 @@ class BlockDiagonal(ProxyNode):
         A_controlled = ModifyControl(A_controlled, max(0, controlled_bits_B - controlled_bits_A), True)
         A_controlled = UnsafeMul(
             UnsafeMul(
-                Projection(subspace_in, A_controlled.subspace_in),
+                Projection(A_controlled.subspace_out, subspace_mid),
                 A_controlled,
             ),
-            Projection(A_controlled.subspace_out, subspace_mid),
+            Projection(subspace_in, A_controlled.subspace_in),
         )
         B_controlled = ModifyControl(B_controlled, max(0, controlled_bits_A - controlled_bits_B), False)
         B_controlled = UnsafeMul(
             UnsafeMul(
-                Projection(subspace_mid, B_controlled.subspace_in),
+                Projection(B_controlled.subspace_out, subspace_out),
                 B_controlled,
             ),
-            Projection(B_controlled.subspace_out, subspace_out),
+            Projection(subspace_mid, B_controlled.subspace_in),
         )
 
-        return UnsafeMul(A_controlled, B_controlled)
+        return UnsafeMul(B_controlled, A_controlled)
 
     def _normalization(self) -> float:
         return self.A.normalization

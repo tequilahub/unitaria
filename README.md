@@ -13,8 +13,8 @@ quantum computers. It allows constructing quantum algorithms using a simple,
 >>> result = ut.Identity(ut.Subspace.from_dim(2)) @ ut.ConstantVector(np.array([3, 4]))
 >>> print(result.draw())
 Mul
-├── ConstantVector{'vec': array([3, 4])}
-└── Identity{'subspace': Subspace("#")}
+├── Identity{'subspace': Subspace("#")}
+└── ConstantVector{'vec': array([3, 4])}
 >>> result.toarray().real
 array([3., 4.])
 >>> result.normalization
