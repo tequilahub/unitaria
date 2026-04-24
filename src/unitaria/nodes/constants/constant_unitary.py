@@ -48,18 +48,6 @@ class ConstantUnitary(Node):
         self.bits = int(np.ceil(np.log2(extended_unitary.shape[0])))
         assert 2**self.bits == extended_unitary.shape[0]
 
-    @staticmethod
-    def _is_unitary(U: np.ndarray, tol: float = 1e-8) -> bool:
-        """
-        Check if a matrix is unitary within a given tolerance.
-
-        :param U: The matrix to check.
-        :param tol: Tolerance for unitarity check (default: 1e-8).
-        :return: True if U is unitary, False otherwise.
-        """
-        identity = np.eye(U.shape[0])
-        return np.allclose(U @ np.conj(U.T), identity, atol=tol) and np.allclose(np.conj(U.T) @ U, identity, atol=tol)
-
     def parameters(self) -> dict:
         """
         Returns the parameters of the node.

@@ -342,11 +342,13 @@ class Node(ABC):
             wavefunction = self.circuit().simulate(input=input, backend="qulacs")
             return self.normalization * self.subspace_out.project(wavefunction)
         else:
-            output = np.zeros((self.dimension_out, self.dimension_in))
+            output = np.zeros((self.dimension_out, self.dimension_in), dtype=np.complex128)
             for i, b in enumerate(self.subspace_in.enumerate_basis()):
                 input = np.zeros(self.dimension_in, dtype=np.complex128)
                 input[i] = 1
-                output[i] = self.normalization * self.subspace_out.project(self.circuit().simulate(b, backend="qulacs"))
+                output[:, i] = self.normalization * self.subspace_out.project(
+                    self.circuit().simulate(b, backend="qulacs")
+                )
             return output
 
     def simulate_norm(self, input: int | None = None) -> float:

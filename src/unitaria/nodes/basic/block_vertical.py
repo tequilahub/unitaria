@@ -46,7 +46,7 @@ class BlockVertical(ProxyNode):
 
         rotation_in = Tensor(
             ConstantVector(np.array([self.A.normalization, self.B.normalization])),
-            Identity(diag.subspace_out.case_zero()),
+            Identity(diag.subspace_in.case_zero()),
         )
 
         return UnsafeMul(diag, rotation_in)
