@@ -2,7 +2,7 @@
 
 .. currentmodule:: {{ module }}
 
-{% if name in ["Node", "ProxyNode", "MultilinearNode"] %}
+{% if name in ["Node", "ProxyNode", "MultilinearNode", "Classical"] %}
 .. autoclass:: {{ objname }}
    :show-inheritance:
    :members:

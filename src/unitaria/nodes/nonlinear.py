@@ -17,7 +17,7 @@ class ComponentwiseMul(MultilinearNode):
     ..., x_n * y_n]``. Usually you will want the elementwise product of two
     vectors, in which case the correct result will be obtained by building the
     tensor product of the vectors and then multiplying it with this operation,
-    i.e. ``Mul(Tensor(a, b), ComponentwiseMul(a.subspace_out()))``
+    i.e. ``Mul(ComponentwiseMul(a.subspace_out()), Tensor(a, b))``
 
     :param subspace:
         The vector space in which to perform the element-wise operation

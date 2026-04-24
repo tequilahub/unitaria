@@ -45,7 +45,7 @@ class MultilinearNode(ProxyNode):
         self.dimensions_in = dimensions_in
         self.apply = apply
 
-    def _definition_internal(self) -> Node:
+    def get_definition(self) -> Node:
         if self._definition is None:
             apply_product = None
             for i, dim in enumerate(self.dimensions_in):
@@ -56,7 +56,7 @@ class MultilinearNode(ProxyNode):
                 if apply_product is None:
                     apply_product = node
                 else:
-                    apply_product = Tensor(apply_product, node)
+                    apply_product = Tensor(node, apply_product)
             definition = self.definition()
-            self._definition = Mul(apply_product, definition)
+            self._definition = Mul(definition, apply_product)
         return self._definition

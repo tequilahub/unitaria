@@ -44,11 +44,11 @@ class Add(ProxyNode):
         permutation_out_A, permutation_out_B = permute(self.A.subspace_out, self.B.subspace_out)
 
         A_permuted = Scale(
-            UnsafeMul(Adjoint(permutation_in_A), UnsafeMul(self.A, permutation_out_A)),
+            UnsafeMul(UnsafeMul(permutation_out_A, self.A), Adjoint(permutation_in_A)),
             absolute=True,
         )
         B_permuted = Scale(
-            UnsafeMul(Adjoint(permutation_in_B), UnsafeMul(self.B, permutation_out_B)),
+            UnsafeMul(UnsafeMul(permutation_out_B, self.B), Adjoint(permutation_in_B)),
             absolute=True,
         )
 
@@ -57,15 +57,15 @@ class Add(ProxyNode):
         sqrt_A = np.sqrt(np.abs(self.A.normalization))
         sqrt_B = np.sqrt(np.abs(self.B.normalization))
         rotation_in = Tensor(
-            Identity(diag.subspace_in.case_zero()),
             ConstantVector(np.array([sqrt_A, sqrt_B])),
+            Identity(diag.subspace_in.case_zero()),
         )
         rotation_out = Tensor(
-            Identity(diag.subspace_out.case_zero()),
             ConstantVector(np.array([self.A.normalization / sqrt_A, self.B.normalization / sqrt_B])),
+            Identity(diag.subspace_out.case_zero()),
         )
 
-        return UnsafeMul(UnsafeMul(rotation_in, diag), Adjoint(rotation_out))
+        return UnsafeMul(UnsafeMul(Adjoint(rotation_out), diag), rotation_in)
 
     def _normalization(self) -> float:
         return self.A.normalization + self.B.normalization

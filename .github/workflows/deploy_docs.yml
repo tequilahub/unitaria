@@ -2,31 +2,45 @@ name: Deploy documentation
 on:
   push:
     branches:
-    - main
+      - main
+    tags:
+      - '*'
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
       - name: Install uv
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@v7
         with:
-          version: "0.10.9"
+          version: "0.11.7"
           enable-cache: true
-      - name: Install dependencies
-        run: uv sync --group docs
       - name: Build documentation
-        working-directory: ./docs
-        run: uv run make html
+        run: |
+          mkdir site
+          uv sync --group docs
+          uv run make -C docs html
+          mkdir site/git
+          mv docs/_build/html/* site/git
+          for tag in $(git tag --sort=-v:refname); do
+            git checkout $tag
+            uv sync --group docs
+            rm -r docs/_build
+            DOCS_VERSION=$tag uv run make -C docs html
+            mkdir site/$tag
+            mv docs/_build/html/* site/$tag
+          done
       - name: Upload GitHub Pages artifact
-        uses: actions/upload-pages-artifact@v4.0.0
+        uses: actions/upload-pages-artifact@v5
         with:
-          path: docs/_build/html
+          path: site
   deploy:
     needs: build
     permissions:
@@ -39,4 +53,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4.0.5
+        uses: actions/deploy-pages@v5

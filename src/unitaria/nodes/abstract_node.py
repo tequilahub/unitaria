@@ -25,6 +25,11 @@ class AbstractNode(Node):
         Implementation of `Node.compute`.
     :param compute_adjoint:
         Implementation of `Node.compute_adjoint`.
+    :param normalization:
+        If given, the node will pretend to have this normalizaton. It does not
+        check that the normalization is larger than the spectral norm of the
+        encoded
+        matrix.
     """
 
     def __init__(
@@ -33,10 +38,12 @@ class AbstractNode(Node):
         dimension_out: int,
         compute: Callable[[np.ndarray], np.ndarray],
         compute_adjoint: Callable[[np.ndarray], np.ndarray],
+        normalization: float | None = None,
     ):
         super().__init__(dimension_in, dimension_out)
         self.compute_fn = compute
         self.compute_adjoint_fn = compute_adjoint
+        self.abstract_normalization = normalization
 
     def compute(self, input):
         return self.compute_fn(input)
@@ -51,7 +58,10 @@ class AbstractNode(Node):
         raise NotImplementedError("Abstract node has no circuit implementation")
 
     def _normalization(self):
-        raise NotImplementedError("Abstract node has no circuit implementation")
+        if self.abstract_normalization is not None:
+            return self.abstract_normalization
+        else:
+            raise NotImplementedError("Abstract node has no circuit implementation")
 
     def _circuit(self, target: Sequence[int], clean_ancillae: Sequence[int], borrowed_ancillae: Sequence[int]):
         raise NotImplementedError("Abstract node has no circuit implementation")

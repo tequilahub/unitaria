@@ -76,10 +76,9 @@ class Verifier:
         up to a multiplicative global phase ``np.exp(theta * 1j)``. This might
         be useful, since some simulation backends to not guarantee to simulate
         the global phase correctly.
+    :param check_adjoint:
+        Wether to check that compute_adjoint is implemented correctly
     """
-
-    drill: bool
-    up_to_phase: bool
 
     def __init__(self, drill: bool = True, up_to_phase: bool = False, check_adjoint: bool = True):
         self.drill = drill

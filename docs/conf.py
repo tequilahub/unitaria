@@ -4,6 +4,7 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
 import os
+import subprocess
 import sys
 
 sys.path.insert(0, os.path.abspath("../src"))
@@ -15,8 +16,13 @@ project = "unitaria"
 copyright = "2025, Matthias Deiml"
 author = "Matthias Deiml"
 
-version = "0.1"
-release = "0.1"
+git_commit = f"git-{subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('utf-8').strip()}"
+version = os.environ.get("DOCS_VERSION", git_commit)
+release = version
+try:
+    tags = subprocess.check_output(["git", "tag", "--sort=-v:refname"]).decode("utf-8").splitlines()
+except Exception:
+    tags = []
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -66,6 +72,21 @@ html_static_path = ["_static"]
 html_css_files = [
     "css/imgmath_furo.css",
 ]
+html_sidebars = {
+    "**": [
+        "sidebar/scroll-start.html",
+        "sidebar/brand.html",
+        "sidebar/search.html",
+        "sidebar/navigation.html",
+        "sidebar/scroll-end.html",
+        "versions.html",
+    ]
+}
+
+html_context = {
+    "current_version": git_commit,
+    "versions": [git_commit] + tags,
+}
 
 # -- Options for todo extension ----------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/extensions/todo.html#configuration

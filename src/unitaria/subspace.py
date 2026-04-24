@@ -154,7 +154,7 @@ class Subspace:
         min_bits = int(np.ceil(np.log2(dim)))
         case_zero = Subspace("#" * (min_bits - 1))
         case_one = Subspace.from_dim(dim - 2 ** (min_bits - 1), bits=min_bits - 1)
-        return (case_zero | case_one) & Subspace("0" * (bits - min_bits))
+        return Subspace("0" * (bits - min_bits)) & (case_zero | case_one)
 
     def __repr__(self) -> str:
         if len(self.tensor_factors) == 0:
@@ -388,7 +388,9 @@ class Subspace:
         return circuit
 
     def clean_ancilla_count(self) -> int:
-        controlled_subspaces = filter(lambda r: isinstance(r, ControlledSubspace), self.tensor_factors)
+        controlled_subspaces = filter(
+            lambda r: isinstance(r, ControlledSubspace) and r != FullQubitSubspace, self.tensor_factors
+        )
         return max(
             [i + r.clean_ancilla_count() for (i, r) in enumerate(controlled_subspaces, start=1)],
             default=0,
@@ -403,6 +405,7 @@ class Subspace:
                 self.total_qubits + 1 + self.clean_ancilla_count(),
             ),
         )
+        circuit.n_qubits = self.total_qubits + 1 + self.clean_ancilla_count()
         for i in range(2**self.total_qubits):
             result = circuit.simulate(i)
             if self.test_basis(i):

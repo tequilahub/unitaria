@@ -322,9 +322,9 @@ class Node(ABC):
         else:
             return self.compute(np.eye(self.dimension_in, dtype=np.complex128)).T
 
-    def compute_norm(self, input: np.array | None) -> float:
+    def compute_norm(self, input: np.array | None = None) -> float:
         """
-        Method to compute the norm of the wavefunction in the subspace.
+        Method to compute the norm of this vector given the arithmetic definition of this node using `compute`.
         """
         if input is None and not self.is_vector():
             raise ValueError("Cannot compute norm, since node is a matrix and no input was given")
@@ -350,11 +350,13 @@ class Node(ABC):
             wavefunction = self.circuit().simulate(input=input, backend="qulacs")
             return self.normalization * self.subspace_out.project(wavefunction)
         else:
-            output = np.zeros((self.dimension_out, self.dimension_in))
+            output = np.zeros((self.dimension_out, self.dimension_in), dtype=np.complex128)
             for i, b in enumerate(self.subspace_in.enumerate_basis()):
                 input = np.zeros(self.dimension_in, dtype=np.complex128)
                 input[i] = 1
-                output[i] = self.normalization * self.subspace_out.project(self.circuit().simulate(b, backend="qulacs"))
+                output[:, i] = self.normalization * self.subspace_out.project(
+                    self.circuit().simulate(b, backend="qulacs")
+                )
             return output
 
     def simulate_norm(self, input: int | None = None) -> float:

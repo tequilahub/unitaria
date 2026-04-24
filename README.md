@@ -13,8 +13,8 @@ quantum computers. It allows constructing quantum algorithms using a simple,
 >>> result = ut.Identity(ut.Subspace.from_dim(2)) @ ut.ConstantVector(np.array([3, 4]))
 >>> print(result.draw())
 Mul
-├── ConstantVector{'vec': array([3, 4])}
-└── Identity{'subspace': Subspace("#")}
+├── Identity{'subspace': Subspace("#")}
+└── ConstantVector{'vec': array([3, 4])}
 >>> result.toarray().real
 array([3., 4.])
 >>> result.normalization
@@ -23,14 +23,11 @@ np.float64(5.0)
 Circuit(_tq_circuit=circuit: 
 GlobalPhase(target=(), control=(), parameter=0.0)
 Ry(target=(0,), parameter=1.854590436003224)
-Rx(target=(0,), parameter=0.0)
-Rx(target=(0,), parameter=-0.0)
-Rx(target=(0,), parameter=0.0)
-)
+, n_qubits=1)
 
 ```
 
-[**Documentation**](https://tequilahub.github.io/unitaria/index.html)
+[**Documentation**](https://tequilahub.github.io/unitaria/git/index.html)
 
 ## Installation
 
@@ -64,7 +61,7 @@ pytest
 
 To build the documentation, some additional dependencies are required, which can be installed using
 ```sh
-pip install --editable .[docs]
+pip install --group docs --editable .
 ```
 Then navigate to the `/docs` folder and run
 ```sh

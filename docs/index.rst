@@ -24,8 +24,8 @@ more complex expressions, stored as a computational graph.
 >>> import numpy as np
 >>> print(ut.Identity(dim=2) @ ut.ConstantVector(np.array([1, 2])))
 Mul
-├── ConstantVector{'vec': array([1, 2])}
-└── Identity{'subspace': Subspace("#")}
+├── Identity{'subspace': Subspace("#")}
+└── ConstantVector{'vec': array([1, 2])}
 
 There are now two ways in which you can obtain the encoded vector of the above
 example. Each node contains a classical implementation of the operation it
@@ -48,7 +48,7 @@ combines this data, which should produce the same result as
 >>> (ut.Identity(dim=2) @ ut.ConstantVector(np.array([1, 2]))).simulate().real
 array([1., 2.])
 
-It can be checked wether the results of `~unitaria.Node.toarray` and
+It can be checked weather the results of `~unitaria.Node.toarray` and
 `~unitaria.Node.simulate` actually match by using `~unitaria.verifier.verify`.
 This also checks other useful things, such as the number of qubits in the
 circuit being correct.
