@@ -17,6 +17,7 @@ class Classical(Node):
     :param output_bits:
         The number of bits in the output of the computed function
         or a Sequence of the number of bits if there are multiple outputs
+    :raises ValueError: If any of the input_bits or output_bits are less than 1.
     """
 
     input_bits: int | Sequence[int]

@@ -16,6 +16,7 @@ class Scale(Node):
     :param scale: The scalar factor (default: 1).
     :param remove_efficiency: (Unused, must be 1).
     :param absolute: If True, A is divided by its normalization first (default: False).
+    :raises AssertionError: If remove_efficiency is not 1.
     """
 
     A: Node

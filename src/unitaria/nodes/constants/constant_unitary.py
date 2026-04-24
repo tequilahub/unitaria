@@ -14,6 +14,7 @@ class ConstantUnitary(Node):
     Node representing the given unitary
 
     :param unitary: The unitary which should be implemented
+    :raises ValueError: If the provided matrix is not unitary.
     """
 
     unitary: np.ndarray

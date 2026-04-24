@@ -18,6 +18,7 @@ class IntegerAddition(Classical):
         The size of the first register. The first summand can be at most ``2 ** source_bits``
     :param target_bits:
         The size of the second register. The addition is performed modulo ``2 ** target_bits``.
+    :raises ValueError: If ``source_bits < 2`` or ``target_bits < source_bits``.
     """
 
     source_bits: int

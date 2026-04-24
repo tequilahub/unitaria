@@ -141,6 +141,12 @@ class Subspace:
 
     @staticmethod
     def from_dim(dim: int, bits: int | None = None) -> Subspace:
+        """
+        Create a subspace of a given dimension.
+        :param dim: The dimension of the subspace
+        :param bits: The number of qubits of the super-space, if not given, the smallest number of qubits such that the dimension fits will be used.
+        :return: A subspace of the given dimension.
+        """
         if bits is None:
             bits = int(np.ceil(np.log2(dim)))
         if dim == 1:
@@ -203,9 +209,17 @@ class Subspace:
         return total_qubits
 
     def __eq__(self, other) -> bool:
+        """
+        Two subspaces are equal if they have the same tensor factors.
+        :return: True if the subspaces are equal, False otherwise
+        """
         return self.tensor_factors == other.tensor_factors
 
     def match_nonzero(self, other: Subspace) -> bool:
+        """
+        Tests whether the nonzero factors of two subspaces are equal.
+        :return: True if the nonzero factors are equal, False otherwise
+        """
         return self.nonzero_factors() == other.nonzero_factors()
 
     def __str__(self) -> str:
@@ -227,6 +241,10 @@ class Subspace:
         return output
 
     def draw_tree(self) -> str:
+        """
+        Draws a tree representation of the subspace according to its internal representation.
+        :return: A string representing the tree structure of the subspace.
+        """
         output = ""
         for i, factor in enumerate(reversed(self.tensor_factors)):
             if i == 0:
@@ -261,6 +279,9 @@ class Subspace:
         return output
 
     def initial_zeros(self) -> int:
+        """
+        Counts the number of initial factors that are zero qubits
+        """
         for i in reversed(range(len(self.tensor_factors))):
             if not isinstance(self.tensor_factors[i], ZeroQubitSubspace):
                 return len(self.tensor_factors) - i - 1

@@ -19,10 +19,9 @@ class Add(ProxyNode):
 
     Both summands must have matching `Add.dimension_in` and `Add.dimension_out`.
 
-    :param A:
-        The first summand
-    :param B:
-        The second summand
+    :param A: The first summand
+    :param B: The second summand
+    :raises ValueError: If the dimensions of the summands do not match.
     """
 
     A: Node
