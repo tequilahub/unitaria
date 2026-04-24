@@ -28,10 +28,13 @@ from unitaria.nodes.basic.add import Add
 from unitaria.nodes.basic.block_horizontal import BlockHorizontal
 from unitaria.nodes.basic.block_vertical import BlockVertical
 
+from unitaria.nodes.permutation.permutation import PermuteFactors
+
 from unitaria.nodes.fourier_transform import FourierTransform
 
 from unitaria.nodes.nonlinear import ComponentwiseMul
 
+from unitaria.nodes.classical.classical import Classical
 from unitaria.nodes.classical.constant_integer_addition import ConstantIntegerAddition
 from unitaria.nodes.classical.constant_integer_multiplication import ConstantIntegerMultiplication
 from unitaria.nodes.classical.increment import Increment
@@ -42,8 +45,6 @@ from unitaria.nodes.inversion.pseudoinverse import Pseudoinverse
 from unitaria.nodes.amplification.grover_amplification import GroverAmplification
 from unitaria.nodes.amplification.linear_amplification import LinearAmplification
 from unitaria.nodes.amplification.fixed_point_amplification import FixedPointAmplification
-
-from unitaria.nodes.permutation.permutation import PermuteFactors
 
 __all__ = [
     "Node",
@@ -57,6 +58,7 @@ __all__ = [
     "BlockEncoding",
     "BlockHorizontal",
     "BlockVertical",
+    "Classical",
     "ComponentwiseMul",
     "ConstantIntegerAddition",
     "ConstantIntegerMultiplication",

@@ -28,6 +28,19 @@ def test_constant_unitary():
     # Triggers an edge case because of the degenerate eigenvalue
     U = np.array([[1, 0, 0, 0], [0, 0, 0, 1], [0, -0.81649658, -0.57735027, 0], [0, -0.57735027, 0.81649658, 0]])
     ut.verify(ut.ConstantUnitary(U))
+    ut.verify(
+        ut.ConstantUnitary(
+            np.sqrt(1 / 2)
+            * np.array(
+                [
+                    [1, -np.sqrt(3) / 2],
+                    [0, 1 / 2],
+                    [1, np.sqrt(3) / 2],
+                    [0, 1 / 2],
+                ]
+            )
+        )
+    )
 
 
 def test_constant_unitary_rectangular():

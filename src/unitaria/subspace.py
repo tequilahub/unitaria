@@ -148,7 +148,7 @@ class Subspace:
         min_bits = int(np.ceil(np.log2(dim)))
         case_zero = Subspace("#" * (min_bits - 1))
         case_one = Subspace.from_dim(dim - 2 ** (min_bits - 1), bits=min_bits - 1)
-        return (case_zero | case_one) & Subspace("0" * (bits - min_bits))
+        return Subspace("0" * (bits - min_bits)) & (case_zero | case_one)
 
     def __repr__(self) -> str:
         if len(self.tensor_factors) == 0:

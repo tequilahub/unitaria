@@ -17,6 +17,13 @@ def test_eq():
     assert c != ut.Subspace("#")
 
 
+def test_from_dim():
+    rng = np.random.default_rng(0)
+    for n in range(1, 5):
+        dim = rng.integers(0, 2**n)
+        np.testing.assert_equal(ut.Subspace.from_dim(dim, bits=n).enumerate_basis(), np.arange(dim))
+
+
 def test_basis():
     assert ut.Subspace("0").test_basis(0)
     assert not ut.Subspace("0").test_basis(1)
