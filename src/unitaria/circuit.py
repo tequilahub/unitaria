@@ -55,7 +55,7 @@ class Circuit:
                 return input
             else:
                 assert isinstance(input, (int, np.integer))
-                result = np.zeros(2**self.n_qubits)
+                result = np.zeros(2**self.n_qubits, dtype=complex)
                 result[input] = 1
                 return result
         if isinstance(input, np.ndarray):

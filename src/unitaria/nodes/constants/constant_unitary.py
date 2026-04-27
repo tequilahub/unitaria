@@ -13,6 +13,9 @@ class ConstantUnitary(Node):
     """
     Node representing the given unitary
 
+    Can also be a rectangular matrix with orthonormal columns, i.e. a matrix V
+    such that either $V^\\dag V$ or $V V^\\dag$ is unitary.
+
     :param unitary: The unitary which should be implemented
     """
 
@@ -46,7 +49,10 @@ class ConstantUnitary(Node):
         if not is_unitary(self.extended_unitary):
             raise ValueError("The provided matrix is not unitary.")
         self.bits = int(np.ceil(np.log2(extended_unitary.shape[0])))
-        assert 2**self.bits == extended_unitary.shape[0]
+        if 2**self.bits > self.extended_unitary.shape[0]:
+            temp = self.extended_unitary
+            self.extended_unitary = np.eye(2**self.bits, dtype=complex)
+            self.extended_unitary[: temp.shape[0], : temp.shape[0]] = temp
 
     def parameters(self) -> dict:
         """
@@ -94,7 +100,7 @@ def _extend_basis_by_one(U: np.array, n: int):
     :param U: The matrix to extend (in-place).
     :param n: The index at which to extend the basis.
     """
-    candidates = np.eye(U.shape[0]) - U[:, :n] @ np.conj(U.T)[:n, :]
+    candidates = np.eye(U.shape[0], dtype=complex) - U[:, :n] @ np.conj(U.T)[:n, :]
     norms = np.linalg.norm(candidates, ord=2, axis=0)
     best = np.argmax(norms)
     U[:, n] = candidates[:, best] / norms[best]

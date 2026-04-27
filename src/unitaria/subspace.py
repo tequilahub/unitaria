@@ -266,12 +266,12 @@ class Subspace:
                 return len(self.tensor_factors) - i - 1
         return len(self.tensor_factors)
 
-    def nonzero_factors(self) -> list[SubspaceFactor]:
+    def nonzero_factors(self) -> Subspace:
         initial_zeros = self.initial_zeros()
         if initial_zeros == 0:
-            return self.tensor_factors
+            return self
         else:
-            return self.tensor_factors[:-initial_zeros]
+            return Subspace(self.tensor_factors[:-initial_zeros])
 
     def test_basis(self, bits: int) -> bool:
         """

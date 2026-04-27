@@ -401,6 +401,12 @@ class Node(ABC):
         output = capture.get().strip()
         return output
 
+    def adjoint(self) -> Node:
+        """
+        Returns the adjoint of this nodes, see `~unitaria.nodes.basic.adjoint.Adjoint`.
+        """
+        raise NotImplementedError("Import `Adjoint` before using this method")
+
     def __str__(self):
         return self.draw()
 
@@ -408,7 +414,7 @@ class Node(ABC):
         out = self.__class__.__name__ + "("
         parameters = self.parameters()
         if len(parameters) != 0:
-            out += str(parameters)[1:-1]
+            out += parameters.__repr__()[1:-1]
             if len(self.children()) > 0:
                 out += ", "
         if len(self.children()) > 0:

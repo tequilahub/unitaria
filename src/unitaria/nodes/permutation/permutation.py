@@ -315,11 +315,11 @@ def _rotate(subspace: Subspace, right: bool) -> Node:
     other_zeros = other.initial_zeros()
     if other_zeros > 1 and initial_zeros > 0:
         permutation.append(
-            AddZerosToControl.remove_zeros(Subspace(subspace.nonzero_factors()), min(initial_zeros, other_zeros - 1))
+            AddZerosToControl.remove_zeros(subspace.nonzero_factors(), min(initial_zeros, other_zeros - 1))
         )
         subspace = permutation[-1].subspace_out
     elif other_zeros == 0:
-        permutation.append(AddZerosToControl(Subspace(subspace.nonzero_factors()), 1))
+        permutation.append(AddZerosToControl(subspace.nonzero_factors(), 1))
         subspace = permutation[-1].subspace_out
 
     if right:
@@ -329,7 +329,7 @@ def _rotate(subspace: Subspace, right: bool) -> Node:
 
     pivot_zeros = pivot.initial_zeros()
     if pivot_zeros != 0:
-        move = AddZerosToControl(Subspace(pivot.nonzero_factors()), pivot_zeros)
+        move = AddZerosToControl(pivot.nonzero_factors(), pivot_zeros)
         if right:
             permutation.append(move | Identity(subspace.case_one()))
         else:
@@ -337,14 +337,15 @@ def _rotate(subspace: Subspace, right: bool) -> Node:
         subspace = permutation[-1].subspace_out
 
     if right:
-        permutation.append(SubspaceRightRotation(Subspace(subspace.nonzero_factors())))
+        permutation.append(SubspaceRightRotation(subspace.nonzero_factors()))
     else:
-        permutation.append(SubspaceRightRotation.left_rotate(Subspace(subspace.nonzero_factors())))
+        permutation.append(SubspaceRightRotation.left_rotate(subspace.nonzero_factors()))
     return logreduce(UnsafeMul, permutation[::-1])
 
 
 def _rotate_to(subspace: Subspace, index: int) -> Node:
     assert index >= 1 and index <= subspace.dimension - 1
+    subspace = subspace.nonzero_factors()
 
     permutation = [Identity(subspace)]
 
@@ -384,7 +385,7 @@ def _rotate_to(subspace: Subspace, index: int) -> Node:
                 "Not making progress. This is a bug."
             )
 
-        subspace = permutation[-1].subspace_out
+        subspace = permutation[-1].subspace_out.nonzero_factors()
 
     if len(permutation) == 1:
         # Contains just the identity
@@ -463,6 +464,8 @@ def permute(a: Subspace, b: Subspace) -> tuple[Node, Node]:
     move_b_out = _move_zeros_to_end(subperms_b.subspace_out)
     perm_b = UnsafeMul(UnsafeMul(move_b_out, subperms_b), UnsafeMul(Adjoint(move_b_in), perm_b))
 
+    assert perm_a.subspace_out.match_nonzero(perm_b.subspace_out)
+
     return perm_a, perm_b
 
 
@@ -505,12 +508,20 @@ def _brute_force(a: Subspace, b: Subspace) -> tuple[Node, Node]:
     # additional zero qubits have to be moved out of the control.
     added_zeros_a = perm_a01.subspace_in.total_qubits - a0.total_qubits - 1
     if added_zeros_a:
-        move = AddZerosToControl.remove_zeros(perm_a01, added_zeros_a)
-        perm_a01 = UnsafeMul(UnsafeMul(move, perm_a01), Adjoint(move))
+        move_in = AddZerosToControl.remove_zeros(perm_a01.subspace_in, added_zeros_a)
+        perm_a01 = UnsafeMul(perm_a01, Adjoint(move_in))
+    output_zeros_a = _controlled_initial_zeros(perm_a01.subspace_out)
+    if output_zeros_a:
+        move_out = AddZerosToControl.remove_zeros(perm_a01.subspace_out, output_zeros_a)
+        perm_a01 = UnsafeMul(move_out, perm_a01)
     added_zeros_b = perm_b01.subspace_in.total_qubits - b0.total_qubits - 1
     if added_zeros_b:
-        move = AddZerosToControl.remove_zeros(perm_b01, added_zeros_b)
-        perm_b01 = UnsafeMul(UnsafeMul(move, perm_b01), Adjoint(move))
+        move_in = AddZerosToControl.remove_zeros(perm_b01.subspace_in, added_zeros_b)
+        perm_b01 = UnsafeMul(perm_b01, Adjoint(move_in))
+    output_zeros_b = _controlled_initial_zeros(perm_b01.subspace_out)
+    if output_zeros_b:
+        move_out = AddZerosToControl.remove_zeros(perm_b01.subspace_out, output_zeros_b)
+        perm_b01 = UnsafeMul(move_out, perm_b01)
 
     if perm_a is not None:
         perm_a = UnsafeMul(perm_a01, perm_a)
@@ -518,6 +529,8 @@ def _brute_force(a: Subspace, b: Subspace) -> tuple[Node, Node]:
     else:
         perm_a = perm_a01
         perm_b = perm_b01
+
+    assert perm_a.subspace_out.match_nonzero(perm_b.subspace_out), (perm_a.subspace_out, perm_b.subspace_out)
 
     return perm_a, perm_b
 
