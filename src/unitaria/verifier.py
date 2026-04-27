@@ -181,6 +181,7 @@ class VerificationError(Exception):
 
     :param node:
         The node which was found to be invalid.
+    :raises VerificationError: If the corresponding circuit of a node could not be rendered.
     """
 
     def __init__(self, node: Node):
