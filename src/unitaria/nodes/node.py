@@ -95,7 +95,6 @@ class Node(ABC):
         Method for computing `subspace_in`.
 
         To be implemented in all subclasses of `Node`.
-        :raises NotImplementedError: If the method is not implemented in a subclass of `Node`.
         """
         raise NotImplementedError
 
@@ -121,7 +120,6 @@ class Node(ABC):
         Method for computing `subspace_out`.
 
         To be implemented in all subclasses of `Node`.
-        :raises NotImplementedError: If the method is not implemented in a subclass of `Node`.
         """
         raise NotImplementedError
 
@@ -142,7 +140,6 @@ class Node(ABC):
         Method for computing `normalization`.
 
         To be implemented in all subclasses of `Node`.
-        :raises NotImplementedError: If the method is not implemented in a subclass of `Node`.
         """
         raise NotImplementedError
 
@@ -177,7 +174,6 @@ class Node(ABC):
         all vectors ``input[i, j, ..., k, :]`` in parallel. The shape of
         the returned array should match the input shape in all but the last
         dimension.
-        :raises NotImplementedError: If the method is not implemented in a subclass of `Node`.
         """
         raise NotImplementedError
 
@@ -187,7 +183,6 @@ class Node(ABC):
         Apply the adjoint action of this nodes matrix to the input.
 
         See `compute` for input and output formats.
-        :raises NotImplementedError: If the method is not implemented in a subclass of `Node`.
         """
         raise NotImplementedError
 
@@ -261,7 +256,6 @@ class Node(ABC):
         Method for computing `circuit`.
 
         To be implemented in all subclasses of `Node`.
-        :raises NotImplementedError: If the method is not implemented in a subclass of `Node`.
         """
         raise NotImplementedError
 
@@ -275,7 +269,6 @@ class Node(ABC):
         Returns the number of borrowed ancillae used by the circuit of this node,
         i.e. qubits that must be in state ``|0>`` at the beginning of the circuit and
         will be returned to this state by the end of the circuit.
-        :raises NotImplementedError: If the method is not implemented in a subclass of `Node`.
         """
         raise NotImplementedError
 
@@ -285,7 +278,6 @@ class Node(ABC):
         Returns the number of borrowed ancillae used by the circuit of this node,
         i.e. qubits that can be in any state and will be returned to this state by
         the end of the circuit.
-        :raises NotImplementedError: If the method is not implemented in a subclass of `Node`.
         """
         raise NotImplementedError
 
