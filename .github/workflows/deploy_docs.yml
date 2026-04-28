@@ -25,6 +25,7 @@ jobs:
       - name: Build documentation
         run: |
           mkdir site
+          echo '<!DOCTYPE html><meta charset="utf-8"><title>Redirecting...</title><meta http-equiv="refresh" content="0; URL=git/">' > site/index.html
           uv sync --group docs
           uv run make -C docs html
           mkdir site/git
