@@ -28,6 +28,7 @@ jobs:
           mkdir site
           echo '<!DOCTYPE html><meta charset="utf-8"><title>Redirecting...</title><meta http-equiv="refresh" content="0; URL=git/">' > site/index.html
           uv sync --group docs
+          export LATEST_GIT_COMMIT="git-$(git rev-parse --short HEAD)"
           uv run make -C docs html
           mkdir site/git
           mv docs/_build/html/* site/git

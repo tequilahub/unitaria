@@ -16,8 +16,11 @@ project = "unitaria"
 copyright = "2025, Matthias Deiml"
 author = "Matthias Deiml"
 
-git_commit = f"git-{subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('utf-8').strip()}"
-version = os.environ.get("DOCS_VERSION", git_commit)
+latest_git_commit = os.environ.get(
+    "LATEST_GIT_COMMIT",
+    f"git-{subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('utf-8').strip()}",
+)
+version = os.environ.get("DOCS_VERSION", latest_git_commit)
 release = version
 try:
     tags = subprocess.check_output(["git", "tag", "--sort=-v:refname"]).decode("utf-8").splitlines()
@@ -85,8 +88,8 @@ html_sidebars = {
 }
 
 html_context = {
-    "current_version": git_commit,
-    "versions": [git_commit] + tags,
+    "current_version": version,
+    "versions": [latest_git_commit] + tags,
 }
 
 # -- Options for todo extension ----------------------------------------------
