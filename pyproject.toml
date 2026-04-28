@@ -11,7 +11,7 @@ authors = [
     { name = "Ram Mosco", email = "ram.mosco@uni-a.de" },
     { name = "Daniel Peterseim", email = "daniel.peterseim@uni-a.de" }
 ]
-version = "0.0.0"
+version = "0.1.0"
 description = "Linear algebra on quantum computers using block encodings"
 keywords = ["quantum computing"]
 license = "MIT"
