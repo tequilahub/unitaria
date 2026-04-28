@@ -21,6 +21,7 @@ version = os.environ.get("DOCS_VERSION", git_commit)
 release = version
 try:
     tags = subprocess.check_output(["git", "tag", "--sort=-v:refname"]).decode("utf-8").splitlines()
+    tags.remove("v0.0.0")
 except Exception:
     tags = []
 

@@ -31,6 +31,9 @@ jobs:
           mkdir site/git
           mv docs/_build/html/* site/git
           for tag in $(git tag --sort=-v:refname); do
+            if [ "$tag" = "v0.0.0" ]; then
+              continue
+            fi
             git checkout $tag
             uv sync --group docs
             rm -r docs/_build
