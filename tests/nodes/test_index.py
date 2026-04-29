@@ -19,9 +19,6 @@ def test_index():
         start1, stop1, step1 = random_index(n, rng)
         start2, stop2, step2 = random_index(m, rng)
 
-        ut.verify(ut.Index(n, slice(start1, stop1, step1)))
-        ut.verify(ut.Index(m, slice(start2, stop2, step2)))
-
         ut.verify(ut.ConstantMatrix(mat)[start1], mat[start1 : start1 + 1, :])
         ut.verify(ut.ConstantMatrix(mat)[start1, start2], mat[start1, start2])
         ut.verify(ut.ConstantMatrix(mat)[start1:stop1:step1], mat[start1:stop1:step1])

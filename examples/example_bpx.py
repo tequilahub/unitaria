@@ -141,14 +141,11 @@ def preconditioned_half_laplace(
     coarse_bits = int(np.ceil(np.log2(coarse_size)))
 
     for level in range(fine_level, 0, -1):
-        subspace_in = ut.Subspace.from_dim(coarse_size * 2**level - 1, bits=level + coarse_bits)
-        subspace_out = ut.Subspace.from_dim(coarse_size * 2**level, bits=level + coarse_bits)
-        I_l = ut.Projection(subspace_in, subspace_out)
-        N_l = (
-            ut.Projection(ut.Subspace("#" * (level + coarse_bits)), subspace_out)
-            @ ut.Increment(bits=level + coarse_bits)
-            @ ut.Projection(subspace_in, ut.Subspace("#" * (level + coarse_bits)))
-        )
+        dimension_in = coarse_size * 2**level - 1
+        dimension_out = coarse_size * 2**level
+        subspace_out = ut.Subspace.from_dim(dimension_out, bits=level + coarse_bits)
+        I_l = ut.Identity(subspace_out)[:, :dimension_in]
+        N_l = ut.Increment(bits=level + coarse_bits)[:dimension_out, :dimension_in]
 
         R_l_1d = 2 ** (-level / 2) * (M & ut.Identity(subspace_out)) @ ut.BlockVertical(I_l, N_l)
         C_l_1d = 2 ** (level / 2) * ut.ConstantVector(np.array([1, 0])) & (I_l - N_l)

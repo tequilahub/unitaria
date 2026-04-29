@@ -7,6 +7,7 @@ from unitaria.nodes.basic.adjoint import Adjoint
 from unitaria.nodes.basic.projection import Projection
 from unitaria.nodes.basic.mul import Mul
 from unitaria.nodes.classical.constant_integer_addition import ConstantIntegerAddition
+from unitaria.util import logreduce
 
 
 class Index(ProxyNode):
@@ -16,119 +17,134 @@ class Index(ProxyNode):
     Specifically, ``A[x]`` is equivalent to ``Index(A.dimension_out, x) @ A``.
     """
 
-    def __init__(self, dim: int, index: slice | int):
+    def __init__(self, A: Node, index_in: slice | int, index_out: slice | int):
+        self.A = A
+        self.index_in = Index._preprocess_index(A.dimension_in, index_in)
+        self.index_out = Index._preprocess_index(A.dimension_out, index_out)
+
+        dimension_in = (self.index_in.stop - self.index_in.start + self.index_in.step - 1) // self.index_in.step
+
+        dimension_out = (self.index_out.stop - self.index_out.start + self.index_out.step - 1) // self.index_out.step
+
+        super().__init__(dimension_in, dimension_out)
+
+    def _preprocess_index(dimension: int, index: slice | int) -> slice:
         if isinstance(index, (int, np.integer)):
             index = slice(int(index), int(index) + 1, None)
 
         index = [index.start, index.stop, index.step]
-
         if index[0] is None:
             index[0] = 0
         if index[1] is None:
-            index[1] = dim
+            index[1] = dimension
         if index[2] is None:
             index[2] = 1
 
         if index[0] < 0:
-            index[0] = dim + index[0]
+            index[0] = dimension + index[0]
         if index[1] < 0:
-            index[1] = dim + index[1]
+            index[1] = dimension + index[1]
 
         if not (
             index[0] >= 0
-            and index[0] < dim
+            and index[0] < dimension
             and index[1] > 0
-            and index[1] <= dim
+            and index[1] <= dimension
             and index[0] < index[1]
             and index[2] > 0
         ):
             raise IndexError
-
-        self.dim = dim
-        self.index = slice(index[0], index[1], index[2])
-        len = (self.index.stop - self.index.start + self.index.step - 1) // self.index.step
-
-        super().__init__(dim, len)
+        return slice(index[0], index[1], index[2])
 
     def children(self) -> list[Node]:
-        return []
+        return [self.A]
 
     def parameters(self) -> dict:
         params = {}
-        params["dim"] = self.dim
-        params["index"] = self.index
+        params["index_in"] = self.index_in
+        params["index_out"] = self.index_out
         return params
 
     def _normalization(self) -> float:
-        return 1
+        return self.A.normalization
 
-    def compute(self, input: np.ndarray) -> np.ndarray:
+    def _compute_index(input: np.array, index: slice) -> np.ndarray:
         outer_shape = list(input.shape[:-1])
-        input = input.reshape([-1, self.dim])
-        input = input[:, self.index.start : self.index.stop : self.index.step]
+        input = input.reshape([-1, input.shape[-1]])
+        input = input[:, index.start : index.stop : index.step]
         input = input.reshape(outer_shape + [-1])
         return input
 
-    def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
+    def _compute_index_adjoint(input: np.array, index: slice, dimension: int) -> np.ndarray:
         outer_shape = list(input.shape[:-1])
         input = input.reshape([-1, input.shape[-1]])
-        output = np.zeros([input.shape[0], self.dim], dtype=complex)
-        output[:, self.index.start : self.index.stop : self.index.step] = input
-        output = output.reshape(outer_shape + [self.dim])
+        output = np.zeros([input.shape[0], dimension], dtype=complex)
+        output[:, index.start : index.stop : index.step] = input
+        output = output.reshape(outer_shape + [dimension])
         return output
 
-    def definition(self):
-        len = (self.index.stop - self.index.start) // self.index.step
-        last_step = self.index.stop - self.index.start - len * self.index.step > 0
-        remainder = self.dim - len * self.index.step - self.index.start
-        if last_step:
-            remainder -= 1
-        subspace_len = Subspace.from_dim(len)
-        subspace_step = Subspace.from_dim(self.index.step)
+    def compute(self, input: np.ndarray) -> np.ndarray:
+        input = Index._compute_index_adjoint(input, self.index_in, self.A.dimension_in)
+        input = self.A.compute(input)
+        input = Index._compute_index(input, self.index_out)
+        return input
 
-        subspace_in = subspace_len & subspace_step
-        subspace_out = subspace_len & Subspace.from_dim(1, bits=subspace_step.total_qubits)
-        assert subspace_in.total_qubits == subspace_out.total_qubits
-        if last_step:
-            subspace_last_step = Subspace("0" * subspace_in.total_qubits)
-            subspace_in = subspace_in | subspace_last_step
-            subspace_out = subspace_out | subspace_last_step
-            assert subspace_in.total_qubits == subspace_out.total_qubits
-        if remainder > 0:
-            remainder_bits = int(np.ceil(np.log2(remainder)))
-            if remainder_bits > subspace_in.total_qubits:
-                add_bits = remainder_bits - subspace_in.total_qubits
-                subspace_in = Subspace("0" * add_bits) & subspace_in
-                subspace_out = Subspace("0" * add_bits) & subspace_out
-            subspace_in = subspace_in | Subspace.from_dim(remainder, bits=subspace_in.total_qubits)
-            subspace_out = Subspace("0") & subspace_out
-            assert subspace_in.total_qubits == subspace_out.total_qubits
+    def compute_adjoint(self, input: np.ndarray) -> np.ndarray:
+        input = Index._compute_index_adjoint(input, self.index_out, self.A.dimension_out)
+        input = self.A.compute_adjoint(input)
+        input = Index._compute_index(input, self.index_in)
+        return input
 
-        projection = Projection(subspace_in, subspace_out)
-        if self.index.start == 0:
-            return projection
+    def definition(self) -> Node:
+        result = []
 
-        # Handle offset
-        # TODO: If Subspace ever supports 1 qubits, this could be simplified
-        # to not use ConstantIntegerAddition
+        projection_in = Index._projection(self.A.subspace_in, self.index_in)
+        if projection_in is not None:
+            result.append(Adjoint(projection_in))
 
-        subspace_dim = Subspace.from_dim(self.dim)
-        bits = subspace_dim.total_qubits
-        subspace_bits = Subspace("#" * bits)
-        shift = Adjoint(ConstantIntegerAddition(bits, self.index.start))
-        subspace_shift_out = Subspace.from_dim(subspace_in.dimension, bits=bits)
-        shift = Mul(Mul(Projection(subspace_bits, subspace_shift_out), shift), Projection(subspace_dim, subspace_bits))
-        return projection @ shift
+        result.append(self.A)
+
+        projection_out = Index._projection(self.A.subspace_out, self.index_out)
+        if projection_out is not None:
+            result.append(projection_out)
+
+        return logreduce(Mul, result[::-1])
+
+    def _projection(subspace: Subspace, index: slice) -> Node | None:
+        result = []
+
+        # 1. Handle stop
+        if index.stop < subspace.dimension:
+            result.append(Projection(subspace, subspace.truncate(index.stop)))
+
+        # 2. Handle start
+        if index.start > 0:
+            subspace_add_in = Subspace.from_dim(index.stop)
+            bits = subspace_add_in.total_qubits
+            subspace_add = Subspace("#" * bits)
+            subspace_add_out = Subspace.from_dim(index.stop - index.start, bits=subspace_add_in.total_qubits)
+            result.append(Projection(subspace_add_in, subspace_add))
+            result.append(Adjoint(ConstantIntegerAddition(bits, index.start)))
+            result.append(Projection(subspace_add, subspace_add_out))
+
+        # 3. Handle step
+        if index.step != 1:
+            subspace_step = Subspace.from_dim(index.step)
+            dimension_out = (index.stop - index.start + index.step - 1) // index.step
+            subspace_stride_in = (Subspace.from_dim(dimension_out) & subspace_step).truncate(index.stop - index.start)
+            subspace_stride_out = Subspace.from_dim(dimension_out) & Subspace("0" * subspace_step.total_qubits)
+            result.append(Projection(subspace_stride_in, subspace_stride_out))
+
+        if len(result) == 0:
+            return None
+
+        return logreduce(Mul, result[::-1])
 
 
 def _node_getitem(self: Node, indices):
-    if isinstance(indices, tuple):
-        return Mul(
-            Mul(Index(self.dimension_out, indices[0]), self),
-            Adjoint(Index(self.dimension_in, indices[1])),
-        )
-    else:
-        return Mul(Index(self.dimension_out, indices), self)
+    if not isinstance(indices, tuple):
+        indices = (indices, slice(None, None, None))
+    return Index(self, indices[1], indices[0])
 
 
 Node.__getitem__ = _node_getitem
