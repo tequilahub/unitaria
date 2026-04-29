@@ -41,6 +41,8 @@ from unitaria.nodes.classical.constant_integer_multiplication import ConstantInt
 from unitaria.nodes.classical.increment import Increment
 from unitaria.nodes.classical.integer_addition import IntegerAddition
 
+from unitaria.nodes.basic.index import Index
+
 from unitaria.nodes.qsvt.qsvt import QSVT, QSVTCoefficients
 from unitaria.nodes.inversion.pseudoinverse import Pseudoinverse
 from unitaria.nodes.amplification.grover_amplification import GroverAmplification
@@ -71,6 +73,7 @@ __all__ = [
     "GroverAmplification",
     "Identity",
     "Increment",
+    "Index",
     "IntegerAddition",
     "LinearAmplification",
     "Mul",

@@ -413,7 +413,16 @@ class Subspace:
             else:
                 assert result[i + 2**self.total_qubits] == 1
 
-    def case_zero(self) -> Subspace:
+    def case_zero(self) -> Subspace | None:
+        """
+        Returns the subspace where the highest relevant bit
+        is zero.
+
+        The highest relevant bit is the first bit that does not correspond to a
+        zero factor, see `Subspace.initial_zeros`.
+
+        :returns: The subspace, or none, if all factors are zero.
+        """
         initial_zeros = self.initial_zeros()
         if initial_zeros == len(self.tensor_factors):
             return None
@@ -423,7 +432,16 @@ class Subspace:
             + self.tensor_factors[-(initial_zeros + 1)].case_zero.tensor_factors,
         )
 
-    def case_one(self) -> Subspace:
+    def case_one(self) -> Subspace | None:
+        """
+        Returns the subspace where the highest relevant bit
+        is one.
+
+        The highest relevant bit is the first bit that does not correspond to a
+        zero factor, see `Subspace.initial_zeros`.
+
+        :returns: The subspace, or none, if all factors are zero.
+        """
         initial_zeros = self.initial_zeros()
         if initial_zeros == len(self.tensor_factors):
             return None
@@ -432,6 +450,33 @@ class Subspace:
             self.tensor_factors[: -(initial_zeros + 1)]
             + self.tensor_factors[-(initial_zeros + 1)].case_one.tensor_factors,
         )
+
+    def truncate(self, dimension: int) -> Subspace:
+        """
+        Return the subspace, which contains the first ``dimension`` basis vectors
+        of this subspace.
+
+        The number of qubits remains unchanged.
+
+        :param dimension: The dimension of the truncated subspace
+        :returns: The truncated subspace
+        :raises ValueError: If ``dimension`` is not in the range `(0, self.dimension]`.
+        """
+        if dimension > self.dimension:
+            raise ValueError("`dimension` must be at most the dimension of the Subspace")
+        if dimension <= 0:
+            raise ValueError("`dimension` must be larger than 0")
+
+        if dimension == self.dimension:
+            return self
+
+        initial_zeros = self.initial_zeros()
+        case_zero = self.case_zero()
+        if case_zero.dimension >= dimension:
+            return Subspace("0" * (initial_zeros + 1)) & case_zero.truncate(dimension)
+        else:
+            case_one = self.case_one()
+            return Subspace("0" * initial_zeros) & (case_zero | case_one.truncate(dimension - case_zero.dimension))
 
     def __and__(self, other: Subspace) -> Subspace:
         return Subspace(other.tensor_factors + self.tensor_factors)
