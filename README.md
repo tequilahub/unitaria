@@ -25,9 +25,9 @@ Ry(target=(0,), parameter=1.854590436003224)
 
 ```
 
-[**Documentation**](https://tequilahub.github.io/unitaria/git/index.html)
+[**Documentation**][docs]
 
-## Installation
+## Getting started
 
 The best way to install this library is using `pip`:
 
@@ -40,14 +40,32 @@ simulation backend `qulacs`. Additional backends compatible with `tequila`,
 which is used for communcating with the backends, can also be installed, see
 [tequila](https://github.com/tequilahub/tequila).
 
-## Python versions
+`unitaria` aims to be as intuitive as possible. Most operators do exactly what
+you would expect them to. To construct a tridiagonal matrix, you can, e.g., write
+```python
+import unitaria as ut
+N = 3
+inc = ut.Increment(bits=N)
+laplace = (2 * ut.Identity(dim=2**N) - inc - inc.adjoint())[:-1, :-1]
+```
 
-`unitaria` requires at least Python version 3.12, and follows [Numpy's deprecation policy](https://numpy.org/neps/nep-0029-deprecation_policy.html),
-i.e. at least Python 3.13 will be required starting April 2027.
+If you are not sure how to construct a matrix or vector, you can use the
+`ConstantMatrix` or `ConstantVector` functions.
+```python
+import unitaria as ut
+import numpy as np
+v = ut.ConstantVector(np.array([1, 2, 3]))
+A = ut.ConstantMatrix(np.array([[1, 2], [3, 4]]))
+```
+Note, however, that this will typically not yield efficient quantum circuits.
 
-## Versioning
+For a list of all implemented matrices, vectors, and operations check
+out the [documentation][docs]. Additional examples are available under
+[`/examples`](/examples).
 
-Unitaria follows [SemVer](https://semver.org/spec/v2.0.0.html) conventions.
+## Contributing
+
+We welcome contributions to `unitaria`. Check out the [Contributing guildlines](CONTRIBUTING.md) for details.
 
 ## Development
 
@@ -75,3 +93,14 @@ If you get the error `locale.Error: unsupported locale setting`, try adding the 
 ```sh
 LC_ALL=C.UTF-8 make html
 ```
+
+## Python versions
+
+`unitaria` requires at least Python version 3.12, and follows [Numpy's deprecation policy](https://numpy.org/neps/nep-0029-deprecation_policy.html),
+i.e. at least Python 3.13 will be required starting April 2027.
+
+## Versioning
+
+Unitaria follows [SemVer](https://semver.org/spec/v2.0.0.html) conventions.
+
+[docs]: https://github.com/tequilahub/unitaria/discussions
