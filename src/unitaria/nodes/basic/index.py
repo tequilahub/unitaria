@@ -45,14 +45,7 @@ class Index(ProxyNode):
         if index[1] < 0:
             index[1] = dimension + index[1]
 
-        if not (
-            index[0] >= 0
-            and index[0] < dimension
-            and index[1] > 0
-            and index[1] <= dimension
-            and index[0] < index[1]
-            and index[2] > 0
-        ):
+        if not (0 <= index[0] < index[1] <= dimension and index[2] > 0):
             raise IndexError
         return slice(index[0], index[1], index[2])
 
@@ -134,9 +127,6 @@ class Index(ProxyNode):
             subspace_stride_in = (Subspace.from_dim(dimension_out) & subspace_step).truncate(index.stop - index.start)
             subspace_stride_out = Subspace.from_dim(dimension_out) & Subspace("0" * subspace_step.total_qubits)
             result.append(Projection(subspace_stride_in, subspace_stride_out))
-
-        if len(result) == 0:
-            return None
 
         return logreduce(Mul, result[::-1])
 

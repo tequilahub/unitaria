@@ -418,7 +418,7 @@ class Subspace:
         Returns the subspace where the highest relevant bit
         is zero.
 
-        The highest relevant bit the first bit that does not correspond to a
+        The highest relevant bit is the first bit that does not correspond to a
         zero factor, see `Subspace.initial_zeros`.
 
         :returns: The subspace, or none, if all factors are zero.
@@ -437,7 +437,7 @@ class Subspace:
         Returns the subspace where the highest relevant bit
         is one.
 
-        The highest relevant bit the first bit that does not correspond to a
+        The highest relevant bit is the first bit that does not correspond to a
         zero factor, see `Subspace.initial_zeros`.
 
         :returns: The subspace, or none, if all factors are zero.
