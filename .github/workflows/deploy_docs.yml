@@ -36,7 +36,7 @@ jobs:
             if [ "$tag" = "v0.0.0" ]; then
               continue
             fi
-            git checkout $tag
+            git checkout -f $tag
             uv sync --group docs
             rm -r docs/_build
             DOCS_VERSION=$tag uv run make -C docs html
