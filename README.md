@@ -1,4 +1,4 @@
-# unitaria :rainbow:
+# unitaria 🌈
 
 `unitaria` is a library for working with so called "block encodings" of matrices
 and vectors. These are format for performing linear algebra calculations on
@@ -34,6 +34,12 @@ The best way to install this library is using `pip`:
 ```sh
 pip install unitaria
 ```
+
+This might fail if your python installation is to old, see `python
+--version`. `unitaria` requires version 3.12 or higher, see [Python
+versions](#python-versions) below. When contributing to `unitaria` we recommend
+to use the [`uv` package manager][uv] for installing `unitaria` and managing
+python versions.
 
 This installs everything needed to work with `unitaria`, including the
 simulation backend `qulacs`. Additional backends compatible with `tequila`,
@@ -104,3 +110,4 @@ i.e. at least Python 3.13 will be required starting April 2027.
 Unitaria follows [SemVer](https://semver.org/spec/v2.0.0.html) conventions.
 
 [docs]: https://tequilahub.github.io/unitaria/git/index.html
+[uv]: https://docs.astral.sh/uv/
