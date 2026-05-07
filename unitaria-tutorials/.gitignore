@@ -1,0 +1,43 @@
+/.quarto/
+
+# Quarto generated files
+_site/
+/_site/
+_output/
+.cache/
+.quarto/
+_freeze/
+
+*.log
+
+# temporary files
+tmp/
+temp/
+*.tmp
+
+# macOS files
+.DS_Store
+
+# Windows files
+Thumbs.db
+
+# editor files
+.vscode/
+.idea/
+*.swp
+
+# Python specific files
+*.pyc
+__pycache__/
+.venv/
+
+# specific files
+*.html
+*.pdf
+*.docx
+*.doc
+*.pptx
+*.json
+*.js
+
+**/*.quarto_ipynb

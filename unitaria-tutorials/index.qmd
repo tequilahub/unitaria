@@ -1,0 +1,41 @@
+---
+title: "Unitaria"
+subtitle: "An open-source framework for linear algebra using block encodings"
+page-layout: full
+title-block-banner: true
+
+about:
+  template: marquee
+  links:
+    - icon: github
+      text: github
+      href: https://github.com/tequilahub/unitaria
+---
+
+# Introduction
+
+Unitaria is a Python library for quantum linear algebra, bringing the simplicity of NumPy and SciPy to quantum algorithms via block encodings.
+It offers a composable, array-like interface for defining, combining, and simulating block-encoded matrices and vectors, automating quantum circuit extraction.
+It also features resource estimation through indcluding parameters like gate counts, qubit counts, and normalization constants prior to circuit exection.
+Unitaria enables efficient classical verification and analysis of quantum algorithms, making advanced quantum linear algebra accessible without low-level circuit expertise.
+
+Unitaria was created by Matthias Deiml, Oliver Hüttenhofer, Ram Mosco under the supervision of prefessors Jakob S. Kottmann and Daniel Peterseim as a collaboration between the institute of mathematics, the institute of computer science and the centre for advanced analytics and predictive sciences at the University of Augsburg, Germany. 
+
+
+# Websites Content and Structure
+
+This [website](index.html) contains some hands-on examples and [tutorials](tutorials.html) using unitaria.
+
+The main sections of this website are:
+
+- a wide collection of [tutorials](tutorials.html) for getting to know unitaria's basic functionalities and general usage
+- a brief guide on how to [contribute your own tutorials](Contribution/Contribution.ipynb) to this website using unitaria
+- the [documentation of unitaria](https://tequilahub.github.io/unitaria/v0.2.0/) for more in-depth information on the library and its functionalities
+
+
+# Contribute
+
+Unitaria is free and open source. You're welcome to contribute if you have ideas to improve the library.
+The standard way to contribute is via pull-requests or issues on [github](https://github.com/tequilahub/unitaria#how-to-contribute). For larger projects it might be useful to let us know in advance what you are planning.  
+
+

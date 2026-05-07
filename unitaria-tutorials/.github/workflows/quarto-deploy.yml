@@ -1,0 +1,84 @@
+name: Quarto Deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository and all branches
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      # Set up Miniconda
+      - name: Set up Miniconda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          environment-file: environment.yml
+          auto-update-conda: true
+          activate-environment: blogqa
+
+      # Install the ipykernel package and the sphinxcontrib package for documentation
+      - name: Install ipykernel
+        run: |
+          conda run -n blogqa conda install -y ipykernel
+          conda run -n blogqa python -m ipykernel install --user --name blogqa
+          conda run -n blogqa conda install sphinxcontrib
+
+      # Set up Quarto
+      - name: Setup Quarto
+        uses: quarto-dev/quarto-actions/setup@v2
+        with:
+          version: '1.3.450'
+      
+      # Install TinyTeX
+      - name: Install TinyTeX
+        run: |
+          conda run -n blogqa quarto install tinytex 
+
+      # Build Sphinx documentation
+      - name: Build Sphinx documentation
+        run: |
+          cd docs
+          conda run -n blogqa make html
+
+       # Commit changes to gh-pages branch
+      - name: Commit changes
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "GitHub Actions"
+          git add .
+          git commit -m "Committing generated build files"
+          git push origin main # Or push to a different branch if needed
+
+      # Commit changes to gh-pages branch
+      - name: Switch to gh-pages branch
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "GitHub Actions"
+          git checkout gh-pages
+          git reset --hard
+          git commit --allow-empty -m "Updating gh-pages branch"
+          git push origin gh-pages
+
+      # Switch back to main branch
+      - name: Switch back to main branch
+        run: |
+          git checkout main
+
+      # Publish site to gh-pages
+      - name: Publish Quarto site
+        run: |
+          conda run -n blogqa quarto publish gh-pages
+
+      # Notify if compiling fails
+      - name: Notify failure
+        if: ${{ failure() }}
+        run: echo "Quarto site failed to compile."

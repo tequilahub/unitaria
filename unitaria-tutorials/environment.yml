@@ -1,0 +1,22 @@
+name: BlogQA
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - ipykernel
+  - psi4
+  - pip
+  - pip:
+      - tequila-basic
+      - pyyaml
+      - nbformat
+      - nbclient
+      - numpy
+      - scipy
+      - matplotlib
+      - qulacs
+      - pyscf
+      - sphinx
+      - sphinxcontrib-programoutput
+      - sphinx-rtd-theme
