@@ -1,16 +1,16 @@
 # Tutorials Repository 
 
-The purpose of this repo is to host tutorials of various functionalities of the tequila library. 
+The purpose of this repo is to host tutorials of various functionalities of the unitaria library. 
 
---> [see the rendered website here](https://tequilahub.github.io/tequila-tutorials/) <--
+--> [see the rendered website here](https://tequilahub.github.io/unitaria/) <--
 
 ## Set Up
-At first make sure to have an environment variable that you run the blog on. 
+At first make sure to have an environment variable that you run the unitaria's tutorials site on. 
 
 ### Environment Variable 
 To create one use:
 ```
-conda create -n BlogQA python=3.9
+conda create -n unitaria python=3.9
 ```
 After creating you can ensure this variable was created correctly and is among your existing ones through listing them with 
 ```
@@ -19,8 +19,8 @@ conda env list
 To get into the variable and activate it run the following command followed by two other commands to install an ipkernal 
 ```
 conda install ipykernel
-conda activate BlogQA
-python -m ipykernel install --user --name=BlogQA
+conda activate unitaria
+python -m ipykernel install --user --name=unitaria
 ```
 
 ### Running 
