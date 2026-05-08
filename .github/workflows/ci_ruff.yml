@@ -17,3 +17,4 @@ jobs:
           version: "0.15.9"
       - run: "ruff format --check --diff"
       - run: "ruff check"
+      - run: "ruff check --exclude unitaria-tutorials/Contribution/Contribution.ipynb"
