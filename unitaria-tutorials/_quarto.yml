@@ -22,7 +22,6 @@ website:
 
   favicon: favicon.ico
   open-graph: true
-  google-analytics: G-V7DRP5E70N
   cookie-consent:
       type: express
       style: simple 

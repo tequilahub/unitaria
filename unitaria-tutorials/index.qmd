@@ -24,7 +24,7 @@ Unitaria was created by Matthias Deiml, Oliver Hüttenhofer, Ram Mosco under the
 
 # Websites Content and Structure
 
-This [website](index.html) contains some hands-on examples and [tutorials](tutorials.html) using unitaria.
+This website contains some hands-on examples and [tutorials](tutorials.html) using unitaria.
 
 The main sections of this website are:
 
@@ -36,6 +36,6 @@ The main sections of this website are:
 # Contribute
 
 Unitaria is free and open source. You're welcome to contribute if you have ideas to improve the library.
-The standard way to contribute is via pull-requests or issues on [github](https://github.com/tequilahub/unitaria#how-to-contribute). For larger projects it might be useful to let us know in advance what you are planning.  
+The standard way to contribute is via pull-requests or issues on [github](https://github.com/tequilahub/unitaria). For larger projects it might be useful to let us know in advance what you are planning.  
 
 
