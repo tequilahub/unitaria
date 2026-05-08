@@ -56,6 +56,11 @@ jobs:
         run: |
           mkdir -p _site/docs
           cp -r docs/_build/html/* _site/docs/
+          
+      - name: List workspace and _site contents
+        run: |
+          echo "Workspace root:" && ls -l
+          echo "_site directory:" && ls -l _site || echo "_site does not exist"
 
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v5
