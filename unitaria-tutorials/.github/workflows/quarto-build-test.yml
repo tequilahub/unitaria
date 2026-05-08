@@ -1,0 +1,58 @@
+name: Quarto Build Test
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v3 # v3 is the third major version of actions/checkout
+
+      # Set up Miniconda
+      - name: Set up Miniconda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          environment-file: environment.yml
+          auto-update-conda: true
+          activate-environment: blogqa
+
+      # Install the ipykernel package and the sphinxcontrib package for documentation
+      - name: Install ipykernel
+        run: |
+          conda run -n blogqa conda install -y ipykernel
+          conda run -n blogqa python -m ipykernel install --user --name blogqa
+          conda run -n blogqa conda install sphinxcontrib
+
+      # Set up Quarto
+      - name: Setup Quarto
+        uses: quarto-dev/quarto-actions/setup@v2
+        with:
+          version: '1.3.450'
+
+      # Install TinyTeX
+      - name: Install TinyTeX
+        run: |
+          conda run -n blogqa quarto install tinytex
+
+      # Build Sphinx documentation
+      - name: Build Sphinx documentation
+        run: |
+          cd docs
+          conda run -n blogqa make html
+
+      # Compile Quarto site and check for compiling errors
+      - name: Check if Quarto site compiles
+        run: |
+          conda run -n blogqa quarto render .
+
+      # Notify if compiling fails
+      - name: Notify failure
+        if: failure()
+        run: echo "Quarto site failed to compile."

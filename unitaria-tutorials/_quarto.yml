@@ -1,0 +1,38 @@
+project:
+  type: website
+
+website:
+  title: "Unitaria"
+  description: "A collection of tutorials for Unitaria, the open-source framework for linear algebra using block encodings."
+  image: unitaria_logo.png
+  repo-url: https://github.com/tequilahub/unitaria
+  repo-actions: [source, issue]
+  navbar:
+    logo: unitaria_logo.png
+    right:
+      - text: "Home"
+        file: index.qmd
+      - text: "Tutorials"
+        file: tutorials.qmd
+      - text: "Contribution"
+        file: Contribution/Contribution.ipynb
+      - text: "Docs"
+        url: https://tequilahub.github.io/unitaria/v0.2.0/
+
+
+  favicon: favicon.ico
+  open-graph: true
+  google-analytics: G-V7DRP5E70N
+  cookie-consent:
+      type: express
+      style: simple 
+
+format:
+  html:
+    theme:
+      light: [flatly, theme-light.scss]
+      dark: [darkly, theme-dark.scss]
+    css: styles.css
+
+execute:
+  freeze: auto

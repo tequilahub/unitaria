@@ -1,0 +1,38 @@
+name: Quarto Deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Miniconda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          environment-file: unitaria-tutorials/environment.yml
+          auto-update-conda: true
+          activate-environment: UnitariaTutorials
+
+      - name: Install ipykernel
+        run: |
+          conda run -n UnitariaTutorials conda install -y ipykernel
+          conda run -n UnitariaTutorials python -m ipykernel install --user --name UnitariaTutorials
+
+      - name: Setup Quarto
+        uses: quarto-dev/quarto-actions/setup@v2
+        with:
+          version: '1.3.450'
+
+      - name: Build Quarto site
+        run: |
+          cd unitaria-tutorials
+          quarto render
