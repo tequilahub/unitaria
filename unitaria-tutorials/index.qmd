@@ -19,7 +19,7 @@ It offers a composable, array-like interface for defining, combining, and simula
 It also features resource estimation through indcluding parameters like gate counts, qubit counts, and normalization constants prior to circuit execution.
 Unitaria enables efficient classical verification and analysis of quantum algorithms, making advanced quantum linear algebra accessible without low-level circuit expertise.
 
-Unitaria was created by Matthias Deiml, Oliver Hüttenhofer, Ram Mosco under the supervision of prefessors Jakob S. Kottmann and Daniel Peterseim as a collaboration between the institute of mathematics, the institute of computer science and the centre for advanced analytics and predictive sciences at the University of Augsburg, Germany. 
+Unitaria was created by Matthias Deiml, Oliver Hüttenhofer and Ram Mosco under the supervision of professors Jakob S. Kottmann and Daniel Peterseim as a collaboration between the institute of mathematics, the institute of computer science and the centre for advanced analytics and predictive sciences at the University of Augsburg, Germany. 
 
 
 # Websites Content and Structure
