@@ -17,7 +17,7 @@ website:
       - text: "Contribution"
         file: Contribution/Contribution.ipynb
       - text: "Docs"
-        url: https://tequilahub.github.io/unitaria/v0.2.0/
+        url: /docs
 
 
   favicon: favicon.ico
