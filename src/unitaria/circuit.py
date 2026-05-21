@@ -35,6 +35,7 @@ class Circuit:
     def __init__(self, tq_circuit: tq.QCircuit | None = None):
         if tq_circuit is not None:
             self._tq_circuit = tq_circuit
+            self.n_qubits = tq_circuit.n_qubits
         else:
             self._tq_circuit = tq.QCircuit()
 

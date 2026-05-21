@@ -17,3 +17,8 @@ def create_block_encoding():
 def test_block_encoding_x_gate_on_first_qubit():
     block_encoding = create_block_encoding()
     ut.verify(block_encoding)
+
+
+def test_nonempty_circuit():
+    A = ut.BlockEncoding(ut.Circuit(tq.gates.X(target=0)), ut.Subspace("#"), ut.Subspace("#"), normalization=1)
+    ut.verify(A)
