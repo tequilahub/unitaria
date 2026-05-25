@@ -16,7 +16,7 @@ class Estimator(ABC):
 
     def __init__(self, default_precision: float, default_failure_probability: float = 0.01):
         self.default_precision = default_precision
-        self.default_failure_probability = default_precision
+        self.default_failure_probability = default_failure_probability
 
     @abstractmethod
     def estimate_norm(node: Node, precision: float | None = None, failure_probability: float | None = None) -> float:
@@ -25,6 +25,8 @@ class Estimator(ABC):
 
         The block encoding must represent a vector. The returned value is
         guaranteed to lie in the range ``[0, node.normalization]``.
+
+        The implementors of this method are free to interpret the ``precision``argument loosely, and ignore the ``failure_probability`` argument.
 
         :param node: The node representing the vector of which to compute the norm.
         :param precision:

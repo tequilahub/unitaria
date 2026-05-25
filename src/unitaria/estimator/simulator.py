@@ -63,6 +63,9 @@ class Simulator(Estimator):
     def estimate_norm(
         self, node: Node, precision: float | None = None, failure_probability: float | None = None
     ) -> float:
+        if not node.is_vector():
+            raise ValueError("Can only estimate the norm of vectors")
+
         if precision is None:
             precision = self.default_precision
         if failure_probability is None:
@@ -86,10 +89,10 @@ class Simulator(Estimator):
         normalized_precision = precision / normalization
 
         if self.scheme == "monte-carlo":
-            samples = int(np.ceil(np.log(2 / failure_probability) / (2 * normalized_precision**2)))
-            measurement = self.rng.binomial(samples, information_efficiency)
+            samples = int(np.ceil(3 * np.log(2 / failure_probability) / normalized_precision**2))
+            measurement = self.rng.binomial(samples, information_efficiency**2)
 
             if self.count_gates is not None:
                 self.gate_count = self.count_gates(self.gate_count, node.circuit(), samples)
 
-            return measurement / samples * normalization
+            return np.sqrt(measurement / samples) * normalization

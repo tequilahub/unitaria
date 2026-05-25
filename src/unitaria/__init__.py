@@ -6,6 +6,7 @@ from unitaria.verifier import verify
 
 from unitaria.estimator.estimator import Estimator
 from unitaria.estimator.simulator import Simulator
+from unitaria.estimator.backend_estimator import BackendEstimator
 
 # Documentation is generated differently for these classes, see
 # docs/_templates/autosummary/class.rst
@@ -58,6 +59,7 @@ __all__ = [
     "Circuit",
     "Estimator",
     "Simulator",
+    "BackendEstimator",
     "verify",
     "AbstractNode",
     "Add",
