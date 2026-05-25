@@ -4,6 +4,9 @@ from unitaria.subspace import Subspace, SubspaceFactor, ControlledSubspace, Zero
 from unitaria.circuit import Circuit
 from unitaria.verifier import verify
 
+from unitaria.estimator.estimator import Estimator
+from unitaria.estimator.simulator import Simulator
+
 # Documentation is generated differently for these classes, see
 # docs/_templates/autosummary/class.rst
 from unitaria.nodes.node import Node
@@ -53,6 +56,8 @@ __all__ = [
     "Node",
     "Subspace",
     "Circuit",
+    "Estimator",
+    "Simulator",
     "verify",
     "AbstractNode",
     "Add",
