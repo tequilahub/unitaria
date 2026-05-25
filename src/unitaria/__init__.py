@@ -20,6 +20,7 @@ from unitaria.nodes.block_encoding import BlockEncoding
 from unitaria.nodes.constants.constant_vector import ConstantVector
 from unitaria.nodes.constants.constant_unitary import ConstantUnitary
 from unitaria.nodes.constants.constant_matrix import ConstantMatrix
+from unitaria.nodes.constants.ones import Ones
 
 from unitaria.nodes.basic.identity import Identity
 from unitaria.nodes.basic.projection import Projection
@@ -85,6 +86,7 @@ __all__ = [
     "LinearAmplification",
     "Mul",
     "MultilinearNode",
+    "Ones",
     "PermuteFactors",
     "Projection",
     "ProxyNode",

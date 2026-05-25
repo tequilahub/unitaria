@@ -3,6 +3,11 @@ import scipy.stats
 import unitaria as ut
 
 
+def test_ones():
+    for i in range(1, 17):
+        ut.verify(ut.Ones(i))
+
+
 def test_constant_vector():
     ut.verify(ut.ConstantVector(np.array([1, 2j, 1 / 3, -1j / 4])))
     ut.verify(ut.ConstantVector(np.array([1, 2j, 1 / 3])))

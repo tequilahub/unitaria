@@ -26,7 +26,7 @@ class BlockVertical(ProxyNode):
     B: Node
 
     def __init__(self, A: Node, B: Node):
-        if A.dimension_out != B.dimension_out:
+        if A.dimension_in != B.dimension_in:
             raise ValueError(f"Matrices have different input dimension {A.dimension_in} and {B.dimension_in}")
 
         super().__init__(A.dimension_in, A.dimension_out + B.dimension_out)
