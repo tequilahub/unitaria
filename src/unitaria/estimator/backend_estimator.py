@@ -5,6 +5,7 @@ from tequila import BitNumbering
 
 from unitaria.estimator.estimator import Estimator
 from unitaria.nodes.node import Node
+from unitaria.util import sample_bound
 
 
 class BackendEstimator(Estimator):
@@ -31,20 +32,20 @@ class BackendEstimator(Estimator):
         normalization = node.normalization
         normalized_precision = precision / normalization
 
-        samples = int(np.ceil(3 * np.log(2 / failure_probability) / normalized_precision**2))
+        samples = sample_bound(normalized_precision, failure_probability)
 
         circuit = node.circuit()
 
         result = tq.simulate(circuit._padded(), samples=samples, **self.backend_kwargs)
         measurement = 0
-        successfull_samples = 0
+        successful_samples = 0
         max_result = 2**node.subspace_out.total_qubits - 1
         for k, v in result.items():
             k_int = k.to_integer(BitNumbering.LSB)
             if k_int > max_result:
                 continue
-            successfull_samples += v
+            successful_samples += v
             if node.subspace_out.test_basis(k_int):
                 measurement += v
 
-        return np.sqrt(measurement / successfull_samples) * normalization
+        return np.sqrt(measurement / successful_samples) * normalization

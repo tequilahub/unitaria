@@ -5,6 +5,7 @@ import numpy as np
 from unitaria.estimator.estimator import Estimator
 from unitaria.nodes.node import Node
 from unitaria.circuit import Circuit
+from unitaria.util import sample_bound
 
 # TODO: Implement simulation of phase estimation
 
@@ -89,7 +90,7 @@ class Simulator(Estimator):
         normalized_precision = precision / normalization
 
         if self.scheme == "monte-carlo":
-            samples = int(np.ceil(3 * np.log(2 / failure_probability) / normalized_precision**2))
+            samples = sample_bound(normalized_precision, failure_probability)
             measurement = self.rng.binomial(samples, information_efficiency**2)
 
             if self.count_gates is not None:

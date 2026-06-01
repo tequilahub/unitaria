@@ -95,3 +95,23 @@ def is_ipython() -> bool:
         return True
     except NameError:
         return False
+
+
+def sample_bound(precision: float, failure_probability: float) -> int:
+    """
+    Number of samples needed in Monte Carlo amplitude estimation
+
+    Specificall, computes a number of samples that guarantees the given
+    precision with the given failure probability, when computing the square root
+    of the expected value (corresponding to the amplitude of a quantum state).
+    """
+
+    # This bound is obtained by a Bernstein inequality, stating that the failure
+    # probability is bounded by
+    #
+    # 2 exp(-(n * precision**2) / 2 / (variance + precision / 3))
+    #
+    # Then use that the variance is p * (1 - p) where p is the expectation
+    # value, and consider the cases p > precision**2 and p <= precision**2
+    # separately.
+    return int(np.ceil(8 / 3 * np.log(2 / failure_probability) / precision**2))
