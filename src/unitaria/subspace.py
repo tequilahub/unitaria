@@ -345,18 +345,12 @@ class Subspace:
         """
         # Index of the current factor
         index = 0
-        # Next unused ancilla index
-        ancilla_index = 0
-        # Set of intermediate flags, if one of them is set, the result flag will be set
-        intermediate_flags = []
 
-        circuit = Circuit()
+        relevant_factors = []
 
         for factor in self.tensor_factors:
             if isinstance(factor, ZeroQubitSubspace):
-                # Zero qubits already behave like flag qubits, so we only need to toggle it
-                circuit += tq.gates.X(target=target[index])
-                intermediate_flags.append(target[index])
+                relevant_factors.append((index, factor))
                 index += 1
                 continue
 
@@ -368,6 +362,31 @@ class Subspace:
             if not isinstance(factor, ControlledSubspace):
                 raise ValueError("SubspaceFactors that aren't of type Qubit are unsupported")
 
+            relevant_factors.append((index, factor))
+            index += factor.total_qubits()
+
+        if len(relevant_factors) == 1 and isinstance(relevant_factors[0][1], ControlledSubspace):
+            index, factor = relevant_factors[0]
+            return factor.circuit(
+                target=target[index : index + factor.total_qubits()],
+                flag=flag,
+                ancillae=ancillae,
+            )
+
+        # Next unused ancilla index
+        ancilla_index = 0
+        # Set of intermediate flags, if one of them is set, the result flag will be set
+        intermediate_flags = []
+
+        circuit = Circuit()
+
+        for index, factor in relevant_factors:
+            if isinstance(factor, ZeroQubitSubspace):
+                # Zero qubits already behave like flag qubits, so we only need to toggle it
+                circuit += tq.gates.X(target=target[index])
+                intermediate_flags.append(target[index])
+                continue
+
             circuit += factor.circuit(
                 target=target[index : index + factor.total_qubits()],
                 flag=ancillae[ancilla_index],
@@ -375,8 +394,6 @@ class Subspace:
             )
             circuit += tq.gates.X(target=ancillae[ancilla_index])
             intermediate_flags.append(ancillae[ancilla_index])
-
-            index += factor.total_qubits()
             ancilla_index += 1
 
         # Apply the constructed circuit, add a multi-controlled NOT to determine
@@ -602,12 +619,14 @@ class ControlledSubspace(SubspaceFactor):
         """
         circuit = Circuit()
         control = target[-1]
-        circuit_zero = self.case_zero.circuit(target=target[:-1], flag=flag, ancillae=ancillae)
-        circuit_one = self.case_one.circuit(target=target[:-1], flag=flag, ancillae=ancillae)
-        circuit += tq.gates.X(target=control)
-        circuit += circuit_zero.add_controls(control)
-        circuit += tq.gates.X(target=control)
-        circuit += circuit_one.add_controls(control)
+        if self.case_zero.dimension != 2**self.case_zero.total_qubits:
+            circuit_zero = self.case_zero.circuit(target=target[:-1], flag=flag, ancillae=ancillae)
+            circuit += tq.gates.X(target=control)
+            circuit += circuit_zero.add_controls(control)
+            circuit += tq.gates.X(target=control)
+        if self.case_one.dimension != 2**self.case_one.total_qubits:
+            circuit_one = self.case_one.circuit(target=target[:-1], flag=flag, ancillae=ancillae)
+            circuit += circuit_one.add_controls(control)
         return circuit
 
     def clean_ancilla_count(self) -> int:
