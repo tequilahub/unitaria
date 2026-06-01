@@ -1,19 +1,11 @@
-from typing import Callable
-
 import numpy as np
+import tequila as tq
 
 from unitaria.estimator.estimator import Estimator
 from unitaria.nodes.node import Node
-from unitaria.circuit import Circuit
 from unitaria.util import sample_bound
 
 # TODO: Implement simulation of phase estimation
-
-
-def default_count_gates(old_gate_count: int, circuit: Circuit, factor: int) -> int:
-    if old_gate_count is None:
-        old_gate_count = 0
-    return old_gate_count + len(circuit._tq_circuit.gates) * factor
 
 
 class Simulator(Estimator):
@@ -28,8 +20,7 @@ class Simulator(Estimator):
         Default for the ``failure_probability`` parameter in
         `~Simulator.estimate_norm`.
     :param count_gates:
-        Set to ``False`` to disable gate counting.
-        Alternatively, a function may be supplied, which obtains (in this order) the current "gate count" (starting with ``None``), a circuit, and an integer indicating the number of times the circuit is run and should compute the new gate count. The default implementation simply counts the number of gates in the circuit.
+        Wether to count the number of gates. May be much slower.
     """
 
     def __init__(
@@ -38,7 +29,7 @@ class Simulator(Estimator):
         default_precision: float | None = None,
         default_failure_probability: float | None = None,
         seed: np.random.SeedSequence | None = None,
-        count_gates: Callable | None = default_count_gates,
+        count_gates: bool = False,
     ):
         if scheme == "exact":
             if default_precision is not None or default_failure_probability is not None:
@@ -59,7 +50,7 @@ class Simulator(Estimator):
         self.seed = seed
         self.rng = np.random.default_rng(seed)
         self.count_gates = count_gates
-        self.gate_count = None
+        self.gate_count = {}
 
     def estimate_norm(
         self, node: Node, precision: float | None = None, failure_probability: float | None = None
@@ -93,7 +84,27 @@ class Simulator(Estimator):
             samples = sample_bound(normalized_precision, failure_probability)
             measurement = self.rng.binomial(samples, information_efficiency**2)
 
-            if self.count_gates is not None:
-                self.gate_count = self.count_gates(self.gate_count, node.circuit(), samples)
+            if self.count_gates:
+                circuit = node.circuit()
+                # This is actually slightly cheating, since this way the error
+                # of the circuit and sampling might add up to be larger than
+                # precision, but since we only use it to count the gates, the
+                # difference should only be logarithmic.
+                compiler = tq.CircuitCompiler.error_correctable_gate_set(normalized_precision)
+                compiled = compiler.compile_circuit(circuit._tq_circuit)
+
+                for gate in compiled.gates:
+                    name = gate.name.lower()
+                    if name == "globalphase":
+                        continue
+                    if name == "phase":
+                        if gate.parameter < 3 * np.pi / 8:
+                            name = "t"
+                        else:
+                            name = "s"
+                    if name == "x":
+                        if len(gate.control) > 0:
+                            name = "cx"
+                    self.gate_count[name] = self.gate_count.get(name, 0) + samples
 
             return np.sqrt(measurement / samples) * normalization
