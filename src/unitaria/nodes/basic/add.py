@@ -40,6 +40,11 @@ class Add(ProxyNode):
         return [self.A, self.B]
 
     def definition(self) -> Node:
+        if self.A.normalization == 0:
+            return self.B
+        if self.B.normalization == 0:
+            return self.A
+
         permutation_in_A, permutation_in_B = permute(self.A.subspace_in, self.B.subspace_in)
         permutation_out_A, permutation_out_B = permute(self.A.subspace_out, self.B.subspace_out)
 
