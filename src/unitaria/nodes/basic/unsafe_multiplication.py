@@ -55,6 +55,14 @@ class UnsafeMul(Node):
         circuit += self.A.circuit(target[: self.A.subspace_in.total_qubits], clean_ancillae, borrowed_ancillae)
         return circuit
 
+    def _controlled_circuit(
+        self, control: int, target: Sequence[int], clean_ancillae: Sequence[int], borrowed_ancillae: Sequence[int]
+    ) -> Circuit:
+        circuit = Circuit()
+        circuit += self.B.circuit(target[: self.B.subspace_in.total_qubits], clean_ancillae, borrowed_ancillae, control)
+        circuit += self.A.circuit(target[: self.A.subspace_in.total_qubits], clean_ancillae, borrowed_ancillae, control)
+        return circuit
+
     def _subspace_in(self) -> Subspace:
         max_qubits = max(self.B.subspace_in.total_qubits, self.A.subspace_out.total_qubits)
         return Subspace("0" * (max_qubits - self.B.subspace_in.total_qubits)) & self.B.subspace_in

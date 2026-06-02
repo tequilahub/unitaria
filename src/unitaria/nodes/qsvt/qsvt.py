@@ -306,7 +306,7 @@ class QSVT(Node):
             output = Tnp * poly.coef[0]
         else:
             assert np.isclose(poly.coef[0], 0)
-            output = np.zeros_like(compute(input) / self.A.normalization)
+            output = np.zeros_like(compute(input) / self.A.normalization, dtype=complex)
         if self.coefficients.degree() >= 0:
             Tn = compute(Tnp) / self.A.normalization
         for n in range(1, self.coefficients.degree() + 1):
@@ -352,6 +352,45 @@ class QSVT(Node):
                 circuit += tq.gates.Rz(2 * np.real(angle + self.coefficients.angles[0]), rotation_bit)
             else:
                 circuit += tq.gates.Rz(2 * np.real(angle), rotation_bit)
+
+            if i % 2 == 0:
+                circuit += subspace_out_circuit.adjoint()
+            else:
+                circuit += subspace_in_circuit.adjoint()
+
+        circuit += tq.gates.H(rotation_bit)
+
+        return circuit
+
+    def _controlled_circuit(
+        self, control: int, target: Sequence[int], clean_ancillae: Sequence[int], borrowed_ancillae: Sequence[int]
+    ) -> Circuit:
+        circuit = Circuit()
+        rotation_bit = target[-1]
+        circuit += tq.gates.H(rotation_bit)
+
+        node_circuit = self.A.circuit(target[:-1], clean_ancillae, borrowed_ancillae)
+        node_circuit_controlled = self.A.circuit(target[:-1], clean_ancillae, borrowed_ancillae, control)
+        subspace_in_circuit = self.A.subspace_in.circuit(target, flag=target[-1], ancillae=clean_ancillae)
+        subspace_out_circuit = self.A.subspace_out.circuit(target, flag=target[-1], ancillae=clean_ancillae)
+
+        for i, angle in enumerate(self.coefficients.angles[1:]):
+            if i % 2 == 0:
+                if i == self.coefficients.degree() - 1:
+                    circuit += node_circuit_controlled
+                else:
+                    circuit += node_circuit
+                circuit += subspace_out_circuit
+            else:
+                circuit += node_circuit.adjoint()
+                circuit += subspace_in_circuit
+
+            # TODO: Do not use projection circuits for last rotation
+            # Combine last and first angle into one rotation
+            if i == len(self.coefficients.angles) - 2:
+                circuit += tq.gates.Rz(2 * np.real(angle + self.coefficients.angles[0]), rotation_bit, control=control)
+            else:
+                circuit += tq.gates.Rz(2 * np.real(angle), rotation_bit, control=control)
 
             if i % 2 == 0:
                 circuit += subspace_out_circuit.adjoint()

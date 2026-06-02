@@ -95,6 +95,20 @@ class Tensor(Node):
         )
         return circuit
 
+    def _controlled_circuit(
+        self, control, target: Sequence[int], clean_ancillae: Sequence[int], borrowed_ancillae: Sequence[int]
+    ) -> Circuit:
+        # TODO: Optionally try to run A and B in parallel by allocating ancillas differently?
+        circuit = Circuit()
+        circuit += self.B.circuit(
+            target[: self.B.target_qubit_count()],
+            clean_ancillae,
+            borrowed_ancillae,
+            control,
+        )
+        circuit += self.A.circuit(target[self.B.target_qubit_count() :], clean_ancillae, borrowed_ancillae, control)
+        return circuit
+
     def _subspace_in(self) -> Subspace:
         subspace_A = self.A.subspace_in
         subspace_B = self.B.subspace_in

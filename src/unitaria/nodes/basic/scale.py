@@ -33,9 +33,9 @@ class Scale(Node):
     ):
         super().__init__(A.dimension_in, A.dimension_out)
         self.A = A
+        self.scale = scale
         assert remove_efficiency is None or remove_efficiency > 1
         self.remove_efficiency = remove_efficiency
-        self.scale = np.abs(scale)
         self.global_phase = np.angle(scale)
         self.absolute = absolute
 
@@ -60,24 +60,24 @@ class Scale(Node):
     def _normalization(self) -> float:
         remove_efficiency = 1 if self.remove_efficiency is None else self.remove_efficiency
         if self.absolute:
-            return self.scale * remove_efficiency
+            return np.abs(self.scale) * remove_efficiency
         else:
-            return self.scale * self.A.normalization * remove_efficiency
+            return np.abs(self.scale) * self.A.normalization * remove_efficiency
 
     def is_guaranteed_unitary(self) -> bool:
         return self.remove_efficiency == 1 and self.A.is_guaranteed_unitary()
 
     def compute(self, input: np.ndarray | None = None) -> np.ndarray:
         if self.absolute:
-            return np.exp(1j * self.global_phase) * self.scale / self.A.normalization * self.A.compute(input)
+            return self.scale / self.A.normalization * self.A.compute(input)
         else:
-            return np.exp(1j * self.global_phase) * self.scale * self.A.compute(input)
+            return self.scale * self.A.compute(input)
 
     def compute_adjoint(self, input: np.ndarray | None = None) -> np.ndarray:
         if self.absolute:
-            return np.exp(-1j * self.global_phase) * self.scale / self.A.normalization * self.A.compute_adjoint(input)
+            return np.conj(self.scale) / self.A.normalization * self.A.compute_adjoint(input)
         else:
-            return np.exp(-1j * self.global_phase) * self.scale * self.A.compute_adjoint(input)
+            return np.conj(self.scale) * self.A.compute_adjoint(input)
 
     def _circuit(
         self, target: Sequence[int], clean_ancillae: Sequence[int], borrowed_ancillae: Sequence[int]
@@ -89,6 +89,18 @@ class Scale(Node):
             circuit += tq.gates.Ry(2 * np.arccos(1 / self.remove_efficiency), target[-1])
         circuit += self.A.circuit(A_target, clean_ancillae, borrowed_ancillae)
         circuit += tq.gates.GlobalPhase(self.global_phase)
+        return circuit
+
+    def _controlled_circuit(
+        self, control: int, target: Sequence[int], clean_ancillae: Sequence[int], borrowed_ancillae: Sequence[int]
+    ) -> Circuit:
+        circuit = Circuit()
+        A_target = target
+        if self.remove_efficiency is not None:
+            A_target = target[:-1]
+            circuit += tq.gates.Ry(2 * np.arccos(1 / self.remove_efficiency), target[-1], control=control)
+        circuit += self.A.circuit(A_target, clean_ancillae, borrowed_ancillae, control=control)
+        circuit += tq.gates.Phase(target=control, angle=self.global_phase)
         return circuit
 
     def clean_ancilla_count(self) -> int:

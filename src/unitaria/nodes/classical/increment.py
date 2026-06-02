@@ -62,11 +62,38 @@ class Increment(Classical):
                 circuit += tq.gates.X(target=target[i], control=target[:i])
             return circuit
         else:
-            circuit = increment_circuit_single_ancilla(target=target, ancilla=borrowed_ancillae[0])
+            second_ancilla = None
+            if len(borrowed_ancillae) > 1:
+                second_ancilla = borrowed_ancillae[1]
+            if len(clean_ancillae) > 0:
+                second_ancilla = clean_ancillae[0]
+            circuit = increment_circuit_single_ancilla(
+                target=target, ancilla=borrowed_ancillae[0], second_ancilla=second_ancilla
+            )
+            return Circuit(circuit)
+
+    def _controlled_circuit(
+        self, control: int, target: Sequence[int], clean_ancillae: Sequence[int], borrowed_ancillae: Sequence[int]
+    ) -> Circuit:
+        if self.bits <= 2:
+            circuit = Circuit()
+            for i in reversed(range(self.bits)):
+                circuit += tq.gates.X(target=target[i], control=list(target[:i]) + [control])
+            return circuit
+        else:
+            second_ancilla = None
+            if len(borrowed_ancillae) > 1:
+                second_ancilla = borrowed_ancillae[1]
+            if len(clean_ancillae) > 0:
+                second_ancilla = clean_ancillae[0]
+            circuit = increment_circuit_single_ancilla(
+                target=[control] + list(target), ancilla=borrowed_ancillae[0], second_ancilla=second_ancilla
+            )
+            circuit += tq.gates.X(control)
             return Circuit(circuit)
 
     def clean_ancilla_count(self) -> int:
         return 0
 
     def borrowed_ancilla_count(self) -> int:
-        return 1 if self.bits > 3 else 0
+        return 1 if self.bits > 2 else 0

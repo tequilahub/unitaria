@@ -7,7 +7,10 @@ from typing import Sequence
 import numpy as np
 
 from unitaria.nodes.node import Node
+from unitaria.nodes.proxy_node import ProxyNode
 from unitaria.nodes.basic.adjoint import Adjoint
+from unitaria.nodes.basic.identity import Identity
+from unitaria.subspace import Subspace
 from unitaria.util import is_unitary
 from rich.console import Console
 from rich.syntax import Syntax
@@ -78,12 +81,17 @@ class Verifier:
         the global phase correctly.
     :param check_adjoint:
         Wether to check that compute_adjoint is implemented correctly
+    :param check_controlled:
+        Wether to check that _controlled_circuit is implemented correctly
     """
 
-    def __init__(self, drill: bool = True, up_to_phase: bool = False, check_adjoint: bool = True):
+    def __init__(
+        self, drill: bool = True, up_to_phase: bool = False, check_adjoint: bool = True, check_controlled: bool = True
+    ):
         self.drill = drill
         self.up_to_phase = up_to_phase
         self.check_adjoint = check_adjoint
+        self.check_controlled = check_controlled
 
     def _verify_circuit_subspaces(self, node: Node):
         assert node.dimension_in == node.subspace_in.dimension
@@ -135,6 +143,14 @@ class Verifier:
                 np.testing.assert_allclose(matrix, reference, atol=atol)
             self._verify_is_guaranteed_unitary(node, matrix)
             self._compare_batch_compute(Adjoint(node))
+            if (
+                self.check_controlled
+                and not isinstance(node, ProxyNode)
+                and type(node)._controlled_circuit != Node._controlled_circuit
+            ):
+                self._compare_compute_simulate(
+                    (node.normalization * Identity(Subspace("#" * node.subspace_out.total_qubits))) | node
+                )
         except AssertionError as err:
             raise VerificationError(node) from err
 
