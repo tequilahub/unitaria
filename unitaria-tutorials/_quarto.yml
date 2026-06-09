@@ -4,11 +4,11 @@ project:
 website:
   title: "Unitaria"
   description: "A collection of tutorials for Unitaria, the open-source framework for linear algebra using block encodings."
-  image: unitaria_logo.png
+  image: unitaria_logo_round.svg
   repo-url: https://github.com/tequilahub/unitaria
   repo-actions: [source, issue]
   navbar:
-    logo: unitaria_logo.png
+    logo: unitaria_logo_round.svg
     right:
       - text: "Home"
         file: index.qmd
