@@ -2,12 +2,12 @@
 
 /* Enlarge navbar logo */
 .navbar-brand img, .quarto-navbar-logo {
-	height: 60px !important;
-	max-height: 60px !important;
+	height: 30px !important;
+	max-height: 30px !important;
 }
 
 /* Enlarge navbar title text */
 .navbar-brand, .quarto-navbar-title {
-	font-size: 2rem !important;
+	font-size: 1.5rem !important;
 	font-weight: 700;
 }
