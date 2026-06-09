@@ -19,10 +19,7 @@ It offers a composable, array-like interface for defining, combining, and simula
 It also features resource estimation through indcluding parameters like gate counts, qubit counts, and normalization constants prior to circuit execution.
 Unitaria enables efficient classical verification and analysis of quantum algorithms, making advanced quantum linear algebra accessible without low-level circuit expertise.
 
-Unitaria was created by Matthias Deiml, Oliver Hüttenhofer and Ram Mosco under the supervision of professors Jakob S. Kottmann and Daniel Peterseim as a collaboration between the institute of mathematics, the institute of computer science and the centre for advanced analytics and predictive sciences at the University of Augsburg, Germany. 
-
-
-# Websites Content and Structure
+# Content and Structure
 
 This website contains some hands-on examples and [tutorials](tutorials.html) using unitaria.
 
@@ -32,10 +29,35 @@ The main sections of this website are:
 - a brief guide on how to [contribute your own tutorials](Contribution/Contribution.ipynb) to this website using unitaria
 - the [documentation of unitaria](https://tequilahub.github.io/unitaria/v0.2.0/) for more in-depth information on the library and its functionalities
 
-
 # Contribute
 
 Unitaria is free and open source. You're welcome to contribute if you have ideas to improve the library.
 The standard way to contribute is via pull-requests or issues on [github](https://github.com/tequilahub/unitaria). For larger projects it might be useful to let us know in advance what you are planning.  
 
+# About
 
+Unitaria was created by Matthias Deiml, Oliver Hüttenhofer and Ram Mosco under the supervision of professors Jakob S. Kottmann and Daniel Peterseim as a collaboration between the institute of mathematics, the institute of computer science and the centre for advanced analytics and predictive sciences at the University of Augsburg, Germany.
+
+For academic work, please cite our project as follows:
+
+> M. Deiml, O. Hüttenhofer, R. Mosco, J. S. Kottmann, D. Peterseim. *"Unitaria: Quantum Linear Algebra via Block Encodings"*, [arXiv:2605.10768 (2026)](https://arxiv.org/abs/2605.10768).
+
+<details>
+<summary>BibTeX reference</summary>
+```bibtex
+@misc{deimlUnitariaQuantumLinear2026,
+  title = {Unitaria: {{Quantum Linear Algebra}} via {{Block Encodings}}},
+  shorttitle = {Unitaria},
+  author = {Deiml, Matthias and H{\"u}ttenhofer, Oliver and Mosco, Ram and Kottmann, Jakob S. and Peterseim, Daniel},
+  year = 2026,
+  month = may,
+  number = {arXiv:2605.10768},
+  eprint = {2605.10768},
+  primaryclass = {quant-ph},
+  publisher = {arXiv},
+  doi = {10.48550/arXiv.2605.10768},
+  urldate = {2026-06-09},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Emerging Technologies,Computer Science - Software Engineering,Mathematics - Numerical Analysis,Quantum Physics}
+}
+```
