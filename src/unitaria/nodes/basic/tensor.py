@@ -112,10 +112,10 @@ class Tensor(Node):
         return self.A.is_guaranteed_unitary() and self.B.is_guaranteed_unitary()
 
     def clean_ancilla_count(self) -> int:
-        return self.A.clean_ancilla_count() + self.B.clean_ancilla_count()
+        return max(self.A.clean_ancilla_count(), self.B.clean_ancilla_count())
 
     def borrowed_ancilla_count(self) -> int:
-        return self.A.borrowed_ancilla_count() + self.B.borrowed_ancilla_count()
+        return max(self.A.borrowed_ancilla_count(), self.B.borrowed_ancilla_count())
 
 
 Node.__and__ = lambda A, B: Tensor(A, B)
