@@ -6,6 +6,7 @@ website:
   description: "A collection of tutorials for Unitaria, the open-source framework for linear algebra using block encodings."
   image: unitaria_logo_round.svg
   repo-url: https://github.com/tequilahub/unitaria
+  repo-subdir: unitaria-tutorials
   repo-actions: [source, issue]
   navbar:
     logo: unitaria_logo_round.svg
