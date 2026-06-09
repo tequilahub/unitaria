@@ -36,7 +36,7 @@ The standard way to contribute is via pull-requests or issues on [github](https:
 
 # About
 
-Unitaria was created by Matthias Deiml, Oliver Hüttenhofer and Ram Mosco under the supervision of professors Jakob S. Kottmann and Daniel Peterseim as a collaboration between the institute of mathematics, the institute of computer science and the centre for advanced analytics and predictive sciences at the University of Augsburg, Germany.
+Unitaria was created by Matthias Deiml, Oliver Hüttenhofer and Ram Mosco under the supervision of professors Jakob S. Kottmann and Daniel Peterseim as a collaboration between the Institute of Mathematics, the Institute of Computer Science and the Centre for Advanced Analytics and Predictive Sciences at the University of Augsburg, Germany.
 
 For academic work, please cite our project as follows:
 
