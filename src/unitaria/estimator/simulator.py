@@ -21,12 +21,12 @@ class Simulator(Estimator):
         `~Simulator.estimate_norm`.
     :param count_gates:
         Wether to count the number of gates. May be much slower.
-    :param min_qubits:
+    :param qubits:
         Determines how many ancillae are passed to `Node.circuit`.
         Specifically, the total qubits passed to that function will
-        be the maximum of ``min_qubits`` or the qubits required to
+        be the maximum of ``qubits`` or the qubits required to
         encode the node.
-        If you want to estimate gates for a specific device, set ``min_qubits``
+        If you want to estimate gates for a specific device, set ``qubits``
         to the number of qubits in that device.
         This parameter is ignored if ``count_gates`` is not set.
     """
@@ -38,7 +38,7 @@ class Simulator(Estimator):
         default_failure_probability: float | None = None,
         seed: np.random.SeedSequence | None = None,
         count_gates: bool = False,
-        min_qubits: int = 20,
+        qubits: int = 100,
     ):
         if scheme == "exact":
             if default_precision is not None or default_failure_probability is not None:
@@ -59,7 +59,7 @@ class Simulator(Estimator):
         self.seed = seed
         self.rng = np.random.default_rng(seed)
         self.count_gates = count_gates
-        self.min_qubits = min_qubits
+        self.qubits = qubits
         self.gate_count = {}
 
     def estimate_norm(
@@ -97,7 +97,7 @@ class Simulator(Estimator):
             if self.count_gates:
                 target_qubits = node.subspace_out.total_qubits
                 ancilla_count = max(
-                    self.min_qubits - target_qubits - node.borrowed_ancilla_count(),
+                    self.qubits - target_qubits - node.borrowed_ancilla_count(),
                     node.clean_ancilla_count(),
                 )
                 circuit = node._cached_circuit(ancilla_count, node.borrowed_ancilla_count(), False)
