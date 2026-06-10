@@ -192,6 +192,7 @@ class Node(ABC):
         target: Sequence[int] = None,
         clean_ancillae: Sequence[int] = None,
         borrowed_ancillae: Sequence[int] = None,
+        control: int | None = None,
     ) -> Circuit:
         """
         The circuit corresponding to the unitary of the block encoding.
@@ -201,34 +202,57 @@ class Node(ABC):
         target, clean_ancillae, borrowed_ancillae. If indices are passed, the
         length of the ancillae needs to match the values returned by
         ``clean_ancillae_count()`` and ``borrowed_ancillae_count()``.
+
+        :param target:
+            The qubits in which the input and result are stored. Must be equal
+            to the number of qubits in `Node.subspace_in` and `Node.subspace_out`.
+        :param clean_ancillae:
+            The qubits which are to be used as clean ancillae. See `Node.clean_ancilla_count`.
+        :param borrowed_ancillae:
+            The qubits which are to be used as borrowed ancillae. See `Node.clean_borrowed_count`.
+        :param control:
+            If not `None` this method returns a circuit that is controlled by
+            this qubit. This mean the circuit is only run if this bit is in its
+            1 state.
         """
         if target is None:
             assert clean_ancillae is None
             assert borrowed_ancillae is None
+            assert control is None
             __tracebackhide__ = True
-            circuit = self._cached_circuit(self.clean_ancilla_count(), self.borrowed_ancilla_count())
+            circuit = self._cached_circuit(self.clean_ancilla_count(), self.borrowed_ancilla_count(), False)
             circuit.n_qubits = max(
                 self.target_qubit_count() + self.clean_ancilla_count() + self.borrowed_ancilla_count(), 1
             )
             return circuit
         else:
+            if control is None:
+                control = []
+            else:
+                control = [control]
             assert len(target) == self.target_qubit_count()
             assert len(clean_ancillae) >= self.clean_ancilla_count()
             assert len(borrowed_ancillae) >= self.borrowed_ancilla_count()
-            total_num = len(target) + len(clean_ancillae) + len(borrowed_ancillae)
+            total_num = len(target) + len(clean_ancillae) + len(borrowed_ancillae) + len(control)
             # Make sure that all passed qubit indices are unique
-            assert len(set(target) | set(clean_ancillae) | set(borrowed_ancillae)) == total_num
+            assert len(set(target) | set(clean_ancillae) | set(borrowed_ancillae) | set(control)) == total_num
 
-        circuit = self._cached_circuit(len(clean_ancillae), len(borrowed_ancillae)).map_qubits(
-            {i: bit for i, bit in enumerate(list(target) + list(clean_ancillae) + list(borrowed_ancillae))}
+        circuit = self._cached_circuit(len(clean_ancillae), len(borrowed_ancillae), len(control) > 0).map_qubits(
+            {i: bit for i, bit in enumerate(list(target) + list(clean_ancillae) + list(borrowed_ancillae) + control)}
         )
         circuit.n_qubits = (
-            max(max(target, default=0), max(clean_ancillae, default=0), max(borrowed_ancillae, default=0)) + 1
+            max(
+                max(target, default=0),
+                max(clean_ancillae, default=0),
+                max(borrowed_ancillae, default=0),
+                max(control, default=0),
+            )
+            + 1
         )
         return circuit
 
     @lru_cache
-    def _cached_circuit(self, clean_ancilla_count: int, borrowed_ancilla_count: int):
+    def _cached_circuit(self, clean_ancilla_count: int, borrowed_ancilla_count: int, control: bool):
         """
         Calls _circuit with target, clean_ancillae and borrowed_ancillae
         being the qubits 0, 1, ... so that the result can be cached.
@@ -241,7 +265,11 @@ class Node(ABC):
             self.target_qubit_count() + clean_ancilla_count,
             self.target_qubit_count() + clean_ancilla_count + borrowed_ancilla_count,
         )
-        return self._circuit(target, clean_ancillae, borrowed_ancillae)
+        control_bit = self.target_qubit_count() + clean_ancilla_count + borrowed_ancilla_count
+        if control:
+            return self._controlled_circuit(control_bit, target, clean_ancillae, borrowed_ancillae)
+        else:
+            return self._circuit(target, clean_ancillae, borrowed_ancillae)
 
     @abstractmethod
     def _circuit(
@@ -253,6 +281,18 @@ class Node(ABC):
         To be implemented in all subclasses of `Node`.
         """
         raise NotImplementedError
+
+    def _controlled_circuit(
+        self, control: int, target: Sequence[int], clean_ancillae: Sequence[int], borrowed_ancillae: Sequence[int]
+    ) -> Circuit:
+        """
+        Method for computing controlled variant `circuit`.
+
+        May be overridden in subclasses of `Node`. By default, the circuit given
+        by `Node._circuit` is used with `Circuit.add_controls`, which simply
+        adds controls to each gate.
+        """
+        return self._circuit(target, clean_ancillae, borrowed_ancillae).add_controls([control])
 
     def target_qubit_count(self) -> int:
         assert self.subspace_in.total_qubits == self.subspace_out.total_qubits

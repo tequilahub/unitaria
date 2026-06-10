@@ -78,6 +78,25 @@ class ModifyControl(Node):
             circuit += tq.gates.X(control_qubit_post)
         return circuit
 
+    def _controlled_circuit(
+        self, control: int, target: Sequence[int], clean_ancillae: Sequence[int], borrowed_ancillae: Sequence[int]
+    ) -> Circuit:
+        subspace = self.A.subspace_in
+        control_qubit_pre = target[subspace.total_qubits - 1]
+        control_qubit_post = target[subspace.total_qubits + self.expand_control.total_qubits - 1]
+
+        circuit = Circuit()
+        if self.swap_control_state:
+            circuit += tq.gates.X(control_qubit_post)
+
+        original_circuit = self.A.circuit(target[: subspace.total_qubits], clean_ancillae, borrowed_ancillae, control)
+        qubit_map = {t: t for t in range(original_circuit.n_qubits)}
+        qubit_map[control_qubit_pre] = control_qubit_post
+        circuit += original_circuit.map_qubits(qubit_map)
+        if self.swap_control_state:
+            circuit += tq.gates.X(control_qubit_post)
+        return circuit
+
     def clean_ancilla_count(self) -> int:
         return self.A.clean_ancilla_count()
 

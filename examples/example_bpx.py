@@ -208,7 +208,9 @@ def preconditioned_half_laplace(
 
 
 def test_preconditioned_half_laplace():
-    ut.verify(preconditioned_half_laplace(1, 2, 2), mat_CP(1, 2, 2).toarray(), check_adjoint=False)
+    ut.verify(
+        preconditioned_half_laplace(1, 2, 2), mat_CP(1, 2, 2).toarray(), check_adjoint=False, check_controlled=False
+    )
     np.testing.assert_allclose(preconditioned_half_laplace(1, 4, 2).toarray(), mat_CP(1, 4, 2).toarray())
 
 

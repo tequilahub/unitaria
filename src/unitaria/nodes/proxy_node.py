@@ -75,6 +75,12 @@ class ProxyNode(Node):
         definition = self.get_definition()
         return definition.circuit(target, clean_ancillae, borrowed_ancillae)
 
+    def _controlled_circuit(
+        self, control: int, target: Sequence[int], clean_ancillae: Sequence[int], borrowed_ancillae: Sequence[int]
+    ) -> Circuit:
+        definition = self.get_definition()
+        return definition.circuit(target, clean_ancillae, borrowed_ancillae, control)
+
     def clean_ancilla_count(self) -> int:
         definition = self.get_definition()
         return definition.clean_ancilla_count()

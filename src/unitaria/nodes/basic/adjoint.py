@@ -49,6 +49,11 @@ class Adjoint(Node):
     ) -> Circuit:
         return self.A.circuit(target, clean_ancillae, borrowed_ancillae).adjoint()
 
+    def _controlled_circuit(
+        self, control: int, target: Sequence[int], clean_ancillae: Sequence[int], borrowed_ancillae: Sequence[int]
+    ) -> Circuit:
+        return self.A.circuit(target, clean_ancillae, borrowed_ancillae, control).adjoint()
+
     def clean_ancilla_count(self) -> int:
         return self.A.clean_ancilla_count()
 

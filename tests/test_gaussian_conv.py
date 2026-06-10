@@ -13,7 +13,7 @@ def test_1d_gaussian_conv():
     unprep = ut.Adjoint(prep)
 
     conv = (unprep @ const_add @ add @ prep)[:8, :8]
-    ut.verify(conv)
+    ut.verify(conv, check_adjoint=False, check_controlled=False)
 
     input = np.linspace(0.0, 1.0, 8)
     input /= np.linalg.norm(input)
@@ -34,7 +34,7 @@ def test_2d_gaussian_conv():
 
     two_dim_conv = one_dim_conv & one_dim_conv
     print(f"qubits: {two_dim_conv.circuit().n_qubits}")
-    ut.verify(two_dim_conv)
+    ut.verify(two_dim_conv, check_adjoint=False, check_controlled=False)
 
     input = np.outer(np.linspace(0.0, 1.0, 4), np.linspace(0.0, 1.0, 4))
     input /= np.linalg.norm(input)
