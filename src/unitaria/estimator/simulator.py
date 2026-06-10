@@ -154,5 +154,20 @@ class Simulator(Estimator):
                     if len(gate.control) == 2:
                         name = "ccx"
                 self.gate_count[name] = self.gate_count.get(name, 0) + samples
+            self.gate_count["t-depth"] = self.gate_count.get("t-depth", 0) + samples * t_depth(compiled)
 
         return result * normalization
+
+def t_depth(circuit: tq.QCircuit) -> int:
+    table = {i: 0 for i in circuit.qubits}
+
+    for gate in circuit.gates:
+        if gate.name.lower() == "phase" and gate.parameter < 3 * np.pi / 8:
+            # gate is T
+            table[gate.qubits[0]] += 1
+        elif len(gate.qubits) > 1:
+            t = max([table[i] for i in gate.qubits])
+            for i in gate.qubits:
+                table[i] = t
+
+    return max(table.values())
