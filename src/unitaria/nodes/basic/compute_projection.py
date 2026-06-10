@@ -53,6 +53,11 @@ class SubspaceCircuit(Node):
     ) -> Circuit:
         return self.subspace.circuit(target[:-1], target[-1], clean_ancillae)
 
+    def _controlled_circuit(
+        self, control: int, target: Sequence[int], clean_ancillae: Sequence[int], borrowed_ancillae: Sequence[int]
+    ) -> Circuit:
+        return self.subspace.circuit(target[:-1], target[-1], clean_ancillae, control=control)
+
     def clean_ancilla_count(self) -> int:
         return self.subspace.clean_ancilla_count()
 

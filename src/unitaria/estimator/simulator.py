@@ -21,6 +21,14 @@ class Simulator(Estimator):
         `~Simulator.estimate_norm`.
     :param count_gates:
         Wether to count the number of gates. May be much slower.
+    :param qubits:
+        Determines how many ancillae are passed to `Node.circuit`.
+        Specifically, the total qubits passed to that function will
+        be the maximum of ``qubits`` or the qubits required to
+        encode the node.
+        If you want to estimate gates for a specific device, set ``qubits``
+        to the number of qubits in that device.
+        This parameter is ignored if ``count_gates`` is not set.
     """
 
     def __init__(
@@ -30,6 +38,7 @@ class Simulator(Estimator):
         default_failure_probability: float | None = None,
         seed: np.random.SeedSequence | None = None,
         count_gates: bool = False,
+        qubits: int = 100,
     ):
         if scheme == "exact":
             if default_precision is not None or default_failure_probability is not None:
@@ -50,6 +59,7 @@ class Simulator(Estimator):
         self.seed = seed
         self.rng = np.random.default_rng(seed)
         self.count_gates = count_gates
+        self.qubits = qubits
         self.gate_count = {}
 
     def estimate_norm(
@@ -85,7 +95,12 @@ class Simulator(Estimator):
             measurement = self.rng.binomial(samples, information_efficiency**2)
 
             if self.count_gates:
-                circuit = node.circuit()
+                target_qubits = node.subspace_out.total_qubits
+                ancilla_count = max(
+                    self.qubits - target_qubits - node.borrowed_ancilla_count(),
+                    node.clean_ancilla_count(),
+                )
+                circuit = node._cached_circuit(ancilla_count, node.borrowed_ancilla_count(), False)
                 # This is actually slightly cheating, since this way the error
                 # of the circuit and sampling might add up to be larger than
                 # precision, but since we only use it to count the gates, the
@@ -103,8 +118,10 @@ class Simulator(Estimator):
                         else:
                             name = "s"
                     if name == "x":
-                        if len(gate.control) > 0:
+                        if len(gate.control) == 1:
                             name = "cx"
+                        if len(gate.control) == 2:
+                            name = "ccx"
                     self.gate_count[name] = self.gate_count.get(name, 0) + samples
 
             return np.sqrt(measurement / samples) * normalization
