@@ -46,8 +46,8 @@ class Simulator(Estimator):
             default_precision = 0
             default_failure_probability = 0
         else:
-            if scheme not in ["monte-carlo"]:
-                raise ValueError('Supported schemes are "exact" and "monte-carlo"')
+            if scheme not in ["monte-carlo", "phase-estimation"]:
+                raise ValueError('Supported schemes are "exact", "monte-carlo" and "phase-estimation"')
             if default_precision is None:
                 raise ValueError('Simulator with scheme != "exact" requires `default_precision` argument')
             if default_failure_probability is None:
@@ -78,8 +78,8 @@ class Simulator(Estimator):
                 raise ValueError('"exact" simulator does not support `precision` or `failure_probability` arguments')
             return node.compute_norm()
 
-        if self.scheme not in ["monte-carlo"]:
-            raise ValueError('Supported schemes are "exact" and "monte-carlo"')
+        if self.scheme not in ["monte-carlo", "phase-estimation"]:
+            raise ValueError('Supported schemes are "exact", "monte-carlo" and "phase-estimation"')
         if precision <= 0:
             raise ValueError('Simulator with scheme != "exact" requires precision > 0')
         if not 0 < failure_probability < 1:
@@ -89,39 +89,70 @@ class Simulator(Estimator):
         normalization = node.normalization
         information_efficiency = norm / normalization
         normalized_precision = precision / normalization
+        samples = None
+        result = None
 
         if self.scheme == "monte-carlo":
             samples = sample_bound(normalized_precision, failure_probability)
             measurement = self.rng.binomial(samples, information_efficiency**2)
+            result = np.sqrt(measurement / samples)
+        elif self.scheme == "phase-estimation":
+            # Following https://arxiv.org/abs/quant-ph/0005055
+            p0 = 8.0 / np.pi**2
 
-            if self.count_gates:
-                target_qubits = node.subspace_out.total_qubits
-                ancilla_count = max(
-                    self.qubits - target_qubits - node.borrowed_ancilla_count(),
-                    node.clean_ancilla_count(),
-                )
-                circuit = node._cached_circuit(ancilla_count, node.borrowed_ancilla_count(), False)
-                # This is actually slightly cheating, since this way the error
-                # of the circuit and sampling might add up to be larger than
-                # precision, but since we only use it to count the gates, the
-                # difference should only be logarithmic.
-                compiler = tq.CircuitCompiler.error_correctable_gate_set(normalized_precision)
-                compiled = compiler.compile_circuit(circuit._tq_circuit)
+            # Find steps such that pi/steps + pi^2/steps^2 <= normalized_precision
+            steps = int(
+                np.ceil((np.pi + np.sqrt(np.pi**2 + 4 * normalized_precision * np.pi**2)) / (2 * normalized_precision))
+            )
 
-                for gate in compiled.gates:
-                    name = gate.name.lower()
-                    if name == "globalphase":
-                        continue
-                    if name == "phase":
-                        if gate.parameter < 3 * np.pi / 8:
-                            name = "t"
-                        else:
-                            name = "s"
-                    if name == "x":
-                        if len(gate.control) == 1:
-                            name = "cx"
-                        if len(gate.control) == 2:
-                            name = "ccx"
-                    self.gate_count[name] = self.gate_count.get(name, 0) + samples
+            # Compute number of tries using Chernoff bound
+            gap = 2 * p0 - 1
+            tries = (
+                1
+                if failure_probability >= 1.0 - p0
+                else max(1, int(np.ceil(2 * np.log(1.0 / failure_probability) / gap**2)))
+            )
 
-            return np.sqrt(measurement / samples) * normalization
+            theta = np.arcsin(np.sqrt(information_efficiency))
+
+            # Distances
+            d = theta / np.pi - np.arange(steps) / steps
+            probs = (np.sinc(steps * d) / np.sinc(d)) ** 2
+            probs /= probs.sum()
+
+            measured = self.rng.choice(steps, p=probs, size=tries)
+
+            samples = tries * steps
+            result = float(np.sin(np.pi * np.median(measured) / steps) ** 2)
+
+        if self.count_gates:
+            target_qubits = node.subspace_out.total_qubits
+            ancilla_count = max(
+                self.qubits - target_qubits - node.borrowed_ancilla_count(),
+                node.clean_ancilla_count(),
+            )
+            circuit = node._cached_circuit(ancilla_count, node.borrowed_ancilla_count(), False)
+            # This is actually slightly cheating, since this way the error
+            # of the circuit and sampling might add up to be larger than
+            # precision, but since we only use it to count the gates, the
+            # difference should only be logarithmic.
+            compiler = tq.CircuitCompiler.error_correctable_gate_set(normalized_precision)
+            compiled = compiler.compile_circuit(circuit._tq_circuit)
+
+            for gate in compiled.gates:
+                name = gate.name.lower()
+                if name == "globalphase":
+                    continue
+                if name == "phase":
+                    if gate.parameter < 3 * np.pi / 8:
+                        name = "t"
+                    else:
+                        name = "s"
+                if name == "x":
+                    if len(gate.control) == 1:
+                        name = "cx"
+                    if len(gate.control) == 2:
+                        name = "ccx"
+                self.gate_count[name] = self.gate_count.get(name, 0) + samples
+
+        return result * normalization
