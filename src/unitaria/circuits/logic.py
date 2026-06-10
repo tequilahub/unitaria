@@ -27,10 +27,10 @@ def multi_controlled_not(
     Can be used an optimization if the circuit is used twice.
     :return: A circuit implementing the multi-controlled NOT gate.
     """
-    if len(clean_ancillae) > len(controls) - 2:
+    if len(clean_ancillae) >= len(controls) - 2:
         return multi_controlled_not_v_chain(target, controls, clean_ancillae, uncompute)
-    if len(clean_ancillae) + len(borrowed_ancillae) > len(controls) - 2:
-        return multi_controlled_not_v_chain(target, controls, clean_ancillae + borrowed_ancillae, uncompute)
+    if len(clean_ancillae) + len(borrowed_ancillae) >= len(controls) - 2:
+        return multi_controlled_not_v_chain_borrowed(target, controls, clean_ancillae + borrowed_ancillae, uncompute)
     return tq.gates.X(target=target, control=controls)
 
 
