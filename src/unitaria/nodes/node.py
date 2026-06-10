@@ -1,6 +1,7 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Sequence
+from functools import lru_cache
 
 import numpy as np
 from rich.tree import Tree
@@ -205,35 +206,29 @@ class Node(ABC):
             assert clean_ancillae is None
             assert borrowed_ancillae is None
             __tracebackhide__ = True
-            target = range(self.target_qubit_count())
-            clean_ancillae = range(self.target_qubit_count(), self.target_qubit_count() + self.clean_ancilla_count())
-            borrowed_ancillae = range(
-                self.target_qubit_count() + self.clean_ancilla_count(),
-                self.target_qubit_count() + self.clean_ancilla_count() + self.borrowed_ancilla_count(),
+            circuit = self._cached_circuit(self.clean_ancilla_count(), self.borrowed_ancilla_count())
+            circuit.n_qubits = max(
+                self.target_qubit_count() + self.clean_ancilla_count() + self.borrowed_ancilla_count(), 1
             )
+            return circuit
         else:
-            assert len(target) >= self.target_qubit_count()
+            assert len(target) == self.target_qubit_count()
             assert len(clean_ancillae) >= self.clean_ancilla_count()
             assert len(borrowed_ancillae) >= self.borrowed_ancilla_count()
             total_num = len(target) + len(clean_ancillae) + len(borrowed_ancillae)
             # Make sure that all passed qubit indices are unique
             assert len(set(target) | set(clean_ancillae) | set(borrowed_ancillae)) == total_num
 
-        circuit = self._cached_circuit.map_qubits(
-            {i: target[i] for i in range(self.target_qubit_count())}
-            | {self.target_qubit_count() + i: clean_ancillae[i] for i in range(self.clean_ancilla_count())}
-            | {
-                self.target_qubit_count() + self.clean_ancilla_count() + i: borrowed_ancillae[i]
-                for i in range(self.borrowed_ancilla_count())
-            }
+        circuit = self._cached_circuit(len(clean_ancillae), len(borrowed_ancillae)).map_qubits(
+            {i: bit for i, bit in enumerate(list(target) + list(clean_ancillae) + list(borrowed_ancillae))}
         )
         circuit.n_qubits = (
             max(max(target, default=0), max(clean_ancillae, default=0), max(borrowed_ancillae, default=0)) + 1
         )
         return circuit
 
-    @cached_property
-    def _cached_circuit(self):
+    @lru_cache
+    def _cached_circuit(self, clean_ancilla_count: int, borrowed_ancilla_count: int):
         """
         Calls _circuit with target, clean_ancillae and borrowed_ancillae
         being the qubits 0, 1, ... so that the result can be cached.
@@ -241,10 +236,10 @@ class Node(ABC):
         """
         __tracebackhide__ = True
         target = range(self.target_qubit_count())
-        clean_ancillae = range(self.target_qubit_count(), self.target_qubit_count() + self.clean_ancilla_count())
+        clean_ancillae = range(self.target_qubit_count(), self.target_qubit_count() + clean_ancilla_count)
         borrowed_ancillae = range(
-            self.target_qubit_count() + self.clean_ancilla_count(),
-            self.target_qubit_count() + self.clean_ancilla_count() + self.borrowed_ancilla_count(),
+            self.target_qubit_count() + clean_ancilla_count,
+            self.target_qubit_count() + clean_ancilla_count + borrowed_ancilla_count,
         )
         return self._circuit(target, clean_ancillae, borrowed_ancillae)
 
@@ -266,18 +261,19 @@ class Node(ABC):
     @abstractmethod
     def clean_ancilla_count(self) -> int:
         """
-        Returns the number of borrowed ancillae used by the circuit of this node,
-        i.e. qubits that must be in state ``|0>`` at the beginning of the circuit and
-        will be returned to this state by the end of the circuit.
+        Returns the minimum number of clean ancillae required for the circuit
+        of this node, i.e. qubits that must be in state ``|0>`` at the beginning
+        of the circuit and will be returned to this state by the end of the
+        circuit.
         """
         raise NotImplementedError
 
     @abstractmethod
     def borrowed_ancilla_count(self) -> int:
         """
-        Returns the number of borrowed ancillae used by the circuit of this node,
-        i.e. qubits that can be in any state and will be returned to this state by
-        the end of the circuit.
+        Returns the minimum number of borrowed ancillae required for the circuit
+        of this node, i.e. qubits that can be in any state and will be returned
+        to this state by the end of the circuit.
         """
         raise NotImplementedError
 

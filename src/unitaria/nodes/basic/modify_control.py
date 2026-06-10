@@ -70,7 +70,7 @@ class ModifyControl(Node):
         if self.swap_control_state:
             circuit += tq.gates.X(control_qubit_post)
 
-        original_circuit = self.A.circuit(target, clean_ancillae, borrowed_ancillae)
+        original_circuit = self.A.circuit(target[: subspace.total_qubits], clean_ancillae, borrowed_ancillae)
         qubit_map = {t: t for t in range(original_circuit.n_qubits)}
         qubit_map[control_qubit_pre] = control_qubit_post
         circuit += original_circuit.map_qubits(qubit_map)

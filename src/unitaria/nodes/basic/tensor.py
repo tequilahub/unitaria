@@ -81,17 +81,17 @@ class Tensor(Node):
     def _circuit(
         self, target: Sequence[int], clean_ancillae: Sequence[int], borrowed_ancillae: Sequence[int]
     ) -> Circuit:
-        # TODO: Optionally optimize for qubit count instead of depth?
+        # TODO: Optionally try to run A and B in parallel by allocating ancillas differently?
         circuit = Circuit()
         circuit += self.B.circuit(
             target[: self.B.target_qubit_count()],
-            clean_ancillae[: self.B.clean_ancilla_count()],
-            borrowed_ancillae[: self.B.borrowed_ancilla_count()],
+            clean_ancillae,
+            borrowed_ancillae,
         )
         circuit += self.A.circuit(
             target[self.B.target_qubit_count() :],
-            clean_ancillae[self.B.clean_ancilla_count() :],
-            borrowed_ancillae[self.B.borrowed_ancilla_count() :],
+            clean_ancillae,
+            borrowed_ancillae,
         )
         return circuit
 
@@ -112,10 +112,10 @@ class Tensor(Node):
         return self.A.is_guaranteed_unitary() and self.B.is_guaranteed_unitary()
 
     def clean_ancilla_count(self) -> int:
-        return self.A.clean_ancilla_count() + self.B.clean_ancilla_count()
+        return max(self.A.clean_ancilla_count(), self.B.clean_ancilla_count())
 
     def borrowed_ancilla_count(self) -> int:
-        return self.A.borrowed_ancilla_count() + self.B.borrowed_ancilla_count()
+        return max(self.A.borrowed_ancilla_count(), self.B.borrowed_ancilla_count())
 
 
 Node.__and__ = lambda A, B: Tensor(A, B)
