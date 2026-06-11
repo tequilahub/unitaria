@@ -58,7 +58,7 @@ class Simulator(Estimator):
             seed = np.random.SeedSequence()
         self.seed = seed
         self.rng = np.random.default_rng(seed)
-        self.count_gates = count_gates
+        self.should_count_gates = count_gates
         self.qubits = qubits
         self.gate_count = {}
 
@@ -125,38 +125,101 @@ class Simulator(Estimator):
             samples = tries * steps
             result = float(np.sin(np.pi * np.median(measured) / steps) ** 2)
 
-        if self.count_gates:
-            target_qubits = node.subspace_out.total_qubits
-            ancilla_count = max(
-                self.qubits - target_qubits - node.borrowed_ancilla_count(),
-                node.clean_ancilla_count(),
-            )
-            circuit = node._cached_circuit(ancilla_count, node.borrowed_ancilla_count(), False)
-            # This is actually slightly cheating, since this way the error
-            # of the circuit and sampling might add up to be larger than
-            # precision, but since we only use it to count the gates, the
-            # difference should only be logarithmic.
-            compiler = tq.CircuitCompiler.error_correctable_gate_set(normalized_precision)
-            compiled = compiler.compile_circuit(circuit._tq_circuit)
-
-            for gate in compiled.gates:
-                name = gate.name.lower()
-                if name == "globalphase":
-                    continue
-                if name == "phase":
-                    if gate.parameter < 3 * np.pi / 8:
-                        name = "t"
-                    else:
-                        name = "s"
-                if name == "x":
-                    if len(gate.control) == 1:
-                        name = "cx"
-                    if len(gate.control) == 2:
-                        name = "ccx"
-                self.gate_count[name] = self.gate_count.get(name, 0) + samples
-            self.gate_count["t-depth"] = self.gate_count.get("t-depth", 0) + samples * t_depth(compiled)
+        if self.should_count_gates:
+            self.count_gates(node, samples=samples)
 
         return result * normalization
+
+    def count_gates(
+        self, node: Node, precision: float | None = None, failure_probability: float | None = None, samples=int | None
+    ):
+        """
+        Count the number of gates required to measure the norm of the given block encoding.
+
+        :param node: The node representing the vector of which to compute the norm.
+        :param precision:
+            The absolute precision, with which the norm should be computed. If
+            ``None``, ``self.default_precision`` is used instead.
+        :param failure_probability:
+            The maximum allowed failure probability, with which the absolute
+            error of the estimate may exceed the given precision. If ``None``,
+            ``self.default_failure_probability`` is used instead.
+        :param samples:
+            Number of times that the block encoding is executed. If given,
+            overides the number of samples computed from ``precision`` and
+            ``failure_probability``.
+        """
+        if precision is None:
+            precision = self.default_precision
+        if failure_probability is None:
+            failure_probability = self.default_failure_probability
+
+        if self.scheme == "exact":
+            raise ValueError('"exact" simulator does not support gate counting')
+
+        if self.scheme not in ["monte-carlo", "phase-estimation"]:
+            raise ValueError('Supported schemes are "exact", "monte-carlo" and "phase-estimation"')
+        if precision <= 0:
+            raise ValueError('Simulator with scheme != "exact" requires precision > 0')
+        if not 0 < failure_probability < 1:
+            raise ValueError('Simulator with scheme != "exact" requires 0 < failure_probability < 1')
+        normalization = node.normalization
+        normalized_precision = precision / normalization
+
+        if samples is not None:
+            if self.scheme == "monte-carlo":
+                samples = sample_bound(normalized_precision, failure_probability)
+            elif self.scheme == "phase-estimation":
+                # Following https://arxiv.org/abs/quant-ph/0005055
+                p0 = 8.0 / np.pi**2
+
+                # Find steps such that pi/steps + pi^2/steps^2 <= normalized_precision
+                steps = int(
+                    np.ceil(
+                        (np.pi + np.sqrt(np.pi**2 + 4 * normalized_precision * np.pi**2)) / (2 * normalized_precision)
+                    )
+                )
+
+                # Compute number of tries using Chernoff bound
+                gap = 2 * p0 - 1
+                tries = (
+                    1
+                    if failure_probability >= 1.0 - p0
+                    else max(1, int(np.ceil(2 * np.log(1.0 / failure_probability) / gap**2)))
+                )
+
+                samples = tries * steps
+
+        target_qubits = node.subspace_out.total_qubits
+        ancilla_count = max(
+            self.qubits - target_qubits - node.borrowed_ancilla_count(),
+            node.clean_ancilla_count(),
+        )
+        circuit = node._cached_circuit(ancilla_count, node.borrowed_ancilla_count(), False)
+        # This is actually slightly cheating, since this way the error
+        # of the circuit and sampling might add up to be larger than
+        # precision, but since we only use it to count the gates, the
+        # difference should only be logarithmic.
+        compiler = tq.CircuitCompiler.error_correctable_gate_set(normalized_precision)
+        compiled = compiler.compile_circuit(circuit._tq_circuit)
+
+        for gate in compiled.gates:
+            name = gate.name.lower()
+            if name == "globalphase":
+                continue
+            if name == "phase":
+                if gate.parameter < 3 * np.pi / 8:
+                    name = "t"
+                else:
+                    name = "s"
+            if name == "x":
+                if len(gate.control) == 1:
+                    name = "cx"
+                if len(gate.control) == 2:
+                    name = "ccx"
+            self.gate_count[name] = self.gate_count.get(name, 0) + samples
+        self.gate_count["t-depth"] = self.gate_count.get("t-depth", 0) + samples * t_depth(compiled)
+
 
 def t_depth(circuit: tq.QCircuit) -> int:
     table = {i: 0 for i in circuit.qubits}
