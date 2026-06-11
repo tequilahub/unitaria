@@ -1,7 +1,8 @@
-import copy
 from typing import Sequence
 
 import tequila as tq
+
+from unitaria.circuits.logic import multi_controlled_not_v_chain_borrowed
 
 
 def addition_circuit(source: Sequence[int], target: Sequence[int]) -> tq.QCircuit:
@@ -87,7 +88,7 @@ def increment_circuit_single_ancilla(target: Sequence[int], ancilla: int, second
                 target=[ancilla] + list(target[split:]), ancillae=list(target[:split]) + [second_ancilla]
             )
         else:
-            upper_inc += multi_controlled_not(
+            upper_inc += multi_controlled_not_v_chain_borrowed(
                 target=target[-1], controls=list(target[split:-1]) + [ancilla], ancillae=target[:split]
             )
             upper_inc += increment_circuit_n_ancillae(
@@ -96,18 +97,18 @@ def increment_circuit_single_ancilla(target: Sequence[int], ancilla: int, second
     else:
         upper_inc += increment_circuit_n_ancillae(target=[ancilla] + list(target[split:]), ancillae=target[:split])
 
-    U += copy.deepcopy(upper_inc)
+    U += upper_inc
     U += tq.gates.X(target=ancilla)
 
     for i in range(split, n):
         U += tq.gates.CNOT(control=ancilla, target=target[i])
 
-    U += multi_controlled_not(target=ancilla, controls=target[:split], ancillae=target[split:])
+    U += multi_controlled_not_v_chain_borrowed(target=ancilla, controls=target[:split], ancillae=target[split:])
 
-    U += copy.deepcopy(upper_inc)
+    U += upper_inc
     U += tq.gates.X(target=ancilla)
 
-    U += multi_controlled_not(target=ancilla, controls=target[:split], ancillae=target[split:])
+    U += multi_controlled_not_v_chain_borrowed(target=ancilla, controls=target[:split], ancillae=target[split:])
 
     for i in range(split, n):
         U += tq.gates.CNOT(control=ancilla, target=target[i])
@@ -154,48 +155,6 @@ def increment_circuit_n_ancillae(target: Sequence[int], ancillae: Sequence[int])
         U += tq.gates.X(target=ancillae[i])
 
     U += addition_circuit(target=target, source=ancillae).dagger()
-
-    return U
-
-
-def multi_controlled_not(
-    target: int, controls: Sequence[int], ancillae: Sequence[int], uncompute: bool = True
-) -> tq.QCircuit:
-    """
-    Implements a multi-controlled NOT gate using Toffoli gates.
-
-    :param target: Index of the target qubit.
-    :param controls: Indices of the control qubits.
-    :param ancillae: Indices of the ancilla qubits.
-    Must contain at least len(controls) - 2 qubits. Ancillae can be in any state,
-    and will be returned to that state by the end of the circuit, except if uncompute is set to False.
-    :param uncompute: Whether to uncompute the ancillae.
-    Can be used an optimization if the circuit is used twice.
-    :return: A circuit implementing the multi-controlled NOT gate.
-    """
-    assert len(ancillae) >= len(controls) - 2
-    assert set(ancillae).isdisjoint(controls)
-    assert target not in set(controls) | set(ancillae)
-
-    if len(controls) <= 2:
-        return tq.gates.X(target=target, control=controls)
-
-    staircase = tq.QCircuit()
-    for i in range(2, len(controls) - 1):
-        staircase += tq.gates.Toffoli(first=controls[i], second=ancillae[i - 2], target=ancillae[i - 1])
-
-    U = tq.QCircuit()
-
-    U += tq.gates.Toffoli(first=controls[-1], second=ancillae[len(controls) - 3], target=target)
-    U += staircase.dagger()
-    U += tq.gates.Toffoli(first=controls[0], second=controls[1], target=ancillae[0])
-    U += copy.deepcopy(staircase)
-    U += tq.gates.Toffoli(first=controls[-1], second=ancillae[len(controls) - 3], target=target)
-
-    if uncompute:
-        U += staircase.dagger()
-        U += tq.gates.Toffoli(first=controls[0], second=controls[1], target=ancillae[0])
-        U += staircase
 
     return U
 
