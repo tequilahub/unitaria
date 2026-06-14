@@ -224,12 +224,16 @@ class QSVT(Node):
     exactly correspond to those angles. If a polynomial P is given, the resulting
     block encoding will encode P(A). The normalization of the block encoding will
     be roughly the sup-norm
-    $$ \\max_{x \\in [-\\gamma_A, \\gamma_A]} |P(x)| $$
+
+    .. math::
+
+       \\max_{x \\in [-\\gamma_A, \\gamma_A]} |P(x)|
+
     though it may be slightly larger.
 
     If a polynomial is given, it should best be specified using the
     `np.polynomial.Chebyshev` class, and the `domain` attribute should
-    correspond to ``[-\\gamma_A, \\gamma_A]`` for reasons of numerical
+    correspond to :math:`[-\\gamma_A, \\gamma_A]` for reasons of numerical
     stability.
 
     :param A: The matrix to be transformed
