@@ -110,4 +110,6 @@ class Scale(Node):
         return self.A.borrowed_ancilla_count()
 
 
+Node.__mul__ = lambda A, s: Scale(A, s)
 Node.__rmul__ = lambda A, s: Scale(A, s)
+Node.__neg__ = lambda A: Scale(A, -1)
