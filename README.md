@@ -25,6 +25,8 @@ Ry(target=(0,), parameter=1.854590436003224)
 
 ```
 
+[**Tutorials**][quarto]
+
 [**Developer Documentation**][docs]
 
 ## Getting started
@@ -109,5 +111,6 @@ i.e. at least Python 3.13 will be required starting April 2027.
 
 Unitaria follows [SemVer](https://semver.org/spec/v2.0.0.html) conventions.
 
+[quarto]: https://tequilahub.github.io/unitaria/
 [docs]: https://tequilahub.github.io/unitaria/docs
 [uv]: https://docs.astral.sh/uv/
