@@ -21,6 +21,7 @@ class ConstantIntegerMultiplication(ProxyNode):
         The size of the quantum state. The addition is performed modulo ``2 ** bits``.
     :param constant:
         The contant factor that should be multiplied. Has to be positive and odd.
+    :raises ValueError: If ``constant`` is negative or even, or if ``bits`` is less than 1.
     """
 
     bits: int

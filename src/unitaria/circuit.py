@@ -83,6 +83,12 @@ class Circuit:
         return result
 
     def __iadd__(self, other):
+        """
+        Add another circuit in-place.
+
+        :param other: The circuit to add.
+        :raises TypeError: If other is not a :class:`Circuit` or a :class:`tequila.QCircuit`.
+        """
         if isinstance(other, Circuit):
             self._tq_circuit += other._tq_circuit
         elif isinstance(other, tq.QCircuit):

@@ -21,6 +21,7 @@ class Simulator(Estimator):
         `~Simulator.estimate_norm`.
     :param count_gates:
         Wether to count the number of gates. May be much slower.
+    :raises ValueError: If the scheme is invalid or if arguments are incompatible with the scheme.
     """
 
     def __init__(
@@ -55,6 +56,9 @@ class Simulator(Estimator):
     def estimate_norm(
         self, node: Node, precision: float | None = None, failure_probability: float | None = None
     ) -> float:
+        """
+        :raises ValueError: If the node does not represent a vector, or if parameters are invalid for the chosen scheme.
+        """
         if not node.is_vector():
             raise ValueError("Can only estimate the norm of vectors")
 

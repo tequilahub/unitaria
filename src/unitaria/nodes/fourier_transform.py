@@ -17,6 +17,7 @@ class FourierTransform(Node):
 
     :param bits:
         The number of bits that this Node acts on.
+    :raises ValueError: If ``bits`` is less than 1.
     """
 
     bits: int

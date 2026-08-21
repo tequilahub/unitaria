@@ -18,6 +18,11 @@ class cached_property:
         self.__module__ = func.__module__
 
     def __set_name__(self, owner, name):
+        """
+        Set the name of the cached property.
+
+        :raises TypeError: If attempting to assign the same cached_property to two different names.
+        """
         if self.attrname is None:
             self.attrname = name
         elif name != self.attrname:
@@ -26,6 +31,12 @@ class cached_property:
             )
 
     def __get__(self, instance, owner=None):
+        """
+        Get the property value.
+
+        :raises TypeError: If used without __set_name__ called first, or if the instance does not support dictionary caching or item assignment.
+        :raises AttributeError: If the instance does not have __dict__ attribute.
+        """
         # This local variable tells many tracers/debuggers to skip this frame
         __tracebackhide__ = True
         if instance is None:

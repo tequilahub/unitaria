@@ -20,6 +20,7 @@ class BlockVertical(ProxyNode):
         The top block
     :param B:
         The bottom block
+    :raises ValueError: If the input dimensions of ``A`` and ``B`` do not match.
     """
 
     A: Node

@@ -11,6 +11,7 @@ class Ones(ProxyNode):
     Node representing an all one vector
 
     :param dim: The dimension of the vector
+    :raises ValueError: If ``dim`` is less than or equal to 0.
     """
 
     def __init__(self, dim: int):

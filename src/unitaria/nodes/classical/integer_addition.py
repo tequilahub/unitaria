@@ -19,6 +19,7 @@ class IntegerAddition(Classical):
     :param target_bits:
         The size of the second register. The addition is performed modulo ``2 ** target_bits``.
     :raises ValueError: If ``source_bits < 2`` or ``target_bits < source_bits``.
+    :raises TypeError: If ``source_bits`` or ``target_bits`` is not specified.
     """
 
     source_bits: int

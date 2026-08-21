@@ -95,6 +95,11 @@ class PermuteFactors(Node):
     def _circuit(
         self, target: Sequence[int], clean_ancillae: Sequence[int], borrowed_ancillae: Sequence[int]
     ) -> Circuit:
+        """
+        Compute the circuit implementing the permutation.
+
+        :raises ValueError: If the permutation map is not a valid permutation.
+        """
         if self.subspace.total_qubits == 0:
             return Circuit()
 
@@ -440,6 +445,8 @@ def permute(a: Subspace, b: Subspace) -> tuple[Node, Node]:
     * ``perm_b.subspace_out.matches_nonzero(perm_a.subspace_out)``
 
     This latter subspace will often be more balanced than the other two.
+
+    :raises ValueError: If the dimensions of ``a`` and ``b`` do not match.
     """
     if a.dimension != b.dimension:
         raise ValueError(f"dimensions {a.dimension} and {b.dimension} do not match")

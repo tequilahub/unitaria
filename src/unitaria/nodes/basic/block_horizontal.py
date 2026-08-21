@@ -20,6 +20,7 @@ class BlockHorizontal(ProxyNode):
         The left block
     :param B:
         The right block
+    :raises ValueError: If the output dimensions of ``A`` and ``B`` do not match.
     """
 
     A: Node

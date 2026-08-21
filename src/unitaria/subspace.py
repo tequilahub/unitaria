@@ -157,6 +157,11 @@ class Subspace:
         return Subspace("0" * (bits - min_bits)) & (case_zero | case_one)
 
     def __repr__(self) -> str:
+        """
+        Return the string representation of Subspace.
+
+        :raises NotImplementedError: If a tensor factor type is unrecognized.
+        """
         if len(self.tensor_factors) == 0:
             return "Subspace()"
         string_constructor = ""
@@ -297,6 +302,10 @@ class Subspace:
     def test_basis(self, bits: int) -> bool:
         """
         Tests whether the given basis state is inside the subspace
+
+        :param bits: The basis state index.
+        :raises ValueError: If bits is out of bounds for the subspace size.
+        :raises NotImplementedError: If the tensor factor has an unsupported type.
         """
         if bits >= 2**self.total_qubits:
             raise ValueError
@@ -509,6 +518,8 @@ class SubspaceFactor(ABC):
         The number of qubits of the state space in which the subspace lives
 
         The dimension of the state space is ``2 ** total_qubits``
+
+        :raises NotImplementedError: If the method is not implemented.
         """
         raise NotImplementedError
 
@@ -516,6 +527,8 @@ class SubspaceFactor(ABC):
     def dimension(self) -> int:
         """
         The dimension of the subspace
+
+        :raises NotImplementedError: If the method is not implemented.
         """
         raise NotImplementedError
 

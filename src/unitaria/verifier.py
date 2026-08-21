@@ -164,6 +164,7 @@ class Verifier:
         :param drill:
             If True and an error is found, recursivly test this nodes children
             to find the smallest node which still contains the error.
+        :raises VerificationError: If the verification checks fail.
         """
 
         try:
