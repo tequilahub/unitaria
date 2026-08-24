@@ -12,6 +12,7 @@ import tequila as tq
 
 from unitaria.circuit import Circuit
 from unitaria.util import cached_property
+from unitaria.circuits.logic import multi_controlled_not
 
 
 class Subspace:
@@ -334,12 +335,11 @@ class Subspace:
         """
         return vector[self.enumerate_basis()]
 
-    def circuit(self, target: Sequence[int], flag: int, ancillae: Sequence[int]) -> Circuit:
+    def circuit(self, target: Sequence[int], flag: int, ancillae: Sequence[int], control: int | None = None) -> Circuit:
         """
         A circuit which checks whether a state is inside the subspace.
 
-        The result of the check will be stored in a flag qubit where
-        the index is the output of ``total_qubits``.
+        The result of the check will be stored in a flag qubit.
         Specifically, this qubit will be flipped if the other qubits
         represent a state outside the embedded vector space.
         """
@@ -368,9 +368,7 @@ class Subspace:
         if len(relevant_factors) == 1 and isinstance(relevant_factors[0][1], ControlledSubspace):
             index, factor = relevant_factors[0]
             return factor.circuit(
-                target=target[index : index + factor.total_qubits()],
-                flag=flag,
-                ancillae=ancillae,
+                target=target[index : index + factor.total_qubits()], flag=flag, ancillae=ancillae, control=control
             )
 
         # Next unused ancilla index
@@ -396,10 +394,16 @@ class Subspace:
             intermediate_flags.append(ancillae[ancilla_index])
             ancilla_index += 1
 
+        if control is not None:
+            intermediate_flags.append(control)
+
         # Apply the constructed circuit, add a multi-controlled NOT to determine
         # if the result flag is set, then uncompute the rest of the circuit
         circuit = (
-            circuit + tq.gates.X(target=flag, control=intermediate_flags) + tq.gates.X(target=flag) + circuit.adjoint()
+            circuit
+            + multi_controlled_not(target=flag, controls=intermediate_flags, clean_ancillae=ancillae[ancilla_index:])
+            + tq.gates.X(target=flag, control=control)
+            + circuit.adjoint()
         )
 
         return circuit
@@ -609,7 +613,7 @@ class ControlledSubspace(SubspaceFactor):
             )
         ]
 
-    def circuit(self, target: Sequence[int], flag: int, ancillae: Sequence[int]) -> Circuit:
+    def circuit(self, target: Sequence[int], flag: int, ancillae: Sequence[int], control: int | None = None) -> Circuit:
         """
         A circuit which checks whether a state is inside the subspace.
 
@@ -618,15 +622,37 @@ class ControlledSubspace(SubspaceFactor):
         represent a state outside the embedded vector space.
         """
         circuit = Circuit()
-        control = target[-1]
+        control2 = target[-1]
         if self.case_zero.dimension != 2**self.case_zero.total_qubits:
-            circuit_zero = self.case_zero.circuit(target=target[:-1], flag=flag, ancillae=ancillae)
-            circuit += tq.gates.X(target=control)
-            circuit += circuit_zero.add_controls(control)
-            circuit += tq.gates.X(target=control)
+            circuit += tq.gates.X(target=control2)
+            if control is not None:
+                if len(ancillae) > self.case_zero.clean_ancilla_count():
+                    circuit += tq.gates.Toffoli(control2, control, ancillae[-1])
+                    circuit += self.case_zero.circuit(
+                        target=target[:-1], flag=flag, ancillae=ancillae[:-1], control=ancillae[-1]
+                    )
+                    circuit += tq.gates.Toffoli(control2, control, ancillae[-1])
+                else:
+                    circuit += self.case_zero.circuit(
+                        target=target[:-1], flag=flag, ancillae=ancillae, control=control2
+                    ).add_control([control])
+            else:
+                circuit += self.case_zero.circuit(target=target[:-1], flag=flag, ancillae=ancillae, control=control2)
+            circuit += tq.gates.X(target=control2)
         if self.case_one.dimension != 2**self.case_one.total_qubits:
-            circuit_one = self.case_one.circuit(target=target[:-1], flag=flag, ancillae=ancillae)
-            circuit += circuit_one.add_controls(control)
+            if control is not None:
+                if len(ancillae) > self.case_one.clean_ancilla_count():
+                    circuit += tq.gates.Toffoli(control2, control, ancillae[-1])
+                    circuit += self.case_one.circuit(
+                        target=target[:-1], flag=flag, ancillae=ancillae[:-1], control=ancillae[-1]
+                    )
+                    circuit += tq.gates.Toffoli(control2, control, ancillae[-1])
+                else:
+                    circuit += self.case_one.circuit(
+                        target=target[:-1], flag=flag, ancillae=ancillae, control=control2
+                    ).add_control([control])
+            else:
+                circuit += self.case_one.circuit(target=target[:-1], flag=flag, ancillae=ancillae, control=control2)
         return circuit
 
     def clean_ancilla_count(self) -> int:
