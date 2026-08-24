@@ -131,7 +131,11 @@ class Simulator(Estimator):
         return result * normalization
 
     def count_gates(
-        self, node: Node, precision: float | None = None, failure_probability: float | None = None, samples=int | None
+        self,
+        node: Node,
+        precision: float | None = None,
+        failure_probability: float | None = None,
+        samples: int | None = None,
     ):
         """
         Count the number of gates required to measure the norm of the given block encoding.
@@ -146,7 +150,7 @@ class Simulator(Estimator):
             ``self.default_failure_probability`` is used instead.
         :param samples:
             Number of times that the block encoding is executed. If given,
-            overides the number of samples computed from ``precision`` and
+            overrides the number of samples computed from ``precision`` and
             ``failure_probability``.
         """
         if precision is None:
@@ -166,7 +170,7 @@ class Simulator(Estimator):
         normalization = node.normalization
         normalized_precision = precision / normalization
 
-        if samples is not None:
+        if samples is None:
             if self.scheme == "monte-carlo":
                 samples = sample_bound(normalized_precision, failure_probability)
             elif self.scheme == "phase-estimation":
