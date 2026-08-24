@@ -20,15 +20,16 @@ def prepare_state(state: npt.NDArray[complex], target: Sequence[int]) -> tq.QCir
     assert np.isclose(np.linalg.norm(state), 1)
     state = state.astype(complex)
 
-    theta = dict()
-    phi = dict()
-    combined = dict()
+    theta = {}
+    phi = {}
+    combined = {}
     for bit in range(n):
         for i in range(2 ** (n - bit - 1)):
             a0 = state[2 * i] if bit == 0 else combined[bit - 1, 2 * i]
             a1 = state[2 * i + 1] if bit == 0 else combined[bit - 1, 2 * i + 1]
-            r = np.hypot(abs(a0), abs(a1))
-            theta[bit, i] = 2 * np.arccos(np.abs(a0) / r) if r != 0 else 0
+            m0, m1 = np.abs(a0), np.abs(a1)
+            r = np.hypot(m0, m1)
+            theta[bit, i] = 2 * np.arctan2(m1, m0)
             phi[bit, i] = np.angle(a1) - np.angle(a0)
             combined[bit, i] = np.exp(((np.angle(a0) + np.angle(a1)) / 2) * 1j) * r
 

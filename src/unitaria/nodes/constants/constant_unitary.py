@@ -14,7 +14,7 @@ class ConstantUnitary(Node):
     Node representing the given unitary
 
     Can also be a rectangular matrix with orthonormal columns, i.e. a matrix V
-    such that either $V^\\dag V$ or $V V^\\dag$ is unitary.
+    such that either :math:`V^\\dag V` or :math:`V V^\\dag` is unitary.
 
     :param unitary: The unitary which should be implemented
     :raises ValueError: If the provided matrix is not unitary.
