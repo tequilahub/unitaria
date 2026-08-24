@@ -18,7 +18,7 @@ class ConstantVector(Node):
 
     vec: np.ndarray
 
-    def __init__(self, vec: np.ndarray | int, dim: int | None = None):
+    def __init__(self, vec: np.ndarray | int, *, dim: int | None = None):
         """
         Initialize a ConstantVector node.
 
