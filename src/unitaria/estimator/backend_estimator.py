@@ -58,7 +58,6 @@ class BackendEstimator(Estimator):
             node.clean_ancilla_count(),
         )
         circuit = node._cached_circuit(ancilla_count, node.borrowed_ancilla_count(), False)
-        print(circuit)
 
         # tq.simulate may also run circuits on a hardware backend
         result = tq.simulate(circuit._tq_circuit, samples=samples, **self.backend_kwargs)

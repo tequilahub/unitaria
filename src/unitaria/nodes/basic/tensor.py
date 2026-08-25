@@ -109,6 +109,11 @@ class Tensor(Node):
         circuit += self.A.circuit(target[self.B.target_qubit_count() :], clean_ancillae, borrowed_ancillae, control)
         return circuit
 
+    def t_count(self, clean_ancilla_count: int, borrowed_ancilla_count: int, controlled: bool, precision: float) -> int:
+        return self.A.t_count(clean_ancilla_count, borrowed_ancilla_count, controlled, precision) + self.B.t_count(
+            clean_ancilla_count, borrowed_ancilla_count, controlled, precision
+        )
+
     def _subspace_in(self) -> Subspace:
         subspace_A = self.A.subspace_in
         subspace_B = self.B.subspace_in

@@ -12,6 +12,8 @@ from unitaria.nodes.basic.adjoint import Adjoint
 from unitaria.nodes.basic.identity import Identity
 from unitaria.subspace import Subspace
 from unitaria.util import is_unitary
+from unitaria.t_count import get_t_count
+
 from rich.console import Console
 from rich.syntax import Syntax
 
@@ -131,6 +133,27 @@ class Verifier:
 
         assert is_unitary(matrix / node.normalization)
 
+    def _verify_t_count(
+        self,
+        node: Node,
+        extra_clean_ancilla_count: int,
+        extra_borrowed_ancilla_count: int,
+        controlled: bool,
+        precision: float,
+    ):
+        clean_ancilla_count = node.clean_ancilla_count() + extra_clean_ancilla_count
+        borrowed_ancilla_count = node.borrowed_ancilla_count() + extra_borrowed_ancilla_count
+        count = node.t_count(
+            clean_ancilla_count,
+            borrowed_ancilla_count,
+            controlled,
+            precision,
+        )
+        reference = get_t_count(
+            node._cached_circuit(clean_ancilla_count, borrowed_ancilla_count, controlled), precision
+        )
+        np.testing.assert_allclose(count, reference)
+
     def _verify(self, node: Node, reference: np.ndarray | None = None, atol: float = 1e-8):
         try:
             self._verify_circuit_subspaces(node)
@@ -142,6 +165,10 @@ class Verifier:
                     reference = np.expand_dims(reference, 1)
                 np.testing.assert_allclose(matrix, reference, atol=atol)
             self._verify_is_guaranteed_unitary(node, matrix)
+            self._verify_t_count(node, 0, 0, False, 0.01)
+            self._verify_t_count(node, 100, 100, False, 0.01)
+            self._verify_t_count(node, 0, 0, True, 0.01)
+            self._verify_t_count(node, 100, 100, True, 0.01)
             self._compare_batch_compute(Adjoint(node))
             if (
                 self.check_controlled
@@ -180,6 +207,9 @@ class Verifier:
 
         You should typically use `verify` instead.
         """
+        if isinstance(node, ProxyNode):
+            self.find_error(node.definition())
+            self._verify(node.definition())
         for child in node.children():
             self.find_error(child)
             self._verify(child)

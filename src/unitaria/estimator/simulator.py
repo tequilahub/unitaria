@@ -1,5 +1,4 @@
 import numpy as np
-import tequila as tq
 
 from unitaria.estimator.estimator import Estimator
 from unitaria.nodes.node import Node
@@ -19,8 +18,6 @@ class Simulator(Estimator):
     :param default_failure_probability:
         Default for the ``failure_probability`` parameter in
         `~Simulator.estimate_norm`.
-    :param count_gates:
-        Wether to count the number of gates. May be much slower.
     :param qubits:
         Determines how many ancillae are passed to `Node.circuit`.
         Specifically, the total qubits passed to that function will
@@ -28,7 +25,6 @@ class Simulator(Estimator):
         encode the node.
         If you want to estimate gates for a specific device, set ``qubits``
         to the number of qubits in that device.
-        This parameter is ignored if ``count_gates`` is not set.
     """
 
     def __init__(
@@ -37,7 +33,6 @@ class Simulator(Estimator):
         default_precision: float | None = None,
         default_failure_probability: float | None = None,
         seed: np.random.SeedSequence | None = None,
-        count_gates: bool = False,
         qubits: int = 100,
     ):
         if scheme == "exact":
@@ -58,9 +53,8 @@ class Simulator(Estimator):
             seed = np.random.SeedSequence()
         self.seed = seed
         self.rng = np.random.default_rng(seed)
-        self.should_count_gates = count_gates
         self.qubits = qubits
-        self.gate_count = {}
+        self.t_count = 0
 
     def estimate_norm(
         self, node: Node, precision: float | None = None, failure_probability: float | None = None
@@ -125,8 +119,7 @@ class Simulator(Estimator):
             samples = tries * steps
             result = float(np.sin(np.pi * np.median(measured) / steps) ** 2)
 
-        if self.should_count_gates:
-            self.count_gates(node, samples=samples)
+        self.count_gates(node, samples=samples)
 
         return result * normalization
 
@@ -199,26 +192,6 @@ class Simulator(Estimator):
             self.qubits - target_qubits - node.borrowed_ancilla_count(),
             node.clean_ancilla_count(),
         )
-        circuit = node._cached_circuit(ancilla_count, node.borrowed_ancilla_count(), False)
-        # This is actually slightly cheating, since this way the error
-        # of the circuit and sampling might add up to be larger than
-        # precision, but since we only use it to count the gates, the
-        # difference should only be logarithmic.
-        compiler = tq.CircuitCompiler.error_correctable_gate_set(normalized_precision)
-        compiled = compiler.compile_circuit(circuit._tq_circuit)
-
-        for gate in compiled.gates:
-            name = gate.name.lower()
-            if name == "globalphase":
-                continue
-            if name == "phase":
-                if gate.parameter < 3 * np.pi / 8:
-                    name = "t"
-                else:
-                    name = "s"
-            if name == "x":
-                if len(gate.control) == 1:
-                    name = "cx"
-                if len(gate.control) == 2:
-                    name = "ccx"
-            self.gate_count[name] = self.gate_count.get(name, 0) + samples
+        self.t_count += samples * node.t_count(
+            ancilla_count, node.borrowed_ancilla_count(), False, normalized_precision
+        )
