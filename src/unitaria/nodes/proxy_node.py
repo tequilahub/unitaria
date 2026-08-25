@@ -89,6 +89,10 @@ class ProxyNode(Node):
         definition = self.get_definition()
         return definition.borrowed_ancilla_count()
 
+    def t_count(self, clean_ancilla_count: int, borrowed_ancilla_count: int, controlled: bool, precision: float) -> int:
+        definition = self.get_definition()
+        return definition.t_count(clean_ancilla_count, borrowed_ancilla_count, controlled, precision)
+
     def tree_label(self, verbose: bool = False):
         label = super().tree_label()
         if not verbose:

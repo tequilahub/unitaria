@@ -97,6 +97,9 @@ class ModifyControl(Node):
             circuit += tq.gates.X(control_qubit_post)
         return circuit
 
+    def t_count(self, clean_ancilla_count: int, borrowed_ancilla_count: int, controlled: bool, precision: float) -> int:
+        return self.A.t_count(clean_ancilla_count, borrowed_ancilla_count, controlled, precision)
+
     def clean_ancilla_count(self) -> int:
         return self.A.clean_ancilla_count()
 

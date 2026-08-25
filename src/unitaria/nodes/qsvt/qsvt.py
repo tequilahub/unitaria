@@ -9,6 +9,7 @@ from unitaria.nodes.node import Node
 from unitaria.subspace import Subspace
 from unitaria.circuit import Circuit
 from unitaria.util import poly_sup_norm
+from unitaria.t_count import get_t_count
 
 
 def interpolation_points(reduced_degree):
@@ -404,6 +405,59 @@ class QSVT(Node):
         circuit += tq.gates.H(rotation_bit)
 
         return circuit
+
+    def t_count(self, clean_ancilla_count: int, borrowed_ancilla_count: int, controlled: bool, precision: float) -> int:
+        t_count = 0
+
+        if self.coefficients.degree() % 2 == 1 and controlled:
+            t_count += (self.coefficients.degree() - 1) * self.A.t_count(
+                clean_ancilla_count, borrowed_ancilla_count, False, precision
+            )
+            t_count += self.A.t_count(clean_ancilla_count, borrowed_ancilla_count, True, precision)
+        else:
+            t_count += self.coefficients.degree() * self.A.t_count(
+                clean_ancilla_count, borrowed_ancilla_count, False, precision
+            )
+
+        # Mock circuit without A
+        circuit = Circuit()
+
+        target = list(range(self.subspace_in.total_qubits))
+        clean_ancillae = list(range(self.subspace_in.total_qubits, self.subspace_in.total_qubits + clean_ancilla_count))
+        control = self.subspace_in.total_qubits + clean_ancilla_count
+        rotation_bit = target[-1]
+
+        subspace_in_circuit = self.A.subspace_in.circuit(target, flag=target[-1], ancillae=clean_ancillae)
+        subspace_out_circuit = self.A.subspace_out.circuit(target, flag=target[-1], ancillae=clean_ancillae)
+
+        for i, angle in enumerate(self.coefficients.angles[1:]):
+            if i % 2 == 0:
+                circuit += subspace_out_circuit
+            else:
+                circuit += subspace_in_circuit
+
+            # TODO: Do not use projection circuits for last rotation
+            # Combine last and first angle into one rotation
+            if controlled:
+                if i == len(self.coefficients.angles) - 2:
+                    circuit += tq.gates.Rz(
+                        2 * np.real(angle + self.coefficients.angles[0]), rotation_bit, control=control
+                    )
+                else:
+                    circuit += tq.gates.Rz(2 * np.real(angle), rotation_bit, control=control)
+            else:
+                if i == len(self.coefficients.angles) - 2:
+                    circuit += tq.gates.Rz(2 * np.real(angle + self.coefficients.angles[0]), rotation_bit)
+                else:
+                    circuit += tq.gates.Rz(2 * np.real(angle), rotation_bit)
+
+            if i % 2 == 0:
+                circuit += subspace_out_circuit.adjoint()
+            else:
+                circuit += subspace_in_circuit.adjoint()
+
+        t_count += get_t_count(circuit, precision)
+        return t_count
 
     def clean_ancilla_count(self) -> int:
         return max(
