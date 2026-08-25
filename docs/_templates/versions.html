@@ -10,13 +10,13 @@
     </div>
     <label for="version-select"
            style="display: block; margin-bottom: 0.5rem; font-weight: bold; color: var(--color-foreground-primary);">
-        Version: {{ current_version }}
+        Version: {% if current_version == "git" %}git ({{ latest_git_commit }}){% else %}{{ current_version }}{% endif %}
     </label>
     <select id="version-select"
             style="width: 100%; padding: 0.25rem; border-radius: 4px; border: 1px solid var(--color-sidebar-item-background--hover); background-color: var(--color-background-primary); color: var(--color-foreground-primary);">
         {% for version in versions %}
-        <option value="{{ version }}" {% if version== current_version %}selected{% endif %}>
-            {{ version }}
+        <option value="{{ version }}" {% if version == current_version %}selected{% endif %}>
+            {% if version == "git" %}git ({{ latest_git_commit }}){% else %}{{ version }}{% endif %}
         </option>
         {% endfor %}
     </select>

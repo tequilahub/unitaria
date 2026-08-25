@@ -46,17 +46,21 @@ jobs:
         run: |
           uv sync --group docs
           # Build current git version
-          DOCS_VERSION=git uv run make -C docs html
+          LATEST_GIT_COMMIT=git-$(git rev-parse --short HEAD)
+          LATEST_GIT_COMMIT=$LATEST_GIT_COMMIT DOCS_VERSION=git uv run sphinx-build -b html docs docs/_build/html/git
           
           # Build tagged versions
           CURRENT_COMMIT=$(git rev-parse HEAD)
           for tag in $(git tag --sort=-v:refname); do
             if [ "$tag" != "v0.0.0" ]; then
+              rm -f uv.lock
               git checkout --quiet tags/$tag
+              git checkout $CURRENT_COMMIT -- docs/conf.py docs/_templates/
               uv sync --group docs
-              DOCS_VERSION=$tag uv run make -C docs html
+              LATEST_GIT_COMMIT=$LATEST_GIT_COMMIT DOCS_VERSION=$tag uv run sphinx-build -b html docs docs/_build/html/$tag
             fi
           done
+          rm -f uv.lock
           git checkout --quiet $CURRENT_COMMIT
 
       - name: Build Quarto site
@@ -68,6 +72,7 @@ jobs:
         run: |
           mkdir -p _site/docs
           cp -r docs/_build/html/* _site/docs/
+          echo '<!DOCTYPE html><meta http-equiv="refresh" content="0; url=git/index.html"><script>window.location.replace("git/index.html")</script><title>Redirecting...</title><a href="git/index.html">Click here if you are not redirected.</a>' > _site/docs/index.html
           
       - name: List workspace and _site contents
         run: |

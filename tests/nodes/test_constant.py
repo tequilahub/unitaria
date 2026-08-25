@@ -13,6 +13,10 @@ def test_constant_vector():
     ut.verify(ut.ConstantVector(np.array([1, 2j, 1 / 3])))
     ut.verify(ut.ConstantVector(np.array([1])))
     ut.verify(ut.ConstantVector(np.array([0, 0])))
+    ut.verify(ut.ConstantVector(0, dim=4))
+    ut.verify(ut.ConstantVector(1, dim=4))
+    ut.verify(ut.ConstantVector(3, dim=4))
+    ut.verify(ut.ConstantVector(2, dim=3))
 
 
 def test_constant_matrix():
