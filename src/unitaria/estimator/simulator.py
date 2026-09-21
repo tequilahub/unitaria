@@ -152,6 +152,7 @@ class Simulator(Estimator):
             Number of times that the block encoding is executed. If given,
             overrides the number of samples computed from ``precision`` and
             ``failure_probability``.
+        :raises ValueError: If the scheme is invalid or if arguments are incompatible with the scheme.
         """
         if precision is None:
             precision = self.default_precision
