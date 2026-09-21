@@ -465,6 +465,78 @@ class Node(ABC):
         """
         raise NotImplementedError("Import `Adjoint` before using this method")
 
+    def __add__(self, other: Node) -> Node:
+        """
+        Returns the sum of two nodes, see `~unitaria.nodes.basic.add.Add`.
+
+        :raises NotImplementedError: If the Add module is not imported.
+        """
+        raise NotImplementedError("Import `Add` before using this method")
+
+    def __sub__(self, other: Node) -> Node:
+        """
+        Returns the difference of two nodes, see `~unitaria.nodes.basic.add.Add`.
+
+        :raises NotImplementedError: If the Add module is not imported.
+        """
+        raise NotImplementedError("Import `Add` before using this method")
+
+    def __mul__(self, other: float) -> Node:
+        """
+        Returns the scaled node, see `~unitaria.nodes.basic.scale.Scale`.
+
+        :raises NotImplementedError: If the Scale module is not imported.
+        """
+        raise NotImplementedError("Import `Scale` before using this method")
+
+    def __rmul__(self, other: float) -> Node:
+        """
+        Returns the scaled node, see `~unitaria.nodes.basic.scale.Scale`.
+
+        :raises NotImplementedError: If the Scale module is not imported.
+        """
+        raise NotImplementedError("Import `Scale` before using this method")
+
+    def __neg__(self) -> Node:
+        """
+        Returns the negated node, see `~unitaria.nodes.basic.scale.Scale`.
+
+        :raises NotImplementedError: If the Scale module is not imported.
+        """
+        raise NotImplementedError("Import `Scale` before using this method")
+
+    def __matmul__(self, other: Node) -> Node:
+        """
+        Returns the product of two nodes, see `~unitaria.nodes.basic.mul.Mul`.
+
+        :raises NotImplementedError: If the Mul module is not imported.
+        """
+        raise NotImplementedError("Import `Mul` before using this method")
+
+    def __and__(self, other: Node) -> Node:
+        """
+        Returns the tensor product of two nodes, see `~unitaria.nodes.basic.tensor.Tensor`.
+
+        :raises NotImplementedError: If the Tensor module is not imported.
+        """
+        raise NotImplementedError("Import `Tensor` before using this method")
+
+    def __or__(self, other: Node) -> Node:
+        """
+        Returns the block diagonal combination of two nodes, see `~unitaria.nodes.basic.block_diagonal.BlockDiagonal`.
+
+        :raises NotImplementedError: If the BlockDiagonal module is not imported.
+        """
+        raise NotImplementedError("Import `BlockDiagonal` before using this method")
+
+    def __getitem__(self, index) -> Node:
+        """
+        Returns the indexed/sliced node, see `~unitaria.nodes.basic.index.Index`.
+
+        :raises NotImplementedError: If the Index module is not imported.
+        """
+        raise NotImplementedError("Import `Index` before using this method")
+
     def __str__(self):
         return self.draw()
 
