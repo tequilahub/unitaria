@@ -31,6 +31,7 @@ def erf_poly(k: float, epsilon: float, guaranteed: bool = False) -> Chebyshev:
     :param guaranteed: If the accuracy should be guaranteed using analytical bounds (ignoring numerical errors).
         If this is set to false, the function will return polynomials of lower degrees.
     :return: The polynomial approximating erf(k * x)
+    :raises RuntimeError: If any of the computed coefficients are NaN.
     """
     assert k > 0
     assert epsilon <= 1 / 5

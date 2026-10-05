@@ -16,6 +16,7 @@ class Increment(Classical):
 
     :param bits:
         The size of the quantum state. The increment is performed modulo ``2 ** bits``.
+    :raises TypeError: If ``bits`` is not specified.
     """
 
     bits: int

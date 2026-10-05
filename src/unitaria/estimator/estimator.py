@@ -36,5 +36,6 @@ class Estimator(ABC):
             The maximum allowed failure probability, with which the absolute
             error of the estimate may exceed the given precision. If ``None``,
             ``self.default_failure_probability`` is used instead.
+        :raises NotImplementedError: If the method is not implemented.
         """
         raise NotImplementedError

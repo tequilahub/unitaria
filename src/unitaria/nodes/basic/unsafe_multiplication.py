@@ -21,6 +21,7 @@ class UnsafeMul(Node):
         The left factor
     :param B:
         The right factor
+    :raises ValueError: If the output subspace of ``B`` does not match the input subspace of ``A``.
     """
 
     A: Node

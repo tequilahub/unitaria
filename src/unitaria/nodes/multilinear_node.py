@@ -21,6 +21,8 @@ class MultilinearNode(ProxyNode):
 
     This is what this class enables. See the source for `ComponentwiseMul` for
     how to use this class.
+
+    :raises ValueError: If too many inputs are supplied, or if the dimension of an input does not match the expected dimension.
     """
 
     apply: list[Node | None]

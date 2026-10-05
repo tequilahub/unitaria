@@ -99,6 +99,8 @@ def compute_angles(poly):
     tuples. The first element of the tuples is an angle sequence for QSVT
     and the second element is the corresponding weight, such that the sum of
     QSVT polynomials equals the input to this function.
+
+    :raises RuntimeError: If angles computation fails.
     """
     poly = poly.convert(kind=np.polynomial.Chebyshev)
 
@@ -162,6 +164,7 @@ class QSVTCoefficients:
     :ivar angles:
         The angles in R-convention. Will be symmetric if ``data`` are polynomial
         coefficients
+    :raises ValueError: If the format is not "angles" or "chebyshev".
     """
 
     polynomial: np.polynomial.Chebyshev
@@ -240,6 +243,7 @@ class QSVT(Node):
     :param polynomial:
         Either a `np.ndarray`, indicating phase angles, or an instance of a class
         in `np.polynomial`, preferrably `np.polynomial.Chebyshev`.
+    :raises ValueError: If the polynomial type is invalid.
     """
 
     def __init__(self, A: Node, polynomial: np.ndarray | np.polynomial.Chebyshev | np.polynomial.Polynomial):

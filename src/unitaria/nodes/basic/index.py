@@ -29,6 +29,9 @@ class Index(ProxyNode):
         super().__init__(dimension_in, dimension_out)
 
     def _preprocess_index(dimension: int, index: slice | int) -> slice:
+        """
+        :raises IndexError: If the index falls outside valid bounds.
+        """
         if isinstance(index, (int, np.integer)):
             index = slice(int(index), int(index) + 1, None)
 

@@ -31,6 +31,8 @@ class ProxyNode(Node):
         This is used to implement all other
         abstract methods of `Node`. The other methods can be overwritten to give
         a more efficient implementation.
+
+        :raises NotImplementedError: If the method is not implemented in a subclass.
         """
         raise NotImplementedError
 

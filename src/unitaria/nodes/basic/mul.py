@@ -24,6 +24,7 @@ class Mul(ProxyNode):
         The left factor
     :param B:
         The right factor
+    :raises ValueError: If the output dimension of ``B`` does not match the input dimension of ``A``.
     """
 
     A: Node

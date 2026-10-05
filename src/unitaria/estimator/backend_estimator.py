@@ -40,6 +40,9 @@ class BackendEstimator(Estimator):
     def estimate_norm(
         self, node: Node, precision: float | None = None, failure_probability: float | None = None
     ) -> float:
+        """
+        :raises ValueError: If the node does not represent a vector.
+        """
         if not node.is_vector():
             raise ValueError("Can only estimate the norm of vectors")
         if precision is None:

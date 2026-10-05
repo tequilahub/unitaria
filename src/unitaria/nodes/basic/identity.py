@@ -16,6 +16,7 @@ class Identity(Node):
         The domain of the identity matrix
     :param dim:
         The dimension of the domain
+    :raises ValueError: If both or neither of ``subspace`` and ``dim`` are specified.
     """
 
     subspace: Subspace

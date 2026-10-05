@@ -41,10 +41,22 @@ class Classical(Node):
 
     @abstractmethod
     def compute_classical(self, input: np.ndarray | Sequence[np.ndarray]) -> np.ndarray | Sequence[np.ndarray]:
+        """
+        Compute the classical function.
+
+        :param input: Input array or sequence of arrays.
+        :raises NotImplementedError: If the method is not implemented.
+        """
         raise NotImplementedError
 
     @abstractmethod
     def compute_reverse_classical(self, input: np.ndarray | Sequence[np.ndarray]) -> np.ndarray | Sequence[np.ndarray]:
+        """
+        Compute the reverse classical function.
+
+        :param input: Input array or sequence of arrays.
+        :raises NotImplementedError: If the method is not implemented.
+        """
         raise NotImplementedError
 
     def compute(self, input: np.ndarray) -> np.ndarray:
