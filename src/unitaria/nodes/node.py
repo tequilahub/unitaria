@@ -8,6 +8,7 @@ from rich.tree import Tree
 from rich.console import Console
 
 from unitaria.util import cached_property
+from unitaria.t_count import get_t_count
 from unitaria.subspace import Subspace
 from unitaria.circuit import Circuit
 
@@ -332,6 +333,10 @@ class Node(ABC):
         :raises NotImplementedError: If the method is not implemented in a subclass.
         """
         raise NotImplementedError
+
+    def t_count(self, clean_ancilla_count: int, borrowed_ancilla_count: int, controlled: bool, precision: float) -> int:
+        circuit = self._cached_circuit(clean_ancilla_count, borrowed_ancilla_count, controlled)
+        return get_t_count(circuit, precision)
 
     def tree_label(self, verbose: bool = False):
         """

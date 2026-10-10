@@ -6,6 +6,7 @@ import tequila as tq
 from unitaria.circuit import Circuit
 from unitaria.subspace import Subspace
 from unitaria.nodes.node import Node
+from unitaria.t_count import get_t_count
 
 
 class Scale(Node):
@@ -102,6 +103,18 @@ class Scale(Node):
         circuit += self.A.circuit(A_target, clean_ancillae, borrowed_ancillae, control=control)
         circuit += tq.gates.Phase(target=control, angle=self.global_phase)
         return circuit
+
+    def t_count(self, clean_ancilla_count: int, borrowed_ancilla_count: int, controlled: bool, precision: float) -> int:
+        t_count = self.A.t_count(clean_ancilla_count, borrowed_ancilla_count, controlled, precision)
+        circuit = Circuit()
+        if self.remove_efficiency is not None:
+            if controlled:
+                circuit += tq.gates.Ry(2 * np.arccos(1 / self.remove_efficiency), 0, control=1)
+            else:
+                circuit += tq.gates.Ry(2 * np.arccos(1 / self.remove_efficiency), 0)
+        circuit += tq.gates.Phase(target=1, angle=self.global_phase)
+        t_count += get_t_count(circuit, precision)
+        return t_count
 
     def clean_ancilla_count(self) -> int:
         return self.A.clean_ancilla_count()

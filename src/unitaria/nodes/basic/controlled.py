@@ -63,6 +63,16 @@ class Controlled(Node):
                 target[: self.A.target_qubit_count()], clean_ancillae, borrowed_ancillae, control=control_qubit
             ).add_controls([control])
 
+    def t_count(self, clean_ancilla_count: int, borrowed_ancilla_count: int, controlled: bool, precision: float) -> int:
+        if not controlled:
+            return self.A.t_count(clean_ancilla_count, borrowed_ancilla_count, True, precision)
+        elif clean_ancilla_count > self.A.clean_ancilla_count():
+            # +14 for two toffolis
+            return self.A.t_count(clean_ancilla_count - 1, borrowed_ancilla_count, True, precision) + 14
+        else:
+            # Need to fall back to expensive circuit computations
+            return super().t_count(clean_ancilla_count, borrowed_ancilla_count, True, precision)
+
     def clean_ancilla_count(self) -> int:
         return self.A.clean_ancilla_count()
 
