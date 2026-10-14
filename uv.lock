@@ -1937,18 +1937,21 @@ wheels = [
 
 [[package]]
 name = "tequila-basic"
-version = "1.9.11"
-source = { git = "https://github.com/tequilahub/tequila?rev=devel#108e25c0440676f021d26d2071cf7b248270057c" }
+version = "1.9.12"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "autograd" },
     { name = "excitationsolve" },
     { name = "numpy" },
     { name = "openfermion" },
     { name = "pytest" },
-    { name = "qulacs" },
     { name = "scipy" },
     { name = "setuptools" },
     { name = "sympy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/f3/14/d4f083d2098bf013b2acd6c41a3797a7f151db6fab16992f21e835454313/tequila_basic-1.9.12.tar.gz", hash = "sha256:5364e425b5966765af4958f17b9b5f258bcc5cce94880dceb0df963c7841bad9", size = 356203, upload-time = "2026-10-06T20:17:52.775Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/2d/83/7d3ac49221f92de1d35738d561587553a7f4d06084607176c8d7ab24d97f/tequila_basic-1.9.12-py3-none-any.whl", hash = "sha256:b902fac3bf73aed65ddd65078ea3b3ba5a1d73f4f3c227d08266cc40a34f7dbe", size = 340875, upload-time = "2026-10-06T20:17:51.146Z" },
 ]
 
 [[package]]
@@ -2043,7 +2046,7 @@ requires-dist = [
     { name = "qulacs", specifier = "==0.6.*" },
     { name = "rich", specifier = "==14.0.*" },
     { name = "scipy", specifier = "==1.17.*" },
-    { name = "tequila-basic", git = "https://github.com/tequilahub/tequila?rev=devel" },
+    { name = "tequila-basic", specifier = "==1.9.12" },
 ]
 provides-extras = ["qpic"]
 
