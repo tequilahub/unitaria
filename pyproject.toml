@@ -18,7 +18,7 @@ license = "MIT"
 license-files = ["LICENSE"]
 readme = "README.md"
 dependencies = [
-    "tequila-basic @ git+https://github.com/tequilahub/tequila@devel",
+    "tequila-basic==1.9.12",
     "rich==14.0.*",
     "qulacs==0.6.*",
     "numpy==2.4.*",
