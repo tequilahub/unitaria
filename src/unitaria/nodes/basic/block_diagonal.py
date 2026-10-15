@@ -8,8 +8,10 @@ from unitaria.nodes.basic.unsafe_multiplication import UnsafeMul
 from unitaria.nodes.basic.projection import Projection
 from unitaria.subspace import Subspace
 
+from unitaria.util import LogReduceMeta
 
-class BlockDiagonal(ProxyNode):
+
+class BlockDiagonal(ProxyNode, metaclass=LogReduceMeta):
     """
     Node for block matrices of the form ``diag(A, B)``
 

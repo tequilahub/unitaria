@@ -1,4 +1,5 @@
 from types import GenericAlias
+from abc import ABCMeta
 
 import numpy as np
 
@@ -73,6 +74,28 @@ def logreduce(f, values):
         return values[0]
     half = (len(values) + 1) // 2
     return f(logreduce(f, values[:half]), logreduce(f, values[half:]))
+
+
+class LogReduceMeta(ABCMeta):
+    def __new__(mcls, name, bases, ns, *, default=None, **kwargs):
+        return super().__new__(mcls, name, bases, ns, **kwargs)
+
+    def __init__(cls, name, bases, ns, default=None, **kwargs):
+        if default is not None:
+            cls._default = default
+        super().__init__(name, bases, ns)
+
+    def __call__(cls, *args, **kwargs):
+        if len(args) == 0:
+            if cls._default is None:
+                raise TypeError(f"{cls.__name__}() needs at least one argument")
+            else:
+                return cls._default
+        if len(args) == 1:
+            return args[0]
+        if len(args) == 2:
+            return super().__call__(*args, **kwargs)
+        return logreduce(cls, args)
 
 
 def poly_sup_norm(poly, range=(-1.0, 1.0)):
