@@ -77,12 +77,18 @@ def logreduce(f, values):
 
 
 class LogReduceMeta(ABCMeta):
+    """
+    Metaclass for simplifying use of nodes implementing binary operations.
+
+    This enables syntax like `Tensor(A, B, C, D)`, which is automatically
+    interpreted as `Tensor(Tensor(A, B), Tensor(C, D))`.
+    """
+
     def __new__(mcls, name, bases, ns, *, default=None, **kwargs):
         return super().__new__(mcls, name, bases, ns, **kwargs)
 
     def __init__(cls, name, bases, ns, default=None, **kwargs):
-        if default is not None:
-            cls._default = default
+        cls._default = default
         super().__init__(name, bases, ns)
 
     def __call__(cls, *args, **kwargs):
