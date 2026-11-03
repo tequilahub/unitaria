@@ -8,8 +8,10 @@ from unitaria.circuit import Circuit
 from unitaria.subspace import Subspace
 from unitaria.nodes.node import Node
 
+from unitaria.util import LogReduceMeta
 
-class UnsafeMul(Node):
+
+class UnsafeMul(Node, metaclass=LogReduceMeta):
     """
     Node for chaining the circuits of two nodes
 

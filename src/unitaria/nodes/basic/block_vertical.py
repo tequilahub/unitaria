@@ -11,8 +11,10 @@ from unitaria.nodes.permutation.permutation import permute
 from unitaria.nodes.constants.constant_vector import ConstantVector
 from unitaria.nodes.basic.identity import Identity
 
+from unitaria.util import LogReduceMeta
 
-class BlockVertical(ProxyNode):
+
+class BlockVertical(ProxyNode, metaclass=LogReduceMeta):
     """
     Node for block matrices of the form ``[A B]^T``
 

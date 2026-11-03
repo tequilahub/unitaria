@@ -3,7 +3,7 @@ from unitaria.nodes.proxy_node import ProxyNode
 from unitaria.nodes.node import Node
 from unitaria.nodes.constants.constant_vector import ConstantVector
 from unitaria.nodes.basic.block_vertical import BlockVertical
-from unitaria.util import logreduce
+from unitaria.nodes.basic.tensor import Tensor
 
 
 class Ones(ProxyNode):
@@ -39,11 +39,11 @@ class Ones(ProxyNode):
             if bits == 0:
                 one_bits = ConstantVector(np.array([1]))
             else:
-                one_bits = logreduce(lambda x, y: x & y, [ones_2] * bits)
+                one_bits = Tensor(*([ones_2] * bits))
 
             result.append(one_bits)
 
-        return logreduce(BlockVertical, result)
+        return BlockVertical(*result)
 
     def compute(self, input: np.ndarray) -> np.ndarray:
         if input.ndim == 1:

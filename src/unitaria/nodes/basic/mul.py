@@ -11,8 +11,10 @@ from unitaria.nodes.basic.identity import Identity
 from unitaria.nodes.basic.adjoint import Adjoint
 from unitaria.subspace import Subspace
 
+from unitaria.util import LogReduceMeta
 
-class Mul(ProxyNode):
+
+class Mul(ProxyNode, metaclass=LogReduceMeta):
     """
     Node for computing the product of two nodes
 

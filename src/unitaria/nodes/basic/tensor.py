@@ -5,9 +5,11 @@ import numpy as np
 from unitaria.circuit import Circuit
 from unitaria.subspace import Subspace
 from unitaria.nodes.node import Node
+from unitaria.util import LogReduceMeta
+from unitaria.nodes.basic.identity import Identity
 
 
-class Tensor(Node):
+class Tensor(Node, metaclass=LogReduceMeta, default=Identity(dim=1)):
     """
     Node representing the tensor product of two other nodes
 

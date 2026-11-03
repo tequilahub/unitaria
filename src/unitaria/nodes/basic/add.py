@@ -12,8 +12,10 @@ from unitaria.nodes.permutation.permutation import permute
 from unitaria.nodes.constants.constant_vector import ConstantVector
 from unitaria.nodes.basic.identity import Identity
 
+from unitaria.util import LogReduceMeta
 
-class Add(ProxyNode):
+
+class Add(ProxyNode, metaclass=LogReduceMeta):
     """
     Node for computing the sum of two vectors or matrices.
 

@@ -7,7 +7,6 @@ from unitaria.nodes.basic.adjoint import Adjoint
 from unitaria.nodes.basic.projection import Projection
 from unitaria.nodes.basic.mul import Mul
 from unitaria.nodes.classical.constant_integer_addition import ConstantIntegerAddition
-from unitaria.util import logreduce
 
 
 class Index(ProxyNode):
@@ -95,18 +94,16 @@ class Index(ProxyNode):
         result = []
 
         projection_in = Index._projection(self.A.subspace_in, self.index_in)
-        if projection_in is not None:
-            result.append(Adjoint(projection_in))
+        result += [Adjoint(x) for x in reversed(projection_in)]
 
-        result.append(self.A)
+        result += [self.A]
 
         projection_out = Index._projection(self.A.subspace_out, self.index_out)
-        if projection_out is not None:
-            result.append(projection_out)
+        result += projection_out
 
-        return logreduce(Mul, result[::-1])
+        return Mul(*result[::-1])
 
-    def _projection(subspace: Subspace, index: slice) -> Node | None:
+    def _projection(subspace: Subspace, index: slice) -> list[Node]:
         result = []
 
         # 1. Handle stop
@@ -131,7 +128,7 @@ class Index(ProxyNode):
             subspace_stride_out = Subspace.from_dim(dimension_out) & Subspace("0" * subspace_step.total_qubits)
             result.append(Projection(subspace_stride_in, subspace_stride_out))
 
-        return logreduce(Mul, result[::-1])
+        return result
 
 
 def _node_getitem(self: Node, indices):

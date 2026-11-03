@@ -11,7 +11,6 @@ from unitaria.nodes.basic.adjoint import Adjoint
 from unitaria.nodes.basic.identity import Identity
 from unitaria.nodes.basic.tensor import Tensor
 from unitaria.circuit import Circuit
-from unitaria.util import logreduce
 
 
 def _move_zeros_to_end(subspace: Subspace) -> PermuteFactors:
@@ -345,7 +344,7 @@ def _rotate(subspace: Subspace, right: bool) -> Node:
         permutation.append(SubspaceRightRotation(subspace.nonzero_factors()))
     else:
         permutation.append(SubspaceRightRotation.left_rotate(subspace.nonzero_factors()))
-    return logreduce(UnsafeMul, permutation[::-1])
+    return UnsafeMul(*permutation[::-1])
 
 
 def _rotate_to(subspace: Subspace, index: int) -> Node:
@@ -396,7 +395,7 @@ def _rotate_to(subspace: Subspace, index: int) -> Node:
         # Contains just the identity
         return permutation[0]
     else:
-        return logreduce(UnsafeMul, permutation[:0:-1])
+        return UnsafeMul(*permutation[:0:-1])
 
 
 def _indices_from_root_to(a: Subspace, index: int) -> int:
@@ -462,11 +461,11 @@ def permute(a: Subspace, b: Subspace) -> tuple[Node, Node]:
 
     subperms_a, subperms_b = zip(*[_brute_force(a, b) for a, b in partitioning])
 
-    subperms_a = logreduce(Tensor, list(reversed(subperms_a)))
+    subperms_a = Tensor(*list(reversed(subperms_a)))
     move_a_in = _move_zeros_to_end(subperms_a.subspace_in)
     move_a_out = _move_zeros_to_end(subperms_a.subspace_out)
     perm_a = UnsafeMul(UnsafeMul(move_a_out, subperms_a), UnsafeMul(Adjoint(move_a_in), perm_a))
-    subperms_b = logreduce(Tensor, list(reversed(subperms_b)))
+    subperms_b = Tensor(*list(reversed(subperms_b)))
     move_b_in = _move_zeros_to_end(subperms_b.subspace_in)
     move_b_out = _move_zeros_to_end(subperms_b.subspace_out)
     perm_b = UnsafeMul(UnsafeMul(move_b_out, subperms_b), UnsafeMul(Adjoint(move_b_in), perm_b))
