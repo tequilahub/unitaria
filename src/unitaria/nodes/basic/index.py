@@ -101,7 +101,7 @@ class Index(ProxyNode):
         projection_out = Index._projection(self.A.subspace_out, self.index_out)
         result += projection_out
 
-        return Mul(*result[::-1])
+        return Mul(*result[::-1], skip_projection=True)
 
     def _projection(subspace: Subspace, index: slice) -> list[Node]:
         result = []
