@@ -101,7 +101,7 @@ class LogReduceMeta(ABCMeta):
             return args[0]
         if len(args) == 2:
             return super().__call__(*args, **kwargs)
-        return logreduce(cls, args)
+        return logreduce(lambda x, y: super(LogReduceMeta, cls).__call__(x, y, **kwargs), args)
 
 
 def poly_sup_norm(poly, range=(-1.0, 1.0)):
