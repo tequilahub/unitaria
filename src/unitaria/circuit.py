@@ -106,6 +106,13 @@ class Circuit:
         adj.n_qubits = self.n_qubits
         return adj
 
+    def as_cached_circuit(self) -> Circuit:
+        """
+        Converts the internal Tequila circuit into a subcircuit gate, which
+        allows Tequila to reuse compilation results and speed up compilation.
+        """
+        return Circuit(self._tq_circuit.as_subcircuit_gate())
+
     def add_controls(self, controls):
         return Circuit(self._tq_circuit.add_controls(control=controls))
 
