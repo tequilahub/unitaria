@@ -71,3 +71,6 @@ python_files = ["test_*.py", "example_*.py"]
 [tool.ruff]
 line-length = 120
 target-version = "py312"
+
+[tool.uv.sources]
+tequila-basic = { git = "https://github.com/tequilahub/tequila", rev = "c28c41b0a8db1d949c018b727bfd633523411928" }

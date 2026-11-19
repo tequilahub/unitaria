@@ -1254,6 +1254,19 @@ wheels = [
 ]
 
 [[package]]
+name = "pauliengine"
+version = "0.1.4"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/db/b7/adcb50f8614f46f2fd869f4884a7754e99609b530f2829a0e71990d53c19/pauliengine-0.1.4.tar.gz", hash = "sha256:ba66a879c087b6c22bd0146d9dc8773a687ac48e2285fd91fe1c5ed4d0a1adef", size = 62285, upload-time = "2026-09-29T23:41:26.03Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/16/f6/c2195f2cfcbd29b0721171ee29299b5d6a91d0371e3daff1a32672f070b3/pauliengine-0.1.4-cp312-abi3-macosx_15_0_arm64.whl", hash = "sha256:c64218a95a24034f5c1d5c2e3d74ccc825c0d324ae2ba6832fddac8f7ce8ed45", size = 1025281, upload-time = "2026-09-29T23:41:19.002Z" },
+    { url = "https://files.pythonhosted.org/packages/b5/59/d4fc34de57646e1bb737bd59d370a871622185620365f25520a79db636f2/pauliengine-0.1.4-cp312-abi3-manylinux_2_26_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:9c19fafde4aee6be7825039438bdce8f31d5e12014be9d4d0f5a34f6b7f20a79", size = 1725418, upload-time = "2026-09-29T23:41:20.33Z" },
+    { url = "https://files.pythonhosted.org/packages/b3/28/4c58e969c52a5aedd7292608a656c8fdc7a9e2700617be117fd08e45f226/pauliengine-0.1.4-cp312-abi3-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:88778151da4db96312868b14dd2264efee93457a46544cc72cb7e25e089f2f86", size = 1743429, upload-time = "2026-09-29T23:41:21.681Z" },
+    { url = "https://files.pythonhosted.org/packages/ab/d8/bdede7bd21f3ac3fafd987f9d7692d5d634817560714a3c9c96bbb84607a/pauliengine-0.1.4-cp312-abi3-win_amd64.whl", hash = "sha256:8926738fbfb1749216e5e2107a2fe590393d611b37e19b14c96a8c1111ec6d16", size = 953270, upload-time = "2026-09-29T23:41:23.049Z" },
+    { url = "https://files.pythonhosted.org/packages/ad/d0/ae456df46acc150c8285fd0efc569068544bb9039a62a2bb4fe969ef4cde/pauliengine-0.1.4-cp312-abi3-win_arm64.whl", hash = "sha256:a85388237fd8eb6c68f7a0a4321e770aa229b9ad67604ba4b2483d346fb1c64e", size = 1210993, upload-time = "2026-09-29T23:41:24.46Z" },
+]
+
+[[package]]
 name = "pexpect"
 version = "4.9.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1938,20 +1951,18 @@ wheels = [
 [[package]]
 name = "tequila-basic"
 version = "1.9.12"
-source = { registry = "https://pypi.org/simple" }
+source = { git = "https://github.com/tequilahub/tequila?rev=c28c41b0a8db1d949c018b727bfd633523411928#c28c41b0a8db1d949c018b727bfd633523411928" }
 dependencies = [
     { name = "autograd" },
     { name = "excitationsolve" },
     { name = "numpy" },
     { name = "openfermion" },
+    { name = "pauliengine" },
     { name = "pytest" },
+    { name = "qulacs" },
     { name = "scipy" },
     { name = "setuptools" },
     { name = "sympy" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/f3/14/d4f083d2098bf013b2acd6c41a3797a7f151db6fab16992f21e835454313/tequila_basic-1.9.12.tar.gz", hash = "sha256:5364e425b5966765af4958f17b9b5f258bcc5cce94880dceb0df963c7841bad9", size = 356203, upload-time = "2026-10-06T20:17:52.775Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/2d/83/7d3ac49221f92de1d35738d561587553a7f4d06084607176c8d7ab24d97f/tequila_basic-1.9.12-py3-none-any.whl", hash = "sha256:b902fac3bf73aed65ddd65078ea3b3ba5a1d73f4f3c227d08266cc40a34f7dbe", size = 340875, upload-time = "2026-10-06T20:17:51.146Z" },
 ]
 
 [[package]]
@@ -2046,7 +2057,7 @@ requires-dist = [
     { name = "qulacs", specifier = "==0.6.*" },
     { name = "rich", specifier = "==14.0.*" },
     { name = "scipy", specifier = "==1.17.*" },
-    { name = "tequila-basic", specifier = "==1.9.12" },
+    { name = "tequila-basic", git = "https://github.com/tequilahub/tequila?rev=c28c41b0a8db1d949c018b727bfd633523411928" },
 ]
 provides-extras = ["qpic"]
 
